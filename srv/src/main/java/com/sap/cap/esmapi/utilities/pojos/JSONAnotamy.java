@@ -13,5 +13,5 @@ import java.util.List;
 @NoArgsConstructor
 public class JSONAnotamy 
 {
-    private List<String> allKeys;    
+    private List<String> caseIDS;    
 }
