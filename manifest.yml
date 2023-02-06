@@ -1,0 +1,9 @@
+---
+applications:
+- name: esmapi
+  path: srv/target/esmapi-exec.jar
+  random-route: true
+  services:
+  - ESMAPI-xsuaa
+  env:
+    IAS_XSUAA_XCHANGE_ENABLED: false

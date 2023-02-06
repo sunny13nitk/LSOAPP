@@ -14,6 +14,7 @@
 
     <!-- ACTUAL DEPENDENCIES -->
     <dependencies>
+        <!-- CDS SPRING BOOT STARTER -->
         <dependency>
             <groupId>com.sap.cds</groupId>
             <artifactId>cds-starter-spring-boot</artifactId>
@@ -30,13 +31,6 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
-        <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1.1</version>
         </dependency>
 
         <dependency>
@@ -64,10 +58,10 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- <dependency>
+        <dependency>
             <groupId>com.sap.cds</groupId>
             <artifactId>cds-starter-cloudfoundry</artifactId>
-        </dependency> -->
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -84,16 +78,16 @@
             <artifactId>spring-boot-devtools</artifactId>
         </dependency>
 
-        <!-- <dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency> -->
+        </dependency>
 
-        <!-- <dependency>
+        <dependency>
             <groupId>com.sap.cloud.security.xsuaa</groupId>
             <artifactId>xsuaa-spring-boot-starter</artifactId>
-            <version>2.13.4</version>
-        </dependency> -->
+            <version>2.13.5</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -101,11 +95,17 @@
             <version>4.5.14</version>
         </dependency>
 
-        <!--HANA DB Dependency -->
+        <!--AOP Enablement -->
         <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+        </dependency>
+
+        <!--HANA DB Dependency -->
+        <!-- <dependency>
             <groupId>com.sap.cds</groupId>
             <artifactId>cds-feature-hana</artifactId>
-        </dependency>
+        </dependency> -->
     </dependencies>
 
     <build>

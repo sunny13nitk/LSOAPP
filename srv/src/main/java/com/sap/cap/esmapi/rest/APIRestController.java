@@ -3,16 +3,15 @@ package com.sap.cap.esmapi.rest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
-import com.sap.cap.esmapi.utilities.pojos.Pojo;
+import com.sap.cds.services.request.UserInfo;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.HttpEntity;
@@ -24,10 +23,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.sap.cloud.security.xsuaa.token.Token;
+import com.sap.cloud.security.xsuaa.tokenflows.XsuaaTokenFlows;
+
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 
 @RestController
 @RequestMapping("/api")
@@ -40,6 +44,24 @@ public class APIRestController
     @Value("${password}")
     private String password;
 
+    @GetMapping("/authInfo")
+    public Map<String, String> sayHello(@AuthenticationPrincipal Token token) {
+
+  
+        Map<String, String> result = new HashMap<>();
+        result.put("grant type", token.getGrantType());
+        result.put("client id", token.getClientId());
+        result.put("subaccount id", token.getSubaccountId());
+        result.put("zone id", token.getZoneId());
+        result.put("logon name", token.getLogonName());
+        result.put("family name", token.getFamilyName());
+        result.put("given name", token.getGivenName());
+        result.put("email", token.getEmail());
+        result.put("authorities", String.valueOf(token.getAuthorities()));
+        result.put("scopes", String.valueOf(token.getScopes()));
+
+        return result;
+    }
 
     @GetMapping("/cases")
     private JsonNode getAllCases() throws IOException
@@ -103,66 +125,7 @@ public class APIRestController
     }
 
 
-    @GetMapping("/casesStr")
-    private String getAllCasesAsString() throws IOException
-    {
-        
-        HttpResponse response = null;
-        String apiOutput = null;
-        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-
-        try 
-        {
-            if (StringUtils.hasLength(userName) && StringUtils.hasLength(password) && StringUtils.hasLength(caseUrl)) 
-            {
-                System.out.println("Url and Credentials Found!!");
-
-                String encoding = Base64.getEncoder().encodeToString((userName + ":" + password).getBytes());
-
-                HttpGet httpGet = new HttpGet(caseUrl);
-                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
-                httpGet.addHeader("accept", "application/json");
-
-                try 
-                {
-                    //Fire the Url
-                    response = httpClient.execute(httpGet);
-
-                    // verify the valid error code first
-                    int statusCode = response.getStatusLine().getStatusCode();
-                    if (statusCode != HttpStatus.SC_OK) 
-                    {
-                        throw new RuntimeException("Failed with HTTP error code : " + statusCode);
-                    }
-
-                    //Try and Get Entity from Response
-                    HttpEntity entity = response.getEntity();
-                    apiOutput = EntityUtils.toString(entity);
-                  
-
-                   
-                    
-
-                } catch (IOException e)
-                {
-
-                    e.printStackTrace();
-                }
-
-            }
-
-        } 
-        finally
-        {
-            httpClient.close();
-        }
-        return apiOutput;
-
-        
-
-    }
-
-
+   
    
     @GetMapping("/casesAnatomy")
     private JSONAnotamy getAllCasesAnotamy() throws IOException
@@ -240,4 +203,10 @@ public class APIRestController
         
         return metaData;
     }
+
+
+    
+
+        
+
 }

@@ -5,3 +5,4 @@ Accept: application/json
 ### Get Cases GUIDS Only
 GET http://localhost:8080/api/casesAnatomy
 Accept: application/json 
+

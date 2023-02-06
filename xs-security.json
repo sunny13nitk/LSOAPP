@@ -1,0 +1,31 @@
+{
+  "xsappname": "esmapi",
+  "oauth2-configuration": {
+    "credential-types": ["x509","binding-secret", "instance-secret"]
+  },
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.Administrators",
+      "description": "Administrators"
+    }
+  ],
+  "attributes": [],
+  "role-templates": [
+    {
+      "name": "Administrators",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.Administrators"
+      ],
+      "attribute-references": []
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "ESMAPI Administrators",
+      "description": "ESMAPI Administrators",
+      "role-template-references": ["$XSAPPNAME.Administrators"]
+    }
+  ]
+}
