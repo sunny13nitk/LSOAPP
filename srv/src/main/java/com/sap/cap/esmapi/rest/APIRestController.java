@@ -11,6 +11,9 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
+import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cds.services.request.UserInfo;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,21 +34,23 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 @RestController
 @RequestMapping("/api")
 public class APIRestController 
 {
-    @Value("${caseurl}")
-    private String caseUrl;
-    @Value("${username}")
-    private String userName;
-    @Value("${password}")
-    private String password;
+
+    @Autowired
+    private IF_UserAPISrv userSrv;
+
+    @Autowired
+    private TY_SrvCloudUrls srvCloudUrls;
 
     @GetMapping("/authInfo")
-    public Map<String, String> sayHello(@AuthenticationPrincipal Token token) {
+    public Map<String, String> sayHello(@AuthenticationPrincipal Token token)
+    {
 
   
         Map<String, String> result = new HashMap<>();
@@ -63,6 +68,13 @@ public class APIRestController
         return result;
     }
 
+    @GetMapping("/userInfo")
+    public Ty_UserAccountContact getUserInfo(@AuthenticationPrincipal Token token)
+    {
+        return userSrv.getUserDetails(token);
+
+    }
+
     @GetMapping("/cases")
     private JsonNode getAllCases() throws IOException
     {
@@ -72,13 +84,13 @@ public class APIRestController
 
         try 
         {
-            if (StringUtils.hasLength(userName) && StringUtils.hasLength(password) && StringUtils.hasLength(caseUrl)) 
+            if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword()) && StringUtils.hasLength(srvCloudUrls.getCasesUrl())) 
             {
                 System.out.println("Url and Credentials Found!!");
 
-                String encoding = Base64.getEncoder().encodeToString((userName + ":" + password).getBytes());
+                String encoding = Base64.getEncoder().encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
 
-                HttpGet httpGet = new HttpGet(caseUrl);
+                HttpGet httpGet = new HttpGet(srvCloudUrls.getCasesUrl());
                 httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
                 httpGet.addHeader("accept", "application/json");
 
