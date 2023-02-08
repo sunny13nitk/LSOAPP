@@ -6,3 +6,6 @@ Accept: application/json
 GET http://localhost:8080/api/casesAnatomy
 Accept: application/json 
 
+### Get Account ID by Email
+GET http://localhost:8080/api/accByEmail/?email=mikemiller@gmail.com
+Accept: application/json 

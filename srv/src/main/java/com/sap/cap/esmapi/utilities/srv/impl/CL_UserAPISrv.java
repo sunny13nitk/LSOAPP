@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,6 +66,8 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                 userData = new Ty_UserAccountContact();
                 userData.setUserId(token.getLogonName());
                 userData.setUserEmail(token.getEmail());
+                userData.setAccountId(getAccountIdByUserEmail(userData.getUserEmail()));
+                
 
                 return userData;
             }
@@ -110,7 +113,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                                         JsonNode accEnt = accItr.next();
                                         if (accEnt != null) 
                                         {
-                                            String accid, accEmail;
+                                            String accid = null, accEmail = null;
                                             System.out.println("Account Entity Bound - Reading Account...");
                                             Iterator<String> fieldNames = accEnt.fieldNames();
                                             while (fieldNames.hasNext()) 
@@ -124,18 +127,61 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                                                     accid = accEnt.get(accFieldName).asText();
                                                 }
 
+                                                if (accFieldName.equals("defaultCommunication")) 
+                                                {
+                                                    System.out.println("Inside Default Communication:  " );
+
+                                                    JsonNode commEnt = accEnt.path("defaultCommunication");
+                                                    if(commEnt != null)
+                                                    {
+                                                        System.out.println("Comm's Node Bound");
+
+                                                        Iterator<String> fieldNamesComm = commEnt.fieldNames();
+                                                        while (fieldNamesComm.hasNext()) 
+                                                        {
+                                                            String commFieldName = fieldNamesComm.next();
+                                                            if (commFieldName.equals("eMail")) 
+                                                                {
+                                                                    System.out.println(
+                                                                            "Account Email Added : " + commEnt.get(commFieldName).asText());
+                                                                    accEmail = commEnt.get(commFieldName).asText();
+                                                                }
+                                                        }
+
+                                                    }
+                                                }
+
+                                            }
+                                            //avoid null email accounts
+                                            if(StringUtils.hasText(accid) && StringUtils.hasText(accEmail))
+                                            {
+                                                accEmails.put(accid,accEmail);
                                             }
 
                                         }
+
 
                                     }
 
                                 }
 
                             }
+
+                            //Filter by Email
+                           Optional<Map.Entry<String,String>> OptionalAcc =  accEmails.entrySet().stream().filter(u->u.getValue().equals(userEmail)).findFirst();
+                           if(OptionalAcc.isPresent())
+                           {
+                                Map.Entry<String,String> account = OptionalAcc.get();
+                                accountID = account.getKey(); //Return Account ID
+                           }
+                           
+
+
+
                         }
                     }
-                } catch (IOException e) {
+                } catch (IOException e)
+                {
                     throw new EX_ESMAPI(msgSrc.getMessage("API_AC_ERROR", new Object[] { e.getLocalizedMessage() },
                             Locale.ENGLISH));
                 }
