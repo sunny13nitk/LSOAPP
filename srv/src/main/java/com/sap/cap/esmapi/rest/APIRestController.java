@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -184,7 +185,10 @@ public class APIRestController
                                     if(caseFieldName.equals("id"))
                                     {
                                         System.out.println("Case Id Added : " + caseEnt.get(caseFieldName).asText());
-                                        caseIds.add(caseEnt.get(caseFieldName).asText());
+                                        if(StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
+                                        {
+                                            caseIds.add(caseEnt.get(caseFieldName).asText());
+                                        }
                                     }
                                                                 
                                 }
@@ -209,6 +213,8 @@ public class APIRestController
 
             if(CollectionUtils.isNotEmpty(caseIds))
             {
+
+               // List<String> distinctCaseIDs = caseIds.stream().distinct().collect(Collectors.toList());
                 metaData = new JSONAnotamy();
                 metaData.setCaseIDS(caseIds);
             }
