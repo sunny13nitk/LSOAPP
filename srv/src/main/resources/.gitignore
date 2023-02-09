@@ -1,2 +1,2 @@
 # Ignore Urls
-**/resources/srvcloudurls.properties
+srvcloudurls.properties
