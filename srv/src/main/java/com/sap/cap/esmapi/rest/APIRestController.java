@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cds.services.request.UserInfo;
 
@@ -50,6 +51,11 @@ public class APIRestController
     @Autowired
     private TY_SrvCloudUrls srvCloudUrls;
 
+    @Autowired
+    private IF_APISrv apiSrv;
+
+    private final String equalsString = "=";
+
     @GetMapping("/authInfo")
     public Map<String, String> sayHello(@AuthenticationPrincipal Token token)
     {
@@ -77,12 +83,20 @@ public class APIRestController
 
     }
 
+ 
+    @GetMapping("/casesCount")
+    private String getNumberofCases() throws IOException
+    {
+        return String.valueOf(apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getCasesUrl()));
+    }
+
     @GetMapping("/cases")
     private JsonNode getAllCases() throws IOException
     {
         JsonNode jsonNode = null;
         HttpResponse response = null;
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        String url = null;
 
         try 
         {
@@ -90,39 +104,47 @@ public class APIRestController
             {
                 System.out.println("Url and Credentials Found!!");
 
-                String encoding = Base64.getEncoder().encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
-
-                HttpGet httpGet = new HttpGet(srvCloudUrls.getCasesUrl());
-                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
-                httpGet.addHeader("accept", "application/json");
-
-                try 
+                long numCases = apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getCasesUrl());
+                if (numCases > 0)
                 {
-                    //Fire the Url
-                    response = httpClient.execute(httpGet);
+                    url = srvCloudUrls.getCasesUrl() + srvCloudUrls.getTopSuffix() + equalsString + numCases;
 
-                    // verify the valid error code first
-                    int statusCode = response.getStatusLine().getStatusCode();
-                    if (statusCode != HttpStatus.SC_OK) 
+                    String encoding = Base64.getEncoder()
+                            .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                    HttpGet httpGet = new HttpGet(url);
+                    httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                    httpGet.addHeader("accept", "application/json");
+
+                    try 
                     {
-                        throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                        // Fire the Url
+                        response = httpClient.execute(httpGet);
+
+                        // verify the valid error code first
+                        int statusCode = response.getStatusLine().getStatusCode();
+                        if (statusCode != HttpStatus.SC_OK) 
+                        {
+                            throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                        }
+
+                        // Try and Get Entity from Response
+                        HttpEntity entity = response.getEntity();
+                        String apiOutput = EntityUtils.toString(entity);
+                        // Lets see what we got from API
+                        System.out.println(apiOutput);
+
+                        // Conerting to JSON
+                        ObjectMapper mapper = new ObjectMapper();
+                        jsonNode = mapper.readTree(apiOutput);
+
+                    } 
+                    catch (IOException e) 
+                    {
+
+                        e.printStackTrace();
                     }
 
-                    //Try and Get Entity from Response
-                    HttpEntity entity = response.getEntity();
-                    String apiOutput = EntityUtils.toString(entity);
-                    //Lets see what we got from API
-                    System.out.println(apiOutput);
-
-                    //Conerting to JSON
-                    ObjectMapper mapper = new ObjectMapper();
-                    jsonNode = mapper.readTree(apiOutput);
-                    
-
-                } catch (IOException e)
-                {
-
-                    e.printStackTrace();
                 }
 
             }
@@ -137,6 +159,8 @@ public class APIRestController
         
 
     }
+
+
 
 
    

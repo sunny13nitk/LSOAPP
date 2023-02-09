@@ -1,11 +1,15 @@
 ### Get Cases 
-GET http://localhost:8081/api/cases
+GET http://localhost:9090/api/cases
+Accept: application/json 
+
+### Get # of Cases 
+GET http://localhost:9090/api/casesCount
 Accept: application/json 
 
 ### Get Cases GUIDS Only
-GET http://localhost:8081/api/casesAnatomy
+GET http://localhost:9090/api/casesAnatomy
 Accept: application/json 
 
 ### Get Account ID by Email
-GET http://localhost:8081/api/accByEmail/?email=mikemiller@gmail.com
+GET http://localhost:9090/api/accByEmail/?email=mikemiller@gmail.com
 Accept: application/json 
