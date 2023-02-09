@@ -6,6 +6,11 @@ Accept: application/json
 GET http://localhost:9090/api/casesCount
 Accept: application/json 
 
+
+### Get Case Ids and GUIDS 
+GET http://localhost:9090/api/caseIds
+Accept: application/json 
+
 ### Get Cases GUIDS Only
 GET http://localhost:9090/api/casesAnatomy
 Accept: application/json 

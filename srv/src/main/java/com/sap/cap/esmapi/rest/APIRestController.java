@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
@@ -55,6 +56,105 @@ public class APIRestController
     private IF_APISrv apiSrv;
 
     private final String equalsString = "=";
+
+
+    @GetMapping("/caseIds")
+    public List<TY_CaseGuidId> getCaseGuidIdList()
+    {
+        List<TY_CaseGuidId> casesGuidIdsList = null;
+
+        try
+        {
+            
+            JsonNode jsonNode = getAllCases();
+
+            if(jsonNode != null)
+            {
+
+                JsonNode rootNode = jsonNode.path("value");
+                if(rootNode != null)
+                {
+                    System.out.println("Cases Bound!!");
+                    casesGuidIdsList = new ArrayList<TY_CaseGuidId>();
+    
+                    Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
+                    while (payloadItr.hasNext()) 
+                    {
+                        System.out.println("Payload Iterator Bound");
+                        Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                        String   payloadFieldName  = payloadEnt.getKey();
+                        System.out.println("Payload Field Scanned:  " + payloadFieldName);
+    
+                        if(payloadFieldName.equals("value"))
+                        {
+                            Iterator<JsonNode> casesItr = payloadEnt.getValue().elements();
+                            System.out.println("Cases Iterator Bound");
+                            while (casesItr.hasNext()) 
+                            {
+                                
+                                JsonNode caseEnt = casesItr.next();
+                                if(caseEnt != null)
+                                {
+                                    String caseid = null, caseguid = null;
+                                    System.out.println("Cases Entity Bound - Reading Case...");
+                                    Iterator<String> fieldNames = caseEnt.fieldNames();
+                                    while (fieldNames.hasNext()) 
+                                    {
+                                        String   caseFieldName  = fieldNames.next();
+                                        System.out.println("Case Entity Field Scanned:  " + caseFieldName);
+                                        if(caseFieldName.equals("id"))
+                                        {
+                                            System.out.println("Case GUID Added : " + caseEnt.get(caseFieldName).asText());
+                                            if(StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
+                                            {
+                                                caseguid = caseEnt.get(caseFieldName).asText();
+                                            }
+                                        }
+
+                                        if(caseFieldName.equals("displayId"))
+                                        {
+                                            System.out.println("Case Id Added : " + caseEnt.get(caseFieldName).asText());
+                                            if(StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
+                                            {
+                                                caseid = caseEnt.get(caseFieldName).asText();
+                                            }
+                                        }
+
+
+                                                                    
+                                    }
+
+                                    if(StringUtils.hasText(caseid) && StringUtils.hasText(caseguid))
+                                    {
+                                        casesGuidIdsList.add(new TY_CaseGuidId(caseguid, caseid));
+                                    }
+    
+                                }
+                           
+    
+                            }
+    
+                        }
+                                 
+                    }
+                }
+                   
+            }
+
+        }
+
+       catch (Exception e) 
+        {
+            e.printStackTrace();
+        }
+ 
+               
+
+
+        return casesGuidIdsList;
+    }
+
+
 
     @GetMapping("/authInfo")
     public Map<String, String> sayHello(@AuthenticationPrincipal Token token)
