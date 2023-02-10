@@ -16,9 +16,9 @@ GET http://localhost:9090/api/casesAnatomy
 Accept: application/json 
 
 ### Get Account ID by Email
-GET http://localhost:9090/api/accByEmail/?email=mikemiller@gmail.com
+GET http://localhost:9090/api/accByEmail/?email=sunny.bhardwaj@sap.com
 Accept: application/json 
 
 ### Get Contact ID by Email
-GET http://localhost:9090/api/cpByEmail/?email=mikemiller@gmail.com
+GET http://localhost:9090/api/cpByEmail/?email=sunny.bhardwaj@sap.com
 Accept: application/json 

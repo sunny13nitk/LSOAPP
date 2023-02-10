@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
+import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
@@ -434,6 +435,13 @@ public class CL_UserAPISrv implements IF_UserAPISrv
 
         
 
+    }
+
+    @Override
+    public TY_UserESS getESSDetails(Token token) throws EX_ESMAPI 
+    {
+        
+        return null;
     }
 
    
