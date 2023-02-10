@@ -355,6 +355,13 @@ public class APIRestController
          
     }
 
+    @GetMapping("/cpByEmail")
+    private String getContactIdByEmail(@RequestParam(name = "email", required = true) String email ) throws IOException
+    {
+        return userSrv.getContactPersonIdByUserEmail(email);
+         
+    }
+
     
 
         

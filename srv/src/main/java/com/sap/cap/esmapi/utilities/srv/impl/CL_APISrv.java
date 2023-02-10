@@ -46,9 +46,9 @@ public class CL_APISrv implements IF_APISrv
 
         try 
         {
-                
+            System.out.println("Getting Entities for Url : " + url);    
             String encoding = Base64.getEncoder().encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
-            HttpGet httpGet = new HttpGet(srvCloudUrls.getCasesUrl());
+            HttpGet httpGet = new HttpGet(url);
             httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
             httpGet.addHeader("accept", "application/json");
             //Fire the Url

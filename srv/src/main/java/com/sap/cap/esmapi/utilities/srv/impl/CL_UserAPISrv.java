@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cloud.security.xsuaa.token.Token;
 
@@ -49,6 +50,11 @@ public class CL_UserAPISrv implements IF_UserAPISrv
     @Autowired
     private TY_SrvCloudUrls srvCloudUrls;
 
+    @Autowired
+    private IF_APISrv apiSrv;
+
+    private final String equalsString = "=";
+
     @Override
     public Ty_UserAccountContact getUserDetails(@AuthenticationPrincipal Token token) throws EX_ESMAPI 
     {
@@ -67,9 +73,8 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                 userData.setUserId(token.getLogonName());
                 userData.setUserEmail(token.getEmail());
                 userData.setAccountId(getAccountIdByUserEmail(userData.getUserEmail()));
-                
-
-                return userData;
+                userData.setContactId(getContactPersonIdByUserEmail(userData.getUserEmail()));
+                 
             }
         }
         return userData;
@@ -191,11 +196,115 @@ public class CL_UserAPISrv implements IF_UserAPISrv
         return accountID;
     }
 
+
+
+    @Override
+    public String getContactPersonIdByUserEmail(String userEmail) throws EX_ESMAPI 
+    {
+        String accountID = null;
+        Map<String,String> accEmails = new HashMap<String,String>();
+        if (StringUtils.hasText(userEmail) && srvCloudUrls != null)
+        {
+            if (StringUtils.hasText(srvCloudUrls.getCpUrl())) 
+            {
+                try 
+                {
+                    JsonNode accountsResp = getAllContacts();
+                    if (accountsResp != null)
+                     {
+                        JsonNode rootNode = accountsResp.path("value");
+                        if (rootNode != null)
+                        {
+                            System.out.println("Contacts Bound!!");
+
+                            Iterator<Map.Entry<String, JsonNode>> payloadItr = accountsResp.fields();
+                            while (payloadItr.hasNext()) 
+                            {
+                                System.out.println("Payload Iterator Bound");
+                                Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                                String payloadFieldName = payloadEnt.getKey();
+                                System.out.println("Payload Field Scanned:  " + payloadFieldName);
+
+                                if (payloadFieldName.equals("value")) 
+                                {
+                                    Iterator<JsonNode> accItr = payloadEnt.getValue().elements();
+                                    System.out.println("Contacts Iterator Bound");
+                                    while (accItr.hasNext()) 
+                                    {
+
+                                        JsonNode accEnt = accItr.next();
+                                        if (accEnt != null) 
+                                        {
+                                            String accid = null, accEmail = null;
+                                            System.out.println("Contact Entity Bound - Reading Contact...");
+                                            Iterator<String> fieldNames = accEnt.fieldNames();
+                                            while (fieldNames.hasNext()) 
+                                            {
+                                                String accFieldName = fieldNames.next();
+                                                System.out.println("Contact Entity Field Scanned:  " + accFieldName);
+                                                if (accFieldName.equals("id")) 
+                                                {
+                                                    System.out.println(
+                                                            "Account Id Added : " + accEnt.get(accFieldName).asText());
+                                                    accid = accEnt.get(accFieldName).asText();
+                                                }
+
+                                                if (accFieldName.equals("eMail")) 
+                                                {
+                                                    System.out.println(
+                                                            "Account Email Added : " + accEnt.get(accFieldName).asText());
+                                                    accEmail =  accEnt.get(accFieldName).asText();
+                                                }
+
+                                               
+
+                                            }
+                                            //avoid null email accounts
+                                            if(StringUtils.hasText(accid) && StringUtils.hasText(accEmail))
+                                            {
+                                                accEmails.put(accid,accEmail);
+                                            }
+
+                                        }
+
+
+                                    }
+
+                                }
+
+                            }
+
+                            //Filter by Email
+                           Optional<Map.Entry<String,String>> OptionalAcc =  accEmails.entrySet().stream().filter(u->u.getValue().equals(userEmail)).findFirst();
+                           if(OptionalAcc.isPresent())
+                           {
+                                Map.Entry<String,String> account = OptionalAcc.get();
+                                accountID = account.getKey(); //Return Account ID
+                           }
+                           
+
+
+
+                        }
+                    }
+                } catch (IOException e)
+                {
+                    throw new EX_ESMAPI(msgSrc.getMessage("API_AC_ERROR", new Object[] { e.getLocalizedMessage() },
+                            Locale.ENGLISH));
+                }
+            }
+
+        }
+        return accountID;
+    }
+
+    
     private JsonNode getAllAccounts() throws IOException
     {
         JsonNode jsonNode = null;
         HttpResponse response = null;
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        String url = null;
 
         try 
         {
@@ -203,40 +312,47 @@ public class CL_UserAPISrv implements IF_UserAPISrv
             {
                 System.out.println("Url and Credentials Found!!");
 
-                String encoding = Base64.getEncoder().encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
-
-                HttpGet httpGet = new HttpGet(srvCloudUrls.getAccountsUrl());
-                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
-                httpGet.addHeader("accept", "application/json");
-
-                try 
+                long numAccounts = apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getAccountsUrl());
+                if(numAccounts > 0)
                 {
-                    //Fire the Url
-                    response = httpClient.execute(httpGet);
+                    url = srvCloudUrls.getAccountsUrl() + srvCloudUrls.getTopSuffix() + equalsString + numAccounts;
+                    String encoding = Base64.getEncoder().encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
 
-                    // verify the valid error code first
-                    int statusCode = response.getStatusLine().getStatusCode();
-                    if (statusCode != HttpStatus.SC_OK) 
+                    HttpGet httpGet = new HttpGet(url);
+                    httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                    httpGet.addHeader("accept", "application/json");
+    
+                    try 
                     {
-                        throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                        //Fire the Url
+                        response = httpClient.execute(httpGet);
+    
+                        // verify the valid error code first
+                        int statusCode = response.getStatusLine().getStatusCode();
+                        if (statusCode != HttpStatus.SC_OK) 
+                        {
+                            throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                        }
+    
+                        //Try and Get Entity from Response
+                        org.apache.http.HttpEntity entity = response.getEntity();
+                        String apiOutput = EntityUtils.toString(entity);
+                        //Lets see what we got from API
+                        System.out.println(apiOutput);
+    
+                        //Conerting to JSON
+                        ObjectMapper mapper = new ObjectMapper();
+                        jsonNode = mapper.readTree(apiOutput);
+                        
+    
+                    } catch (IOException e)
+                    {
+    
+                        e.printStackTrace();
                     }
-
-                    //Try and Get Entity from Response
-                    org.apache.http.HttpEntity entity = response.getEntity();
-                    String apiOutput = EntityUtils.toString(entity);
-                    //Lets see what we got from API
-                    System.out.println(apiOutput);
-
-                    //Conerting to JSON
-                    ObjectMapper mapper = new ObjectMapper();
-                    jsonNode = mapper.readTree(apiOutput);
-                    
-
-                } catch (IOException e)
-                {
-
-                    e.printStackTrace();
                 }
+
+               
 
             }
 
@@ -252,7 +368,77 @@ public class CL_UserAPISrv implements IF_UserAPISrv
     }
 
 
+    private JsonNode getAllContacts() throws IOException
+    {
+        JsonNode jsonNode = null;
+        HttpResponse response = null;
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        String url = null;
+
+        try 
+        {
+            if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword()) && StringUtils.hasLength(srvCloudUrls.getCpUrl())) 
+            {
+                System.out.println("Url and Credentials Found!!");
+
+                long numAccounts = apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getCpUrl());
+                if(numAccounts > 0)
+                {
+                    url = srvCloudUrls.getCpUrl() + srvCloudUrls.getTopSuffix() + equalsString + numAccounts;
+                    String encoding = Base64.getEncoder().encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                    HttpGet httpGet = new HttpGet(url);
+                    httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                    httpGet.addHeader("accept", "application/json");
+    
+                    try 
+                    {
+                        //Fire the Url
+                        response = httpClient.execute(httpGet);
+    
+                        // verify the valid error code first
+                        int statusCode = response.getStatusLine().getStatusCode();
+                        if (statusCode != HttpStatus.SC_OK) 
+                        {
+                            throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                        }
+    
+                        //Try and Get Entity from Response
+                        org.apache.http.HttpEntity entity = response.getEntity();
+                        String apiOutput = EntityUtils.toString(entity);
+                        //Lets see what we got from API
+                        System.out.println(apiOutput);
+    
+                        //Conerting to JSON
+                        ObjectMapper mapper = new ObjectMapper();
+                        jsonNode = mapper.readTree(apiOutput);
+                        
+    
+                    } catch (IOException e)
+                    {
+    
+                        e.printStackTrace();
+                    }
+                }
+
+               
+
+            }
+
+        } 
+        finally
+        {
+            httpClient.close();
+        }
+        return jsonNode;
+
+        
+
+    }
+
    
+
+
 
 
 }

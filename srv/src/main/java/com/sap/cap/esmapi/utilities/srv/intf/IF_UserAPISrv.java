@@ -13,6 +13,8 @@ public interface IF_UserAPISrv
 
     public String getAccountIdByUserEmail(String userEmail) throws EX_ESMAPI;
 
+    public String getContactPersonIdByUserEmail(String userEmail) throws EX_ESMAPI;
+
 
     
 }

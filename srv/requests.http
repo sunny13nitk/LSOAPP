@@ -18,3 +18,7 @@ Accept: application/json
 ### Get Account ID by Email
 GET http://localhost:9090/api/accByEmail/?email=mikemiller@gmail.com
 Accept: application/json 
+
+### Get Contact ID by Email
+GET http://localhost:9090/api/cpByEmail/?email=mikemiller@gmail.com
+Accept: application/json 
