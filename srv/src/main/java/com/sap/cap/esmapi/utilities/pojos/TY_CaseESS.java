@@ -19,4 +19,5 @@ public class TY_CaseESS
     private String statusDesc;
     private String createdOn;
     private Date creationDate;    
+    private String formattedDate;
 }

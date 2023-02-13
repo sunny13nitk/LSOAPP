@@ -299,6 +299,14 @@ public class CL_UserAPISrv implements IF_UserAPISrv
         return accountID;
     }
 
+
+    @Override
+    public TY_UserESS getESSDetails(Token token) throws EX_ESMAPI 
+    {
+        
+        return null;
+    }
+
     
     private JsonNode getAllAccounts() throws IOException
     {
@@ -437,13 +445,9 @@ public class CL_UserAPISrv implements IF_UserAPISrv
 
     }
 
-    @Override
-    public TY_UserESS getESSDetails(Token token) throws EX_ESMAPI 
-    {
-        
-        return null;
-    }
 
+    
+    
    
 
 
