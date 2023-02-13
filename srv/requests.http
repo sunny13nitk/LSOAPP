@@ -2,6 +2,10 @@
 GET http://localhost:9090/api/cases
 Accept: application/json 
 
+### Get ESS Portal View
+GET http://localhost:9090/api/ESS
+Accept: application/json 
+
 ### Get Case Details in ESS Format
 GET http://localhost:9090/api/casesESS
 Accept: application/json 

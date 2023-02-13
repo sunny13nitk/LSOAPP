@@ -17,6 +17,8 @@ public class TY_CaseESS
     private String id;
     private String subject;
     private String statusDesc;
+    private String accountId;
+    private String contactId;
     private String createdOn;
     private Date creationDate;    
     private String formattedDate;

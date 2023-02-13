@@ -18,6 +18,7 @@ import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
+import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
@@ -302,7 +303,7 @@ public class APIRestController
                                 JsonNode caseEnt = casesItr.next();
                                 if(caseEnt != null)
                                 {
-                                    String caseid = null, caseguid = null, subject= null, status= null,createdOn=null;
+                                    String caseid = null, caseguid = null, subject= null, status= null,createdOn=null, accountId= null, contactId= null ;
                                     System.out.println("Cases Entity Bound - Reading Case...");
                                     Iterator<String> fieldNames = caseEnt.fieldNames();
                                     while (fieldNames.hasNext()) 
@@ -378,7 +379,53 @@ public class APIRestController
                                                     }
                                                 }
 
+                                        if (caseFieldName.equals("account")) 
+                                                {
+                                                    System.out.println("Inside Account:  " );
 
+                                                    JsonNode accEnt = caseEnt.path("account");
+                                                    if(accEnt != null)
+                                                    {
+                                                        System.out.println("Account Node Bound");
+
+                                                        Iterator<String> fieldNamesAcc= accEnt.fieldNames();
+                                                        while (fieldNamesAcc.hasNext()) 
+                                                        {
+                                                            String accFieldName = fieldNamesAcc.next();
+                                                            if (accFieldName.equals("id")) 
+                                                                {
+                                                                    System.out.println(
+                                                                            "Account ID : " + accEnt.get(accFieldName).asText());
+                                                                    accountId = accEnt.get(accFieldName).asText();
+                                                                }
+                                                        }
+
+                                                    }
+                                                }        
+
+                                        if (caseFieldName.equals("reporter")) 
+                                                {
+                                                    System.out.println("Inside Reporter:  " );
+
+                                                    JsonNode repEnt = caseEnt.path("reporter");
+                                                    if(repEnt != null)
+                                                    {
+                                                        System.out.println("Reporter Node Bound");
+
+                                                        Iterator<String> fieldNamesRep= repEnt.fieldNames();
+                                                        while (fieldNamesRep.hasNext()) 
+                                                        {
+                                                            String repFieldName = fieldNamesRep.next();
+                                                            if (repFieldName.equals("id")) 
+                                                                {
+                                                                    System.out.println(
+                                                                            "Reporter ID : " + repEnt.get(repFieldName).asText());
+                                                                    contactId = repEnt.get(repFieldName).asText();
+                                                                }
+                                                        }
+
+                                                    }
+                                                }                
 
                                                                     
                                     }
@@ -397,12 +444,12 @@ public class APIRestController
                                             SimpleDateFormat sdf = new SimpleDateFormat("dd/M/yyyy");
                                             String dateFormatted= sdf.format(date);
                                             
-                                            casesESSList.add(new TY_CaseESS(caseguid, caseid, subject, status, createdOn, date, dateFormatted ));
+                                            casesESSList.add(new TY_CaseESS(caseguid, caseid, subject, status, accountId, contactId, createdOn, date, dateFormatted));
 
                                         }
                                         else
                                         {
-                                            casesESSList.add(new TY_CaseESS(caseguid, caseid, subject, status, createdOn, null,null));
+                                            casesESSList.add(new TY_CaseESS(caseguid, caseid, subject, status, accountId, contactId, createdOn, null,null));
                                         }
                                         
                                     }
@@ -433,6 +480,13 @@ public class APIRestController
     }
 
     
+    @GetMapping("/ESS")
+    private TY_UserESS getESSPortal(@AuthenticationPrincipal Token token)
+    {
+        TY_UserESS userDetails = userSrv.getESSDetails(token);
+
+        return userDetails;
+    }
 
    
    
