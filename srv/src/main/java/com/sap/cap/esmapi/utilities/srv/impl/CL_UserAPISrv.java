@@ -15,10 +15,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
+import com.sap.cap.esmapi.utilities.pojos.TY_AccountCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
+import com.sap.cap.esmapi.utilities.pojos.TY_DefaultComm;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
@@ -27,10 +31,16 @@ import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cloud.security.xsuaa.token.Token;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Scope;
@@ -63,7 +73,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
     @Autowired
     private IF_APISrv apiSrv;
 
-    private final String equalsString = "=";
+   
 
     @Override
     public Ty_UserAccountContact getUserDetails(@AuthenticationPrincipal Token token) throws EX_ESMAPI 
@@ -79,8 +89,9 @@ public class CL_UserAPISrv implements IF_UserAPISrv
             if(userData == null)
             {
                 //Fetch and Return
-                userData = new Ty_UserAccountContact();
+                this.userData = new Ty_UserAccountContact();
                 userData.setUserId(token.getLogonName());
+                userData.setUserName(token.getGivenName() + " " + token.getFamilyName());
                 userData.setUserEmail(token.getEmail());
                 userData.setAccountId(getAccountIdByUserEmail(userData.getUserEmail()));
                 userData.setContactId(getContactPersonIdByUserEmail(userData.getUserEmail()));
@@ -338,14 +349,167 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                     
 
             }
+            else
+            {
+               //2.b. Account Not Identified - Create Account and Update Session 
+               this.userData.setAccountId(createAccount());
+            }
         }
 
-        //2.b. Account Not Identified - Create Account and Update Session
+        
 
         return userDetails;
     }
 
+
+    @Override
+    public String createAccount() throws EX_ESMAPI
+    {
+        String accountId= null;
+        //User Email and UserName Bound
+        if(StringUtils.hasText(userData.getUserEmail()) && StringUtils.hasText(userData.getUserName()) )
+        {
+            TY_AccountCreate newAccount = new TY_AccountCreate
+            (userData.getUserName(), GC_Constants.gc_roleCustomer, GC_Constants.gc_statusACTIVE, new TY_DefaultComm(userData.getUserEmail()) );
+
+            if(newAccount != null)
+            {
+                HttpClient httpclient = HttpClients.createDefault();
+                String accPOSTURL = getAccountsPOSTURL();
+                if(StringUtils.hasText(accPOSTURL))
+                {
+                    String encoding = Base64.getEncoder().encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                    HttpPost httpPost = new HttpPost(accPOSTURL);
+                    httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                    httpPost.addHeader("Content-Type", "application/json");
+
+                    ObjectMapper objMapper = new ObjectMapper();
+                    try 
+                    {
+                        String requestBody = objMapper.writeValueAsString(newAccount);
+                        System.out.println(requestBody);
+
+                        StringEntity entity = new StringEntity(requestBody,ContentType.APPLICATION_JSON);
+                        httpPost.setEntity(entity);
+
+                        //POST Account in Service Cloud
+                        try 
+                        {
+                            // Fire the Url
+                            HttpResponse response = httpclient.execute(httpPost);
+                            // verify the valid error code first
+                            int statusCode = response.getStatusLine().getStatusCode();
+                            if (statusCode != HttpStatus.SC_CREATED) 
+                            {
+                                throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                            }
+
+                            // Try and Get Entity from Response
+                            HttpEntity entityResp = response.getEntity();
+                            String apiOutput = EntityUtils.toString(entityResp);
+                           
+                            // Conerting to JSON
+                            ObjectMapper mapper = new ObjectMapper();
+                            JsonNode jsonNode = mapper.readTree(apiOutput);
+
+                            if(jsonNode != null)
+                            {
+                
+                                JsonNode rootNode = jsonNode.path("value");
+                                if(rootNode != null)
+                                {
+                                
+                                    System.out.println("Account Bound!!");
+                                    
+                    
+                                    Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
+                                    while (payloadItr.hasNext()) 
+                                    {
+                                        System.out.println("Payload Iterator Bound");
+                                        Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                                        String   payloadFieldName  = payloadEnt.getKey();
+                                        System.out.println("Payload Field Scanned:  " + payloadFieldName);
+                    
+                                        if(payloadFieldName.equals("value"))
+                                        {
+                                            JsonNode accEnt = payloadEnt.getValue();
+                                            System.out.println("New Account Entity Bound");
+                                            if(accEnt != null)
+                                                {
+                                                    
+                                                    System.out.println("Accounts Entity Bound - Reading Account...");
+                                                    Iterator<String> fieldNames = accEnt.fieldNames();
+                                                    while (fieldNames.hasNext()) 
+                                                    {
+                                                        String   accFieldName  = fieldNames.next();
+                                                        System.out.println("Account Entity Field Scanned:  " + accFieldName);
+                                                        if(accFieldName.equals("id"))
+                                                        {
+                                                            System.out.println("Account GUID Added : " + accEnt.get(accFieldName).asText());
+                                                            if(StringUtils.hasText(accEnt.get(accFieldName).asText()))
+                                                            {
+                                                                accountId = accEnt.get(accFieldName).asText();
+                                                            }
+                                                        }
+                                                        
+                                                    }
+                                                    
+                                                }
+                                                
+                                            
+                
+                                        }							
+                
+                                    }			
+                                }	
+                            }		
+                
+
+
+
+
+                        } 
+                        catch (IOException e)
+                        {
+                            throw new EX_ESMAPI(msgSrc.getMessage("ERR_ACC_POST", new Object[] { e.getLocalizedMessage() },
+                                 Locale.ENGLISH));
+                        }
+                    }
+                    catch (JsonProcessingException e) 
+                    {
+                        throw new EX_ESMAPI(msgSrc.getMessage("ERR_NEW_AC_JSON", new Object[] { e.getLocalizedMessage() },
+                        Locale.ENGLISH));
+                    }
+                    
+                  
+
+
+                }
+
+                
+
+
+            }
+        }
+         return accountId;
+    }
+   
+
     
+    private String getAccountsPOSTURL()
+    {
+        String url = null;
+        if(StringUtils.hasText(srvCloudUrls.getAccountsUrl()))
+        {
+            String[] urlParts = srvCloudUrls.getAccountsUrl().split("\\?");
+            if(urlParts.length > 0)
+            {
+                url = urlParts[0];
+            }
+        }
+        return url;
+    }
+
     private JsonNode getAllAccounts() throws IOException
     {
         JsonNode jsonNode = null;
@@ -362,7 +526,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                 long numAccounts = apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getAccountsUrl());
                 if(numAccounts > 0)
                 {
-                    url = srvCloudUrls.getAccountsUrl() + srvCloudUrls.getTopSuffix() + equalsString + numAccounts;
+                    url = srvCloudUrls.getAccountsUrl() + srvCloudUrls.getTopSuffix() + GC_Constants.equalsString + numAccounts;
                     String encoding = Base64.getEncoder().encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
 
                     HttpGet httpGet = new HttpGet(url);
@@ -431,7 +595,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                 long numAccounts = apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getCpUrl());
                 if(numAccounts > 0)
                 {
-                    url = srvCloudUrls.getCpUrl() + srvCloudUrls.getTopSuffix() + equalsString + numAccounts;
+                    url = srvCloudUrls.getCpUrl() + srvCloudUrls.getTopSuffix() + GC_Constants.equalsString + numAccounts;
                     String encoding = Base64.getEncoder().encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
 
                     HttpGet httpGet = new HttpGet(url);
@@ -757,7 +921,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                 long numCases = apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getCasesUrl());
                 if (numCases > 0)
                 {
-                    url = srvCloudUrls.getCasesUrl() + srvCloudUrls.getTopSuffix() + equalsString + numCases;
+                    url = srvCloudUrls.getCasesUrl() + srvCloudUrls.getTopSuffix() + GC_Constants.equalsString + numCases;
 
                     String encoding = Base64.getEncoder()
                             .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
@@ -809,7 +973,8 @@ public class CL_UserAPISrv implements IF_UserAPISrv
         
 
     }
-   
+
+    
 
 
 

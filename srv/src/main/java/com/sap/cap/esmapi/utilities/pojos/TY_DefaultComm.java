@@ -1,5 +1,8 @@
 package com.sap.cap.esmapi.utilities.pojos;
 
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,11 +12,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Ty_UserAccountContact
+public class TY_DefaultComm 
 {
-    private String userId;
-    private String userName;
-    private String userEmail;
-    private String accountId;
-    private String contactId;    
+    @JsonProperty("eMail")
+    private String eMail;    
 }

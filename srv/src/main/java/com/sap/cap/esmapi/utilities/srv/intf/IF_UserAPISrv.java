@@ -5,6 +5,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
 import com.sap.cloud.security.xsuaa.token.Token;
 
+import org.apache.http.HttpResponse;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 public interface IF_UserAPISrv
@@ -18,6 +19,6 @@ public interface IF_UserAPISrv
 
     public TY_UserESS getESSDetails(@AuthenticationPrincipal Token token) throws EX_ESMAPI;
 
-
+    public String createAccount() throws EX_ESMAPI;
     
 }

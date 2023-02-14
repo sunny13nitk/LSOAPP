@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.utilities.pojos;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,11 +10,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Ty_UserAccountContact
+public class TY_AccountCreate 
 {
-    private String userId;
-    private String userName;
-    private String userEmail;
-    private String accountId;
-    private String contactId;    
+    private String firstLineName;
+    private String customerRole;
+    private String lifeCycleStatus;
+    private TY_DefaultComm defaultCommunication;    
 }

@@ -2,6 +2,7 @@ package com.sap.cap.esmapi.rest;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -9,41 +10,48 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
+import com.sap.cap.esmapi.utilities.pojos.TY_AccountCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
+import com.sap.cap.esmapi.utilities.pojos.TY_DefaultComm;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
-import com.sap.cds.services.request.UserInfo;
-import java.time.Instant;
+import com.sap.cloud.security.xsuaa.token.Token;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import com.sap.cloud.security.xsuaa.token.Token;
-import com.sap.cloud.security.xsuaa.tokenflows.XsuaaTokenFlows;
-
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Autowired;
 
 
 @RestController
@@ -59,6 +67,9 @@ public class APIRestController
 
     @Autowired
     private IF_APISrv apiSrv;
+
+    @Autowired
+    private MessageSource msgSrc;
 
     private final String equalsString = "=";
 
@@ -587,6 +598,149 @@ public class APIRestController
          
     }
 
+
+    @GetMapping("/accURL")
+    private String getACCURL( )
+    {
+        String url = null;
+        String requestBody = null;
+        JsonNode jsonNode = null;
+        String accountId = null;
+
+        if(StringUtils.hasText(srvCloudUrls.getAccountsUrl()))
+        {
+            String[] urlParts = srvCloudUrls.getAccountsUrl().split("\\?");
+            if(urlParts.length > 0)
+            {
+                url = urlParts[0];
+            }
+        }
+        
+        if(StringUtils.hasText(url))
+        {
+            TY_AccountCreate newAccount = new TY_AccountCreate
+            ("Mohd. Shami", GC_Constants.gc_roleCustomer, GC_Constants.gc_statusACTIVE, new TY_DefaultComm("mohd.shami@gmail.com") );
+
+            if(newAccount != null)
+            {
+                HttpClient httpclient = HttpClients.createDefault();
+                
+                
+                    String encoding = Base64.getEncoder().encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                    HttpPost httpPost = new HttpPost(url);
+                    httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                    httpPost.addHeader("Content-Type", "application/json");
+
+                    ObjectMapper objMapper = new ObjectMapper();
+                    try 
+                    {
+
+                        requestBody = objMapper.writeValueAsString(newAccount);
+                        System.out.println(requestBody);
+
+                        StringEntity entity = new StringEntity(requestBody,ContentType.APPLICATION_JSON);
+                        httpPost.setEntity(entity);
+
+                        //POST Account in Service Cloud
+                        try 
+                        {
+                            // Fire the Url
+                            HttpResponse response = httpclient.execute(httpPost);
+                            // verify the valid error code first
+                            int statusCode = response.getStatusLine().getStatusCode();
+                            if (statusCode != HttpStatus.SC_CREATED) 
+                            {
+                                throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                            }
+
+                            // Try and Get Entity from Response
+                            HttpEntity entityResp = response.getEntity();
+                            String apiOutput = EntityUtils.toString(entityResp);
+                            // Lets see what we got from API
+                            System.out.println(apiOutput);
+
+                            // Conerting to JSON
+                            ObjectMapper mapper = new ObjectMapper();
+                            jsonNode = mapper.readTree(apiOutput);
+
+
+                            if(jsonNode != null)
+                            {
+                
+                                JsonNode rootNode = jsonNode.path("value");
+                                if(rootNode != null)
+                                {
+                                
+                                    System.out.println("Account Bound!!");
+                                    
+                    
+                                    Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
+                                    while (payloadItr.hasNext()) 
+                                    {
+                                        System.out.println("Payload Iterator Bound");
+                                        Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                                        String   payloadFieldName  = payloadEnt.getKey();
+                                        System.out.println("Payload Field Scanned:  " + payloadFieldName);
+                    
+                                        if(payloadFieldName.equals("value"))
+                                        {
+                                            JsonNode accEnt = payloadEnt.getValue();
+                                            System.out.println("New Account Entity Bound");
+                                            if(accEnt != null)
+                                                {
+                                                    
+                                                    System.out.println("Accounts Entity Bound - Reading Account...");
+                                                    Iterator<String> fieldNames = accEnt.fieldNames();
+                                                    while (fieldNames.hasNext()) 
+                                                    {
+                                                        String   accFieldName  = fieldNames.next();
+                                                        System.out.println("Account Entity Field Scanned:  " + accFieldName);
+                                                        if(accFieldName.equals("id"))
+                                                        {
+                                                            System.out.println("Account GUID Added : " + accEnt.get(accFieldName).asText());
+                                                            if(StringUtils.hasText(accEnt.get(accFieldName).asText()))
+                                                            {
+                                                                accountId = accEnt.get(accFieldName).asText();
+                                                            }
+                                                        }
+                                                        
+                                                    }
+                                                    
+                                                }
+                                                
+                                            
+                
+                                        }							
+                
+                                    }			
+                                }	
+                            }		
+                
+
+
+
+                        } 
+                        catch (IOException e)
+                        {
+                            throw new EX_ESMAPI(msgSrc.getMessage("ERR_ACC_POST", new Object[] { e.getLocalizedMessage() },
+                                 Locale.ENGLISH));
+                        }
+                    }
+                    catch (JsonProcessingException e) 
+                    {
+                        throw new EX_ESMAPI(msgSrc.getMessage("ERR_NEW_AC_JSON", new Object[] { e.getLocalizedMessage() },
+                        Locale.ENGLISH));
+                    }
+                    
+                   
+
+            }  
+        }
+
+
+
+        return accountId;
+    }
     
 
         
