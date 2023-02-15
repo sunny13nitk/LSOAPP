@@ -35,3 +35,7 @@ Accept: application/json
 ### Get Accounts Base URL 
 GET http://localhost:9090/api/accURL
 Accept: application/json 
+
+### Get Accounts Base URL 
+GET http://localhost:9090/esslocal/
+Accept: application/json 

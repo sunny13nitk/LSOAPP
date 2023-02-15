@@ -340,6 +340,9 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                     
                 try 
                 {
+                    //First Clear Any if in Session
+                    userDetails.setCases(null);
+                    //Fetch Afresh
                     userDetails.setCases(getCases4User());
                 } 
                 catch (IOException e)
@@ -686,7 +689,8 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                                 JsonNode caseEnt = casesItr.next();
                                 if(caseEnt != null)
                                 {
-                                    String caseid = null, caseguid = null, subject= null, status= null,createdOn=null, accountId= null, contactId= null ;
+                                    String caseid = null, caseguid = null, caseType = null, caseTypeDescription = null, subject= null, status= null,
+                                    createdOn=null, accountId= null, contactId= null ;
                                     System.out.println("Cases Entity Bound - Reading Case...");
                                     Iterator<String> fieldNames = caseEnt.fieldNames();
                                     while (fieldNames.hasNext()) 
@@ -710,6 +714,25 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                                                 caseid = caseEnt.get(caseFieldName).asText();
                                             }
                                         }
+
+                                        if(caseFieldName.equals("caseType"))
+                                        {
+                                            System.out.println("Case Type Added : " + caseEnt.get(caseFieldName).asText());
+                                            if(StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
+                                            {
+                                                caseType = caseEnt.get(caseFieldName).asText();
+                                            }
+                                        }
+
+                                        if(caseFieldName.equals("caseTypeDescription"))
+                                        {
+                                            System.out.println("Case Type Description Added : " + caseEnt.get(caseFieldName).asText());
+                                            if(StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
+                                            {
+                                                caseTypeDescription = caseEnt.get(caseFieldName).asText();
+                                            }
+                                        }
+
 
                                         if(caseFieldName.equals("subject"))
                                         {
@@ -827,12 +850,12 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                                             SimpleDateFormat sdf = new SimpleDateFormat("dd/M/yyyy");
                                             String dateFormatted= sdf.format(date);
                                             
-                                            casesESSList.add(new TY_CaseESS(caseguid, caseid, subject, status, accountId, contactId, createdOn, date, dateFormatted));
+                                            casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType, caseTypeDescription, subject, status, accountId, contactId, createdOn, date, dateFormatted));
 
                                         }
                                         else
                                         {
-                                            casesESSList.add(new TY_CaseESS(caseguid, caseid, subject, status, accountId, contactId, createdOn, null,null));
+                                            casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType, caseTypeDescription ,subject, status, accountId, contactId, createdOn, null,null));
                                         }
                                         
                                     }

@@ -15,6 +15,8 @@ public class TY_CaseESS
 {
     private String guid;
     private String id;
+    private String caseType;
+    private String caseTypeDescription;
     private String subject;
     private String statusDesc;
     private String accountId;

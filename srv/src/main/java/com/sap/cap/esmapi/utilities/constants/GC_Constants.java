@@ -8,4 +8,7 @@ public class GC_Constants
 
     public static final String gc_statusACTIVE = "ACTIVE";
 
+    public static final String gc_statusCompleted = "Completed";
+    
+
 }

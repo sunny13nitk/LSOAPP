@@ -39,8 +39,10 @@ public class AppSecurityConfig
       ----------- Local Testing --------------------
     */
      return http
-      .requestMatchers().antMatchers("/api/**").and()
-      .csrf().disable() // don't insist on csrf tokens in put, post etc.
+      .requestMatchers()
+      .antMatchers("/api/**")
+      .antMatchers("/esslocal/**")
+      .and().csrf().disable() // don't insist on csrf tokens in put, post etc.
       .authorizeRequests().anyRequest().permitAll().and()
       .build();
       
@@ -55,7 +57,8 @@ public class AppSecurityConfig
       //     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
       // .and()
       //     .authorizeRequests()
-      //     .antMatchers("/api/**").authenticated()
+      //     .antMatchers("/api/**").hasAuthority("Administrators")
+      //     .antMatchers("/ess/**").authenticated()
       //     //.anyRequest().permitAll()
       //     .anyRequest().denyAll()
       // .and()
