@@ -355,7 +355,11 @@ public class CL_UserAPISrv implements IF_UserAPISrv
             else
             {
                //2.b. Account Not Identified - Create Account and Update Session 
-               this.userData.setAccountId(createAccount());
+               //this.userData.setAccountId(createAccount());
+
+               /*
+                ---- Would be expliciltly handled while creating a Case via createAccount() call
+               */
             }
         }
 
@@ -452,6 +456,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                                                             if(StringUtils.hasText(accEnt.get(accFieldName).asText()))
                                                             {
                                                                 accountId = accEnt.get(accFieldName).asText();
+                                                                this.userData.setAccountId(accountId);
                                                             }
                                                         }
                                                         
@@ -659,6 +664,9 @@ public class CL_UserAPISrv implements IF_UserAPISrv
 
         try
         {
+            if(StringUtils.hasLength(userData.getAccountId()) ||StringUtils.hasLength(userData.getContactId()))
+          {
+                      
             
             JsonNode jsonNode = getAllCases();
 
@@ -873,6 +881,13 @@ public class CL_UserAPISrv implements IF_UserAPISrv
             }
 
         }
+
+        else
+        {
+            return null; //Neither AccountId or ContactId found for logged in User
+        }
+
+      }
 
        catch (Exception e) 
         {

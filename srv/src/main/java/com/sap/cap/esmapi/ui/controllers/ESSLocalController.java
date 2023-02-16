@@ -40,6 +40,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -75,8 +76,11 @@ public class ESSLocalController
              */
 
              Ty_UserAccountContact userAcc =
-                new Ty_UserAccountContact("I057386", "Sunny Bhardwaj", "sunny13nitk@gmail.com",
-                 "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00");
+                // new Ty_UserAccountContact("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
+                //  "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00");
+
+                 new Ty_UserAccountContact("Dummy", "ESS Test User", "test@gmail.com",
+                 null, null);
 
                  TY_UserESS userDetails = new TY_UserESS();
                  userDetails.setUserDetails(userAcc);
@@ -106,6 +110,20 @@ public class ESSLocalController
     }
 
 
+    @GetMapping("/createCase/{caseType}")
+	public String showTxnDetails4Scrip(@PathVariable("caseType") String caseType, Model model) throws Exception
+	{
+		
+		String viewName = "success";
+		if (StringUtils.hasText(caseType))
+		{
+			System.out.println("Case Type Slected for Creation: " + caseType);
+		}
+		
+		return viewName;
+	}
+
+
 
     private List<TY_CaseESS> getCases4User(String accountIdUser, String contactIdUser)throws IOException
     {
@@ -115,7 +133,12 @@ public class ESSLocalController
 
         try
         {
-            
+            if(accountIdUser == null)
+            {
+                return null;
+            }
+            else
+            {
             JsonNode jsonNode = getAllCases();
 
             if(jsonNode != null)
@@ -330,6 +353,8 @@ public class ESSLocalController
 
         }
 
+     }
+
        catch (Exception e) 
         {
             e.printStackTrace();
@@ -372,6 +397,7 @@ public class ESSLocalController
     
                 }
             ).collect(Collectors.toList());
+            
        }
    
 
