@@ -38,7 +38,21 @@ public class CL_ESS_UISrv implements IF_ESS_UISrv
 
             stats.getCaseSummary().setTotalCases(cases4User.size());
             //Get Completed Cases
-            stats.getCaseSummary().setCompletedCases(cases4User.stream().filter(c->c.getStatusDesc().equals(GC_Constants.gc_statusCompleted)).collect(Collectors.toList()).size());
+            stats.getCaseSummary().setCompletedCases(cases4User.stream().filter(c->
+            {
+                if( c.getStatusDesc().equals(GC_Constants.gc_statusCompleted) 
+                            ||
+                     c.getStatusDesc().equals(GC_Constants.gc_statusSolnProvided)
+                  ) 
+                  {
+                    return true;
+                  }
+                  else
+                  {
+                    return false;
+                  }
+                
+            }).collect(Collectors.toList()).size());
             //Set Percentage Completed
             stats.getCaseSummary().setPerCompleted(
                 Precision.round( ( (stats.getCaseSummary().getCompletedCases() * 100) /stats.getCaseSummary().getTotalCases()),0 ));

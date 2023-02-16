@@ -86,7 +86,7 @@ public class ESSLocalController
                     if(userDetails != null && uiSrv != null)
                     {
                         TY_ESS_Stats stats = uiSrv.getStatsForUserCases(userDetails.getCases());
-                        model.addAttribute("userDetails", userDetails);
+                        model.addAttribute("userInfo", userDetails);
                         model.addAttribute("stats", stats);
                     }
                 } 
@@ -102,7 +102,7 @@ public class ESSLocalController
             
         }
 
-        return "success";
+        return "essListView";
     }
 
 
