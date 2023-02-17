@@ -39,3 +39,12 @@ Accept: application/json
 ### Get Accounts Base URL 
 GET http://localhost:9090/esslocal/
 Accept: application/json 
+
+
+### Get Accounts Case Type(s) Config 
+GET http://localhost:9090/api/cfg
+Accept: application/json
+
+### Get Catg Tree by Case Type
+GET http://localhost:9090/api/cfgCatg/LSO
+Accept: application/json 

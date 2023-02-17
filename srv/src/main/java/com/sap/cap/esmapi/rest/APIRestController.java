@@ -16,8 +16,12 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cap.esmapi.catg.pojos.TY_CaseCatgTree;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
+import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
+import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
 import com.sap.cap.esmapi.utilities.pojos.TY_AccountCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
@@ -49,6 +53,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,10 +71,16 @@ public class APIRestController
     private TY_SrvCloudUrls srvCloudUrls;
 
     @Autowired
+    private TY_CatgCus catgCus;
+
+    @Autowired
     private IF_APISrv apiSrv;
 
     @Autowired
     private MessageSource msgSrc;
+
+    @Autowired
+    private IF_CatgSrv catgSrv;
 
     private final String equalsString = "=";
 
@@ -617,6 +628,18 @@ public class APIRestController
          
     }
 
+
+    @GetMapping("/cfg")
+    private TY_CatgCus checkCaseCus()
+    {
+        return this.catgCus;
+    }
+
+    @GetMapping("/cfgCatg/{caseType}")
+    private TY_CaseCatgTree checkCaseCusCatg(@PathVariable("caseType") EnumCaseTypes caseType)
+    {
+        return catgSrv.getCaseCatgTree4LoB(caseType);
+    }
 
     @GetMapping("/accURL")
     private String getACCURL( )
