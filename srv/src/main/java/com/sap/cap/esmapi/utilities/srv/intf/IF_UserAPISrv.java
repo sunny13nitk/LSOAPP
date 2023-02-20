@@ -20,5 +20,7 @@ public interface IF_UserAPISrv
     public TY_UserESS getESSDetails(@AuthenticationPrincipal Token token) throws EX_ESMAPI;
 
     public String createAccount() throws EX_ESMAPI;
+
+    public Ty_UserAccountContact getUserDetails4mSession();
     
 }

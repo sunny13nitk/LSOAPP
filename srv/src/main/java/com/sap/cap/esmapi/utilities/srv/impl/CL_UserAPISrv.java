@@ -501,6 +501,15 @@ public class CL_UserAPISrv implements IF_UserAPISrv
         }
          return accountId;
     }
+
+
+    @Override
+    public Ty_UserAccountContact getUserDetails4mSession() 
+    {
+        return this.userData;
+    }
+        
+    
    
 
     
@@ -1011,6 +1020,8 @@ public class CL_UserAPISrv implements IF_UserAPISrv
         
 
     }
+
+   
 
     
 

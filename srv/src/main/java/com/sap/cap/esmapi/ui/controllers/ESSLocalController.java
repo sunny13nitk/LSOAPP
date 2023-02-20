@@ -10,13 +10,19 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
+import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
+import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_ESS_Stats;
 import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
+import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
@@ -63,6 +69,12 @@ public class ESSLocalController
     private IF_APISrv apiSrv;
 
     @Autowired
+    private TY_CatgCus catgCusSrv;
+
+    @Autowired
+    private IF_CatgSrv catgTreeSrv;
+
+    @Autowired
     private TY_SrvCloudUrls srvCloudUrls;
 
     @GetMapping("/")
@@ -74,13 +86,9 @@ public class ESSLocalController
              /*
                     //1 Populate User Details - Token Simulation locally for UI and logical Validation. 
              */
-
-             Ty_UserAccountContact userAcc =
-                new Ty_UserAccountContact("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
-                 "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00");
-
-                //  new Ty_UserAccountContact("Dummy", "ESS Test User", "test@gmail.com",
-                //  null, null);
+                 
+                //Local Load for Testing
+                 Ty_UserAccountContact userAcc = getUserAccount();
 
                  TY_UserESS userDetails = new TY_UserESS();
                  userDetails.setUserDetails(userAcc);
@@ -110,14 +118,83 @@ public class ESSLocalController
     }
 
 
+    private Ty_UserAccountContact getUserAccount() 
+    {
+        return new Ty_UserAccountContact("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
+        "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00");
+
+        //    return new Ty_UserAccountContact("Dummy", "ESS Test User", "test@gmail.com",
+        //               null, null);
+    }
+
+
     @GetMapping("/createCase/{caseType}")
-	public String showTxnDetails4Scrip(@PathVariable("caseType") String caseType, Model model) throws Exception
+	public String showTxnDetails4Scrip(@PathVariable("caseType") EnumCaseTypes caseType , Model model) throws Exception
 	{
 		
-		String viewName = "success";
-		if (StringUtils.hasText(caseType))
+		final String viewName = "caseForm";
+        String accountId;
+
+		if (StringUtils.hasText(caseType.toString()) && userSrv != null)
 		{
 			System.out.println("Case Type Selected for Creation: " + caseType);
+
+            TY_UserESS userDetails = new TY_UserESS();
+
+            //1. Check if Account Exists for the logged in User as A/C is mandatory to create a case
+           
+            // --- FOR PROD
+            // if(StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
+            // {
+                   
+            //     userDetails.setUserDetails(userSrv.getUserDetails4mSession());
+            //     model.addAttribute("userInfo", userDetails);     
+            //     accountId = userSrv.getUserDetails4mSession().getAccountId();
+            // }
+           
+            // -- FOR TEST : STARTS
+            if(StringUtils.hasText( getUserAccount().getAccountId()))
+            {
+                accountId = getUserAccount().getAccountId(); 
+            }
+            // -- FOR TEST : ENDS
+            else //Create the Account with logged in User credentials
+            {
+                accountId = userSrv.createAccount(); //Implictly refreshed in buffer
+            }
+
+            //Prepare Case Model - Form
+            if(StringUtils.hasText(accountId) && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+            {
+
+                Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream().filter(g->g.getCaseTypeEnum().toString().equals(caseType.toString())).findFirst();
+                if(cusItemO.isPresent() && catgTreeSrv != null)
+                {
+
+                    //For TEST ONLY: Starts
+                    userDetails.setUserDetails(getUserAccount());
+                    model.addAttribute("userInfo", userDetails);
+                    //For TEST ONLY: ENDS
+
+
+                    model.addAttribute("caseTypeStr", caseType.toString());
+
+                    TY_Case_Form caseForm = new TY_Case_Form();
+                    caseForm.setAccId(accountId);   //hidden
+                    caseForm.setCaseTxnType(cusItemO.get().getCaseType()); //hidden
+                    model.addAttribute("caseForm", caseForm);
+
+                    model.addAttribute("formError", null);
+
+                    //also Upload the Catg. Tree as per Case Type
+                    model.addAttribute("catgsList", catgTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
+
+                }
+
+             
+            }
+
+
 		}
 		
 		return viewName;
