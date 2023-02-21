@@ -13,10 +13,6 @@ public interface IF_UserAPISrv
 
     public Ty_UserAccountContact getUserDetails(@AuthenticationPrincipal Token token) throws EX_ESMAPI;
 
-    public String getAccountIdByUserEmail(String userEmail) throws EX_ESMAPI;
-
-    public String getContactPersonIdByUserEmail(String userEmail) throws EX_ESMAPI;
-
     public TY_UserESS getESSDetails(@AuthenticationPrincipal Token token) throws EX_ESMAPI;
 
     public String createAccount() throws EX_ESMAPI;

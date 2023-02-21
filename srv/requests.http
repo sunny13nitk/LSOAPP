@@ -33,7 +33,7 @@ Accept: application/json
 
 
 ### Get Accounts Base URL 
-GET http://localhost:9090/api/accURL
+GET http://localhost:9090/api/accURL/?email=ibnebatuta@gmail.com&userName=Ibne Batuta
 Accept: application/json 
 
 ### Get Accounts Base URL 
@@ -46,5 +46,5 @@ GET http://localhost:9090/api/cfg
 Accept: application/json
 
 ### Get Catg Tree by Case Type
-GET http://localhost:9090/api/cfgCatg/LSO
+GET http://localhost:9090/api/cfgCatg/Learning
 Accept: application/json 
