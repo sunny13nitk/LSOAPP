@@ -16,5 +16,12 @@ public class TY_Case_Form
     private String catgDesc;
     private String subject;
     private String description;
+    @Override
+    public String toString() {
+        return "TY_Case_Form [accId=" + accId + ", caseTxnType=" + caseTxnType + ", catgDesc=" + catgDesc
+                + ", description=" + description + ", subject=" + subject + "]";
+    }
+
+    
     
 }

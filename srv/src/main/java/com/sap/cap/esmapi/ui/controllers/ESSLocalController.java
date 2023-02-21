@@ -9,6 +9,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,7 +47,9 @@ import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -189,6 +192,8 @@ public class ESSLocalController
                     //also Upload the Catg. Tree as per Case Type
                     model.addAttribute("catgsList", catgTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
 
+                    
+
                 }
 
              
@@ -201,6 +206,56 @@ public class ESSLocalController
 	}
 
 
+
+    @PostMapping("/saveCase")
+	public String updatePFSchema(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
+	{
+        TY_UserESS userDetails = new TY_UserESS();
+        if(caseForm != null)
+        {
+            System.out.println(caseForm.toString());
+
+            //Validate Case Form
+            List<String> msgs = validateCaseForm(caseForm);
+            if(!CollectionUtils.isEmpty(msgs))
+            {
+                model.addAttribute("formError", msgs);
+                /*
+                 ------ Prepare Model for REload
+                */
+                // --- FOR PROD
+                // if(StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
+                // {
+                    
+                //     userDetails.setUserDetails(userSrv.getUserDetails4mSession());
+                //     model.addAttribute("userInfo", userDetails);     
+                // }
+
+                //For TEST ONLY: Starts
+                userDetails.setUserDetails(getUserAccount());
+                model.addAttribute("userInfo", userDetails);
+                //For TEST ONLY: ENDS
+
+                Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream().filter(g->g.getCaseType().equals(caseForm.getCaseTxnType())).findFirst();
+                if(cusItemO.isPresent() && catgTreeSrv != null)
+                {
+                    model.addAttribute("caseTypeStr", cusItemO.get().getCaseTypeEnum().toString());
+                    model.addAttribute("caseForm", caseForm);   
+                    //also Upload the Catg. Tree as per Case Type
+                    model.addAttribute("catgsList", catgTreeSrv.getCaseCatgTree4LoB(cusItemO.get().getCaseTypeEnum()).getCategories());
+
+                    return  "caseForm";
+                }
+            } //CaseForm has errors
+
+            else //Commit the Case
+            {
+               
+            }
+
+        }
+        return "redirect:/esslocal/";
+    }
 
     private List<TY_CaseESS> getCases4User(String accountIdUser, String contactIdUser)throws IOException
     {
@@ -485,7 +540,32 @@ public class ESSLocalController
         return casesESSList4User;
     }
 
+    private List<String> validateCaseForm(TY_Case_Form caseForm)
+    {
+        List<String> msgs = new ArrayList<String>();
 
+        if(!StringUtils.hasLength(caseForm.getAccId()))
+        {
+            msgs.add(msgSrc.getMessage("ERR_NO_AC", null, Locale.ENGLISH));
+        }
+
+        if(!StringUtils.hasLength(caseForm.getCaseTxnType()))
+        {
+            msgs.add(msgSrc.getMessage("ERR_NO_CASETYPE", null, Locale.ENGLISH));
+        }
+
+        if(!StringUtils.hasLength(caseForm.getCatgDesc()))
+        {
+            msgs.add(msgSrc.getMessage("ERR_NO_CATG", null, Locale.ENGLISH));
+        }
+
+        if(!StringUtils.hasLength(caseForm.getSubject()))
+        {
+            msgs.add(msgSrc.getMessage("ERR_NO_SUBJECT", null, Locale.ENGLISH));
+        }
+        
+        return msgs;
+    }
 
     private JsonNode getAllCases() throws IOException
     {
