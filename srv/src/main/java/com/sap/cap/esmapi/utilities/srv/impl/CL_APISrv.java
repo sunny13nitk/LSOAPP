@@ -66,7 +66,7 @@ public class CL_APISrv implements IF_APISrv
                 HttpEntity entity = response.getEntity();
                 String apiOutput = EntityUtils.toString(entity);
                 //Lets see what we got from API
-                System.out.println(apiOutput);
+                //System.out.println(apiOutput);
 
                 //Conerting to JSON
                 ObjectMapper mapper = new ObjectMapper();

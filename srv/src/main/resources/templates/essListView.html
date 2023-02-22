@@ -31,7 +31,7 @@
 					</div>
 
                <!-- User Information Card -->
-               <div class="colspan-3 offset-2" th:if="${userInfo.userDetails != null}">
+               <div class="colspan-3 offset-1" th:if="${userInfo.userDetails != null}">
 
                   <div class="icon-box border bd-default">
                      <div class="icon bg-cyan fg-white"><span class="mif-user-check"></span></div>
@@ -53,12 +53,82 @@
 
                </div>
 
+               <div class="colspan-2" style="padding: 20px;" th:if="${sessMsgs != null}">
+
+                  <a 
+                        href="#" class="button alert outline cycle " 
+                        data-role="hint"
+                        role="button"
+                        onclick="$('#info-box').data('infobox').open()"
+                        data-hint-position="bottom" data-cls-hint="fg-black"
+                        data-hint-text="Session Alerts!">
+                        <span
+                            class="mif-bell" style="margin-left: 0px"> 
+                        </span> 
+                             
+			          </a>
+
+                   <a 
+                        href="#" class="button primary outline cycle " style= "margin-right: 20px;"
+                        data-role="hint"
+                        th:href="@{/esslocal/}" role="button"
+                        data-hint-position="bottom" data-cls-hint="fg-black"
+                        data-hint-text="Refresh">
+                           <span 
+                              class="mif-refresh" style="margin-left: 0px"> 
+                           </span> 
+                     
+                   </a>
+
+                   <div class="row flex-justify-left">
+                     <div class="info-box" id="info-box"
+                        data-role="infobox" data-width=800
+                        data-height=800>
+                        <span class="button square closer"></span>
+                        <div class="info-box-content">
+
+                           <div class="remark success">
+                              <p>
+                                 Alerts generated for <strong> current Session.</strong> 
+                              </p>    
+                           </div>
+
+                           <div class= "cell-11">
+                              <table
+                                       class="table  table-border compact striped">
+                                       <thead>
+                                          <tr>
+                                             <th
+                                                style="text-align: center;">Messages</th>
+                                             </tr>
+                                       </thead>
+                                       <tbody>
+                                          <tr th:each="msg : ${sessMsgs}">
+
+                                             <td style="text-align: left" th:text="${msg}"></td>
+                                          </tr>
+                                       </tbody>
+                                    </table>
+
+                           </div>
+
+                        </div>
+                     </div>
+                   </div>
+
+
+
+
+                  
+
+               </div>
+
 
             </div>
 
             <!-- Stats Row - Begin  -->
 
-				<div class="row flex-justify-center" th:if="${userInfo.cases != null}">
+				<div class="row flex-justify-center" th:if="${stats != null}">
 
 					<!-- Stats - Begin -->
 					<div class="cell-3" style="background-color: #F1FDF7; margin: 5px">
@@ -260,7 +330,7 @@
 					data.addRows(dataArray);
                
                      var options = {
-                                     width : 450,
+                                     width : 480,
                                      height : 210,
                                      colors : [ '#7998C5', '#C8819E', '#8ABC67','#79C580','#C579BE','#C5A679','#67B4BC' ],
                                      legend : 'right',
@@ -271,7 +341,7 @@
                                                          fontSize: 11,
                                                                                     
                                                       },
-                                     pieHole: 0.4
+                                     pieHole: 0.35
                           };
 					
 
@@ -302,7 +372,7 @@
          dataS.addRows(dataArrayS);
          
                var optionsS = {
-                               width : 450,
+                               width : 480,
                                height : 210,
                                colors : [ '#7998C5', '#C8819E', '#8ABC67','#79C580','#C579BE','#C5A679','#67B4BC' ],
                                legend : 'right',
@@ -313,7 +383,7 @@
                                                    fontSize: 11,
                                                                               
                                                 },
-                               pieHole: 0.4
+                               pieHole: 0.35
                     };
          
 

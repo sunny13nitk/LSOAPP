@@ -1,6 +1,5 @@
 package com.sap.cap.esmapi.utilities.pojos;
 
-import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,8 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TY_UserESS
+public class TY_NotesCreate
 {
-    private Ty_UserAccountContact userDetails;
-    private List<TY_CaseESS>  cases;  
+    private String htmlContent;
 }

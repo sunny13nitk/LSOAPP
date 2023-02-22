@@ -8,5 +8,6 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 
 public interface IF_ESS_UISrv
 {
-    public TY_ESS_Stats getStatsForUserCases(List<TY_CaseESS> cases4User) throws EX_ESMAPI;    
+    public TY_ESS_Stats getStatsForUserCases(List<TY_CaseESS> cases4User) throws EX_ESMAPI;  
+      
 }

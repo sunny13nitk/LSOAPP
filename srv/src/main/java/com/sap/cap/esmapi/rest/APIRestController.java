@@ -19,6 +19,7 @@ import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
+import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
@@ -475,6 +476,15 @@ public class APIRestController
     private String getACCURL( @RequestParam(name = "userName", required = true) String userName,@RequestParam(name = "email", required = true) String email )
     {
         return srvCloudApiSrv.createAccount(email, userName);
+    }
+
+    @GetMapping("/notesURL")
+    private String createNotes( )
+    {
+        TY_NotesCreate newNote = new TY_NotesCreate("This is a new Note dropped in via /n a Service call");
+
+
+        return srvCloudApiSrv.createNotes(newNote);
     }
     
 

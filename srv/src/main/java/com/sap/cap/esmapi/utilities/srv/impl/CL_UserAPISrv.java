@@ -59,6 +59,8 @@ import org.springframework.util.StringUtils;
 public class CL_UserAPISrv implements IF_UserAPISrv
 {
     private Ty_UserAccountContact userData;
+
+    private List<String> sessionMessages;
     
     @Autowired
     private MessageSource msgSrc;
@@ -174,6 +176,37 @@ public class CL_UserAPISrv implements IF_UserAPISrv
     }
         
     
+
+    @Override
+    public void addSessionMessage(String msg) 
+    {
+        if(CollectionUtils.isEmpty(this.sessionMessages))
+        {
+            this.sessionMessages = new ArrayList<String>();
+        }
+
+        if(StringUtils.hasText(msg))
+        {
+            sessionMessages.add(msg);
+        }
+
+        
+    }
+
+
+
+    @Override
+    public List<String> getSessionMessages() 
+    {
+       return this.sessionMessages;
+    }
+
+    //Temporary Method - To be deleted later
+    @Override
+    public void setUserAccount(Ty_UserAccountContact userDetails)
+    {
+        this.userData = userDetails;
+    }
    
 
     
@@ -183,6 +216,12 @@ public class CL_UserAPISrv implements IF_UserAPISrv
     {
        return srvCloudApiSrv.getCases4User(userData.getAccountId(), userData.getContactId());
     }
+
+
+
+
+
+   
 
     
 

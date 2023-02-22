@@ -48,3 +48,8 @@ Accept: application/json
 ### Get Catg Tree by Case Type
 GET http://localhost:9090/api/cfgCatg/Learning
 Accept: application/json 
+
+
+### Create new Note
+GET http://localhost:9090/api/notesURL
+Accept: application/json 
