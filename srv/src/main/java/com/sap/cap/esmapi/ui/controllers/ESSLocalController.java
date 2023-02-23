@@ -101,9 +101,9 @@ public class ESSLocalController
                     model.addAttribute( "sessMsgs" , userSrv.getSessionMessages()); 
                     
                 } 
-                catch (IOException e)
+                catch (Exception e)
                 {
-                    e.printStackTrace();
+                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_LIST", new Object[]{ e.getLocalizedMessage()}, Locale.ENGLISH));
                 }
 
                 
@@ -123,21 +123,25 @@ public class ESSLocalController
         // "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00");
 
          
-        // return new Ty_UserAccountContact("Dummy ESS2", "ESS Portal Test1", "testess2@gmail.com",
-        //                "11edb2b5-5f45-64fe-afdb-81df97010a00", null);
+        return new Ty_UserAccountContact("Dummy ESS2", "ESS Portal Test1", "testess2@gmail.com",
+                       "11edb2b5-5f45-64fe-afdb-81df97010a00", null);
 
         
-            if(userSrv.getUserDetails4mSession() != null)
-            {
-                return new Ty_UserAccountContact("Dummy ESS3", "ESS Portal Test3", "testess3@gmail.com",
-                       userSrv.getUserDetails4mSession().getAccountId(), userSrv.getUserDetails4mSession().getContactId());
+            // if(userSrv.getUserDetails4mSession() != null)
+            // {
+            //     System.out.println("Account from Session");
+            //     return new Ty_UserAccountContact("Dummy ESS5", "ESS Portal Test5", "testess5@gmail.com",
+            //            userSrv.getUserDetails4mSession().getAccountId(), userSrv.getUserDetails4mSession().getContactId());
+               
+            // }
+            // else
+            // {
+            //     System.out.println("Account is New");
+            //     return new Ty_UserAccountContact("Dummy ESS5", "ESS Portal Test5", "testess5@gmail.com",
+            //            null, null);
 
-            }
-            else
-            {
-                return new Ty_UserAccountContact("Dummy ESS3", "ESS Portal Test3", "testess3@gmail.com",
-                       null, null);
-            }           
+                       
+            // }           
     }
 
 
@@ -148,69 +152,82 @@ public class ESSLocalController
 		final String viewName = "caseForm";
         String accountId;
 
-		if (StringUtils.hasText(caseType.toString()) && userSrv != null)
-		{
-			System.out.println("Case Type Selected for Creation: " + caseType);
+        try
+        {
 
-            TY_UserESS userDetails = new TY_UserESS();
-
-            //1. Check if Account Exists for the logged in User as A/C is mandatory to create a case
-           
-            // --- FOR PROD
-            // if(StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
-            // {
-                   
-            //     userDetails.setUserDetails(userSrv.getUserDetails4mSession());
-            //     model.addAttribute("userInfo", userDetails);     
-            //     accountId = userSrv.getUserDetails4mSession().getAccountId();
-            // }
-           
-            // -- FOR TEST : STARTS
-            if(StringUtils.hasText( getUserAccount().getAccountId()))
+            if (StringUtils.hasText(caseType.toString()) && userSrv != null)
             {
-                accountId = getUserAccount().getAccountId(); 
-            }
-            // -- FOR TEST : ENDS
-            else //Create the Account with logged in User credentials
-            {
-                accountId = userSrv.createAccount(); //Implictly refreshed in buffer
-            }
+                System.out.println("Case Type Selected for Creation: " + caseType);
 
-            //Prepare Case Model - Form
-            if(StringUtils.hasText(accountId) && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
-            {
+                TY_UserESS userDetails = new TY_UserESS();
 
-                Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream().filter(g->g.getCaseTypeEnum().toString().equals(caseType.toString())).findFirst();
-                if(cusItemO.isPresent() && catgTreeSrv != null)
-                {
-
-                    //For TEST ONLY: Starts
-                    userDetails.setUserDetails(getUserAccount());
-                    model.addAttribute("userInfo", userDetails);
-                    //For TEST ONLY: ENDS
-
-
-                    model.addAttribute("caseTypeStr", caseType.toString());
-
-                    TY_Case_Form caseForm = new TY_Case_Form();
-                    caseForm.setAccId(accountId);   //hidden
-                    caseForm.setCaseTxnType(cusItemO.get().getCaseType()); //hidden
-                    model.addAttribute("caseForm", caseForm);
-
-                    model.addAttribute("formError", null);
-
-                    //also Upload the Catg. Tree as per Case Type
-                    model.addAttribute("catgsList", catgTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
-
+                //1. Check if Account Exists for the logged in User as A/C is mandatory to create a case
+            
+                // --- FOR PROD
+                // if(StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
+                // {
                     
-
+                //     userDetails.setUserDetails(userSrv.getUserDetails4mSession());
+                //     model.addAttribute("userInfo", userDetails);     
+                //     accountId = userSrv.getUserDetails4mSession().getAccountId();
+                // }
+            
+                // -- FOR TEST : STARTS
+                if(StringUtils.hasText( getUserAccount().getAccountId()))
+                {
+                    accountId = getUserAccount().getAccountId(); 
+                }
+                // -- FOR TEST : ENDS
+                else //Create the Account with logged in User credentials
+                {
+                    accountId = userSrv.createAccount(); //Implictly refreshed in buffer
                 }
 
-             
+                //Prepare Case Model - Form
+                if(StringUtils.hasText(accountId) && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+                {
+
+                    Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream().filter(g->g.getCaseTypeEnum().toString().equals(caseType.toString())).findFirst();
+                    if(cusItemO.isPresent() && catgTreeSrv != null)
+                    {
+
+                        //For TEST ONLY: Starts
+                        userDetails.setUserDetails(getUserAccount());
+                        model.addAttribute("userInfo", userDetails);
+                        //For TEST ONLY: ENDS
+
+
+                        model.addAttribute("caseTypeStr", caseType.toString());
+
+                        TY_Case_Form caseForm = new TY_Case_Form();
+                        caseForm.setAccId(accountId);   //hidden
+                        caseForm.setCaseTxnType(cusItemO.get().getCaseType()); //hidden
+                        model.addAttribute("caseForm", caseForm);
+
+                        model.addAttribute("formError", null);
+
+                        //also Upload the Catg. Tree as per Case Type
+                        model.addAttribute("catgsList", catgTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
+
+                        
+
+                    }
+                    else
+                    {
+                        throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]{ caseType.toString()}, Locale.ENGLISH));
+                    }
+
+                
+                }
+
+
             }
 
-
-		}
+        }
+        catch (Exception e)
+        {
+                 throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_FORM", new Object[]{ e.getLocalizedMessage()}, Locale.ENGLISH));
+        }
 		
 		return viewName;
 	}
