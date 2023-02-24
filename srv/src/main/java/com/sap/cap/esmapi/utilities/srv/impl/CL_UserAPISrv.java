@@ -1,49 +1,18 @@
 package com.sap.cap.esmapi.utilities.srv.impl;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
-import com.sap.cap.esmapi.utilities.constants.GC_Constants;
-import com.sap.cap.esmapi.utilities.pojos.TY_AccountCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
-import com.sap.cap.esmapi.utilities.pojos.TY_DefaultComm;
-import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
-import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cloud.security.xsuaa.token.Token;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Scope;
@@ -162,7 +131,11 @@ public class CL_UserAPISrv implements IF_UserAPISrv
             
             accountId = srvCloudApiSrv.createAccount(userData.getUserEmail(), userData.getUserName());
             //Also update in the session for newly created Account
-            userData.setAccountId(accountId);
+            if(StringUtils.hasText(accountId))
+            {
+                userData.setAccountId(accountId);
+                this.addSessionMessage(msgSrc.getMessage("NEW_AC", new Object[]{userData.getUserId()}, Locale.ENGLISH));
+            }
            
         }
          return accountId;

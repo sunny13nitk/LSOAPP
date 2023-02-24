@@ -1,5 +1,13 @@
 {
-    "build": {
-        "target": "."
+  "build": {
+    "target": "."
+  },
+  "requires": {
+    "auth": {
+      "kind": "xsuaa"
+    },
+    "approuter": {
+      "kind": "cloudfoundry"
     }
+  }
 }

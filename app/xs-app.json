@@ -1,0 +1,13 @@
+{
+  "welcomeFile": "index.html",
+  "authenticationMethod": "route",
+  
+  "routes": [
+    {
+      "source": "^/ess",
+      "target": "/ess",
+      "destination": "token-destination",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}

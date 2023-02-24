@@ -113,18 +113,18 @@ public class ESSLocalController
             
         }
 
-        return "essListView";
+        return "essListViewLocal";
     }
 
 
     private Ty_UserAccountContact getUserAccount() 
     {
-        // return new Ty_UserAccountContact("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
-        // "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00");
+        return new Ty_UserAccountContact("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
+        "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00");
 
          
-        return new Ty_UserAccountContact("Dummy ESS2", "ESS Portal Test1", "testess2@gmail.com",
-                       "11edb2b5-5f45-64fe-afdb-81df97010a00", null);
+        // return new Ty_UserAccountContact("Dummy ESS2", "ESS Portal Test1", "testess2@gmail.com",
+        //                "11edb2b5-5f45-64fe-afdb-81df97010a00", null);
 
         
             // if(userSrv.getUserDetails4mSession() != null)
@@ -149,7 +149,7 @@ public class ESSLocalController
 	public String showTxnDetails4Scrip(@PathVariable("caseType") EnumCaseTypes caseType , Model model) throws Exception
 	{
 		
-		final String viewName = "caseForm";
+		final String viewName = "caseFormLocal";
         String accountId;
 
         try
@@ -275,7 +275,7 @@ public class ESSLocalController
                     //also Upload the Catg. Tree as per Case Type
                     model.addAttribute("catgsList", catgTreeSrv.getCaseCatgTree4LoB(cusItemO.get().getCaseTypeEnum()).getCategories());
 
-                    return  "caseForm";
+                    return  "caseFormLocal";
                 }
             } //CaseForm has errors
 

@@ -86,8 +86,9 @@
                         <span style="color: #B1365B"
                         th:text="${caseTypeStr}"></span> ! 
                       </h6>
-                     <form th:object="${caseForm}" th:action="@{/ess/saveCase}"
+                     <form th:object="${caseForm}" th:action="@{/esslocal/saveCase}"
                                                    method="post">
+
 
                         <input type="hidden" th:field="*{accId}" />
                         <input type="hidden" th:field="*{caseTxnType}" />
@@ -149,7 +150,7 @@
 
                         <a href="#" class="button rounded " 
                            style="color: #004466; background: #FF004C; margin-left: 10px; margin-right: 20px;" data-role="hint"
-                           th:href="@{/ess/}" role="button"
+                           th:href="@{/esslocal/}" role="button"
                            data-hint-position="top" data-cls-hint="fg-black"
                            data-hint-text="Cancel Case Submission.">
                               <span class="mif-cancel" style="margin-left: 0px"> 
@@ -166,7 +167,7 @@
                 </div>   
                                 
 
-                
+           
 
 
              

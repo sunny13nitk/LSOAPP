@@ -71,7 +71,7 @@
                    <a 
                         href="#" class="button primary outline cycle " style= "margin-right: 20px;"
                         data-role="hint"
-                        th:href="@{/ess/}" role="button"
+                        th:href="@{/esslocal/}" role="button"
                         data-hint-position="bottom" data-cls-hint="fg-black"
                         data-hint-text="Refresh">
                            <span 
@@ -281,7 +281,7 @@
                      <ul class="d-menu" data-role="dropdown">
                         
                         <li th:each="caseType : ${T(com.sap.cap.esmapi.utilities.enums.EnumCaseTypes).values()}">
-                           <a href="#" class="button primary rounded outline"  th:href="@{'/ess/createCase/' + ${caseType}}"
+                           <a href="#" class="button primary rounded outline"  th:href="@{'/esslocal/createCase/' + ${caseType}}"
                               th:text="${caseType}">
                            </a>
                         </li>

@@ -17,6 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -25,11 +26,11 @@ import org.springframework.security.web.SecurityFilterChain;
 public class AppSecurityConfig
 {
 
-  //  @Autowired
-  //  private XsuaaServiceConfiguration xsuaaServiceConfiguration;
+   @Autowired
+   private XsuaaServiceConfiguration xsuaaServiceConfiguration;
 
-  //  @Autowired
-  //  XsuaaTokenFlows xsuaaTokenFlows;
+   @Autowired
+   XsuaaTokenFlows xsuaaTokenFlows;
 
   @Bean
   public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception 
@@ -38,37 +39,38 @@ public class AppSecurityConfig
     /*
       ----------- Local Testing --------------------
     */
-     return http
-      .requestMatchers()
-      .antMatchers("/api/**")
-      .antMatchers("/esslocal/**")
-      .and().csrf().disable() // don't insist on csrf tokens in put, post etc.
-      .authorizeRequests().anyRequest().permitAll().and()
-      .build();
+    //  return http
+    //   .requestMatchers()
+    //   .antMatchers("/api/**")
+    //   .antMatchers("/esslocal/**")
+    //   .and().csrf().disable() // don't insist on csrf tokens in put, post etc.
+    //   .authorizeRequests().anyRequest().permitAll().and()
+    //   .build();
       
 
     
     /*
       ----------- CF Deployment --------------------
     */
-      
-      //    // @formatter:off
-      //     http
-      //     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-      // .and()
-      //     .authorizeRequests()
-      //     .antMatchers("/api/**").hasAuthority("Administrators")
-      //     .antMatchers("/ess/**").authenticated()
-      //     //.anyRequest().permitAll()
-      //     .anyRequest().denyAll()
-      // .and()
-      //     .oauth2ResourceServer()
-      //     .bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows))
-      //     .jwt()
-      //     .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
-      // // @formatter:on
+        // @formatter:off
+          http
+          .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+          .and()
+          .authorizeRequests()
+          .antMatchers("/api/**").hasAuthority("Administrators")
+          .antMatchers("/ess/**").authenticated()
+          //.anyRequest().permitAll()
+          .anyRequest().denyAll()
+          .and()
+            .oauth2ResourceServer()
+          .bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows))
+          .jwt()
+          .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
+          // @formatter:on
 
-      // return http.build(); 
+        return http.build();
+         
+ 
 
 
   }
@@ -76,12 +78,12 @@ public class AppSecurityConfig
   // /*
   //     ----------- CF Deployment --------------------
   //   */
-  //  Converter<Jwt, AbstractAuthenticationToken> getJwtAuthoritiesConverter() 
-  //  {
-  //      TokenAuthenticationConverter converter = new TokenAuthenticationConverter(xsuaaServiceConfiguration);
-	//  	   converter.setLocalScopeAsAuthorities(true);
-	//  	   return converter;
-  //  }
+   Converter<Jwt, AbstractAuthenticationToken> getJwtAuthoritiesConverter() 
+   {
+       TokenAuthenticationConverter converter = new TokenAuthenticationConverter(xsuaaServiceConfiguration);
+	 	   converter.setLocalScopeAsAuthorities(true);
+	 	   return converter;
+   }
 
  
 
