@@ -130,67 +130,72 @@ public class ESSController
 		
         String accountId;
 
-        try
-        {
+        //Only Authenticated user via IDP
+        if(userInfo.isAuthenticated()) 
+        { 
 
-            if (StringUtils.hasText(caseType.toString()) && userSrv != null)
+            try
             {
-                System.out.println("Case Type Selected for Creation: " + caseType);
 
-                TY_UserESS userDetails = new TY_UserESS();
-
-                //1. Check if Account Exists for the logged in User as A/C is mandatory to create a case
-                 
-                if(StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
+                if (StringUtils.hasText(caseType.toString()) && userSrv != null)
                 {
+                    System.out.println("Case Type Selected for Creation: " + caseType);
+
+                    TY_UserESS userDetails = new TY_UserESS();
+
+                    //1. Check if Account Exists for the logged in User as A/C is mandatory to create a case
                     
-                    accountId = userSrv.getUserDetails4mSession().getAccountId();
-                }
-                           
-                else //Create the Account with logged in User credentials
-                {
-                    accountId = userSrv.createAccount(); //Implictly refreshed in buffer
-                }
-
-                //Prepare Case Model - Form
-                if(StringUtils.hasText(accountId) && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
-                {
-                    userDetails.setUserDetails(userSrv.getUserDetails4mSession());
-                    model.addAttribute("userInfo", userDetails);  
-
-                    Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream().filter(g->g.getCaseTypeEnum().toString().equals(caseType.toString())).findFirst();
-                    if(cusItemO.isPresent() && catgTreeSrv != null)
+                    if(StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
                     {
-
-                        model.addAttribute("caseTypeStr", caseType.toString());
-
-                        TY_Case_Form caseForm = new TY_Case_Form();
-                        caseForm.setAccId(accountId);   //hidden
-                        caseForm.setCaseTxnType(cusItemO.get().getCaseType()); //hidden
-                        model.addAttribute("caseForm", caseForm);
-
-                        model.addAttribute("formError", null);
-
-                        //also Upload the Catg. Tree as per Case Type
-                        model.addAttribute("catgsList", catgTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
-                   
-
+                        
+                        accountId = userSrv.getUserDetails4mSession().getAccountId();
                     }
-                    else
+                            
+                    else //Create the Account with logged in User credentials
                     {
-                        throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]{ caseType.toString()}, Locale.ENGLISH));
+                        accountId = userSrv.createAccount(); //Implictly refreshed in buffer
                     }
 
-                
-                }
+                    //Prepare Case Model - Form
+                    if(StringUtils.hasText(accountId) && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+                    {
+                        userDetails.setUserDetails(userSrv.getUserDetails4mSession());
+                        model.addAttribute("userInfo", userDetails);  
 
+                        Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream().filter(g->g.getCaseTypeEnum().toString().equals(caseType.toString())).findFirst();
+                        if(cusItemO.isPresent() && catgTreeSrv != null)
+                        {
+
+                            model.addAttribute("caseTypeStr", caseType.toString());
+
+                            TY_Case_Form caseForm = new TY_Case_Form();
+                            caseForm.setAccId(accountId);   //hidden
+                            caseForm.setCaseTxnType(cusItemO.get().getCaseType()); //hidden
+                            model.addAttribute("caseForm", caseForm);
+
+                            model.addAttribute("formError", null);
+
+                            //also Upload the Catg. Tree as per Case Type
+                            model.addAttribute("catgsList", catgTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
+                    
+
+                        }
+                        else
+                        {
+                            throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]{ caseType.toString()}, Locale.ENGLISH));
+                        }
+
+                    
+                    }
+
+
+                }
 
             }
-
-        }
-        catch (Exception e)
-        {
-                 throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_FORM", new Object[]{ e.getLocalizedMessage()}, Locale.ENGLISH));
+            catch (Exception e)
+            {
+                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_FORM", new Object[]{ e.getLocalizedMessage()}, Locale.ENGLISH));
+            }
         }
 		
 		return VW_CaseForm;
@@ -198,7 +203,7 @@ public class ESSController
 
 
     @PostMapping("/saveCase")
-	public String saveCase(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model, @AuthenticationPrincipal Token token)
+	public String saveCase(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model )
 	{
         log.info("Inside SAve Case Method!!");
         System.out.println("Inside SAve Case Method!!");
@@ -206,7 +211,7 @@ public class ESSController
         TY_Case_SrvCloud newCaseEntity = new TY_Case_SrvCloud();
         Optional<TY_CatgCusItem> cusItemO = null;
 
-        if(caseForm != null)
+        if(caseForm != null && userInfo.isAuthenticated())
         {
             System.out.println("Case Payload: " + caseForm.toString());
 
