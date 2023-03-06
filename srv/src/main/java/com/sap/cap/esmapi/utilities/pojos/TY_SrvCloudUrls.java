@@ -19,5 +19,8 @@ public class TY_SrvCloudUrls
     private String accountsUrl;
     private String notesUrl;
     private String topSuffix;
+    private String caseTemplateUrl;
+    private String catgTreeUrl;
+
     
 }

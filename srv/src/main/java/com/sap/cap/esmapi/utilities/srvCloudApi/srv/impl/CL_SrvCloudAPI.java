@@ -1162,7 +1162,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         int statusCode = response.getStatusLine().getStatusCode();
                         if (statusCode != HttpStatus.SC_CREATED) 
                         {
+                            HttpEntity entityResp = response.getEntity();
+                            String apiOutput = EntityUtils.toString(entityResp);
+                            System.out.println(apiOutput);
                             throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                           
+
                         }
 
                         // Try and Get Entity from Response
