@@ -9,9 +9,11 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
-import com.sap.cap.esmapi.utilities.pojos.TY_Description_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 
+/*
+ * Impl with comments
+ */
 public interface IF_SrvCloudAPI
 {
     public JsonNode getAllCases() throws IOException;    
