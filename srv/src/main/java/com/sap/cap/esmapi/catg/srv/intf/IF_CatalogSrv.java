@@ -8,5 +8,5 @@ import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 
 public interface IF_CatalogSrv 
 {
-    public List<TY_CatalogTree> getCaseCatgTree4LoB(EnumCaseTypes caseType)  throws EX_ESMAPI;    
+    public TY_CatalogTree getCaseCatgTree4LoB(EnumCaseTypes caseType)  throws EX_ESMAPI;    
 }

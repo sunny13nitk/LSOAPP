@@ -15,8 +15,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sap.cap.esmapi.catg.pojos.TY_CaseCatgTree;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
+import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
@@ -29,6 +31,7 @@ import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cloud.security.xsuaa.token.Token;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.filefilter.FalseFileFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -476,6 +479,15 @@ public class APIRestController
     private String getACCURL( @RequestParam(name = "userName", required = true) String userName,@RequestParam(name = "email", required = true) String email )
     {
         return srvCloudApiSrv.createAccount(email, userName);
+    }
+
+    
+    @GetMapping("/caseConfig")
+    private TY_CaseCatalogCustomizing getCaseConfig( @RequestParam(name = "caseType", required = true) String caseType ) throws IOException
+    {
+       
+            return srvCloudApiSrv.getActiveCaseTemplateConfig4CaseType(caseType);
+        
     }
 
     @GetMapping("/notesURL")

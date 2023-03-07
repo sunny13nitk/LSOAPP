@@ -53,3 +53,8 @@ Accept: application/json
 ### Create new Note
 GET http://localhost:9090/api/notesURL
 Accept: application/json 
+
+
+### Get Case configuration by Case Type 
+GET http://localhost:9090/api/caseConfig/?caseType=ZLSS
+Accept: application/json 

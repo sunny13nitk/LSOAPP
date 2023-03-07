@@ -47,12 +47,14 @@ public class PropertyConfig
 			@Value("${cpurl}") final String cpUrl,
 			@Value("${accountsurl}") final String acUrl,
 			@Value("${notesurl}") final String notesUrl,
-			@Value("${topN}") final String topN
+			@Value("${topN}") final String topN,
+			@Value("${caseTemplateUrl}") final String caseTemplateUrl,
+			@Value("${catgTreeUrl}") final String catgTreeUrl
 			
 	)
 	
 	{
-		TY_SrvCloudUrls srvClUrls = new TY_SrvCloudUrls(userName, password, casesUrl, cpUrl, acUrl, notesUrl, topN);
+		TY_SrvCloudUrls srvClUrls = new TY_SrvCloudUrls(userName, password, casesUrl, cpUrl, acUrl, notesUrl, topN, caseTemplateUrl, catgTreeUrl );
 		
 		return srvClUrls;
 	}
