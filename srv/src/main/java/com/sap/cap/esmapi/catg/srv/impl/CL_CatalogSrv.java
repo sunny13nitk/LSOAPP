@@ -79,7 +79,7 @@ public class CL_CatalogSrv implements IF_CatalogSrv {
             // Read FRom Srv Cloud the Catg. Tree
             try
             {
-
+                //Get config from Srv Cloud for Case type - Active Catalog ID
             }
             catch (Exception e)
             {
