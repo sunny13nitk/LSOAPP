@@ -10,6 +10,7 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
+import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class CL_CatalogSrv implements IF_CatalogSrv {
 
     @Autowired
     private TY_CatgCus catgCus;
+
+    @Autowired
+    private IF_SrvCloudAPI srvCloudApiSrv;
 
     @Autowired
     private MessageSource msgSrc;
@@ -70,7 +74,7 @@ public class CL_CatalogSrv implements IF_CatalogSrv {
          // Get the Config
          Optional<TY_CatgCusItem> caseCFgO = catgCus.getCustomizations().stream()
          .filter(g -> g.getCaseTypeEnum().toString().equals(caseType.toString())).findFirst();
-        if (caseCFgO.isPresent()) 
+        if (caseCFgO.isPresent() && srvCloudApiSrv != null) 
         {
             // Read FRom Srv Cloud the Catg. Tree
             try

@@ -5,23 +5,29 @@ Accept: application/json
 ### Get ESS Portal View
 GET http://localhost:9090/api/ESS
 Accept: application/json 
+Authorization: Basic admin:pass_admin
 
 ### Get Case Details in ESS Format
 GET http://localhost:9090/api/casesESS
 Accept: application/json 
+Authorization: Basic admin:pass_admin
+
 
 ### Get # of Cases 
 GET http://localhost:9090/api/casesCount
 Accept: application/json 
+Authorization: Basic admin:pass_admin
 
 
 ### Get Case Ids and GUIDS 
 GET http://localhost:9090/api/caseIds
 Accept: application/json 
+Authorization: Basic admin:pass_admin
 
 ### Get Cases GUIDS Only
 GET http://localhost:9090/api/casesAnatomy
 Accept: application/json 
+Authorization: Basic admin:pass_admin
 
 ### Get Account ID by Email
 GET http://localhost:9090/api/accByEmail/?email=sunny.bhardwaj@sap.com
@@ -58,3 +64,4 @@ Accept: application/json
 ### Get Case configuration by Case Type 
 GET http://localhost:9090/api/caseConfig/?caseType=ZLSS
 Accept: application/json 
+Authorization: Basic admin:pass_admin
