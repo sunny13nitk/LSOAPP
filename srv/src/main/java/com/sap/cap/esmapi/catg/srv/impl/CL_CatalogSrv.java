@@ -4,20 +4,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import com.sap.cap.esmapi.catg.pojos.TY_CatalogTree;
-import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
-import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
-import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
-import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
-import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
-import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
+
+import com.sap.cap.esmapi.catg.pojos.TY_CatalogTree;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
+import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
+import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
+import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
 @Service
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -80,6 +81,15 @@ public class CL_CatalogSrv implements IF_CatalogSrv {
             try
             {
                 //Get config from Srv Cloud for Case type - Active Catalog ID
+                TY_CaseCatalogCustomizing caseCus = srvCloudApiSrv.getActiveCaseTemplateConfig4CaseType(caseCFgO.get().getCaseType());
+                if(caseCus!= null)
+                {
+                    if(caseCus.getCataglogId() != null)
+                    {
+                        //Get category Tree for Catalog ID
+                    }
+                }
+                
             }
             catch (Exception e)
             {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
@@ -39,5 +40,7 @@ public interface IF_SrvCloudAPI
     public String createCase(TY_Case_SrvCloud caseEntity) throws EX_ESMAPI;
 
     public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType) throws EX_ESMAPI, IOException;
+
+    public List<TY_CatalogItem>getActiveCaseCategoriesByCatalogId(String catalogID) throws EX_ESMAPI, IOException;
     
 }

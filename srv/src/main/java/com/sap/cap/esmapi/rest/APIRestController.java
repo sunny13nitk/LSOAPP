@@ -11,11 +11,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sap.cap.esmapi.catg.pojos.TY_CaseCatgTree;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
-import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.utilities.StringsUtility;
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
@@ -29,18 +41,6 @@ import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cloud.security.xsuaa.token.Token;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.filefilter.FalseFileFilter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -497,6 +497,12 @@ public class APIRestController
 
 
         return srvCloudApiSrv.createNotes(newNote);
+    }
+
+    @GetMapping("/parseURL")
+    private String parseUrl( )
+    {
+        return StringsUtility.replaceURLwithParams(srvCloudUrls.getCatgTreeUrl(), new String[] {"24d8e296-403d-4551-b29b-bbdfbb5e5c9c"}, GC_Constants.gc_pipeString);
     }
     
 
