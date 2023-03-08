@@ -502,7 +502,8 @@ public class APIRestController
     @GetMapping("/parseURL")
     private String parseUrl( )
     {
-        return StringsUtility.replaceURLwithParams(srvCloudUrls.getCatgTreeUrl(), new String[] {"24d8e296-403d-4551-b29b-bbdfbb5e5c9c"}, GC_Constants.gc_pipeString);
+        System.out.println(StringsUtility.replaceURLwithParams(srvCloudUrls.getCatgTreeUrl(), new String[] {"24d8e296-403d-4551-b29b-bbdfbb5e5c9c"}, GC_Constants.gc_UrlReplParam));
+        return StringsUtility.replaceURLwithParams(srvCloudUrls.getCatgTreeUrl(), new String[] {"24d8e296-403d-4551-b29b-bbdfbb5e5c9c"}, GC_Constants.gc_UrlReplParam);
     }
     
 

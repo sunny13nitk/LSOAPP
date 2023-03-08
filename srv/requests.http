@@ -65,3 +65,7 @@ Accept: application/json
 GET http://localhost:9090/api/caseConfig/?caseType=ZLSS
 Accept: application/json 
 Authorization: Basic admin:pass_admin
+
+### URL Parsing
+GET http://localhost:9090/api/parseURL
+Accept: application/json 

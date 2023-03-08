@@ -1032,6 +1032,7 @@ public List<TY_CatalogItem> getActiveCaseCategoriesByCatalogId(String catalogID)
     return catgTree;
 }
 
+@Override
     public String createNotes(TY_NotesCreate notes) throws EX_ESMAPI
     {
         String noteId = null;
@@ -1130,7 +1131,8 @@ public List<TY_CatalogItem> getActiveCaseCategoriesByCatalogId(String catalogID)
 
         return noteId;
     }
-
+    
+@Override
     public String createCase(TY_Case_SrvCloud caseEntity) throws EX_ESMAPI {
         String caseId = null;
 
