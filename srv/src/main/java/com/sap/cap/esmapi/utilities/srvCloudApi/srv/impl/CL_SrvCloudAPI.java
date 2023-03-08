@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.pojos.TY_AccountCreate;
@@ -829,213 +830,210 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI {
     }
 
     @Override
-    public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType) throws EX_ESMAPI, IOException 
-    {
+    public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType)
+            throws EX_ESMAPI, IOException {
         TY_CaseCatalogCustomizing caseCus = null;
         JsonNode jsonNode = null;
         HttpResponse response = null;
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         String url = null;
 
-        try 
-        {
-            if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword()) && StringUtils.hasLength(srvCloudUrls.getCaseTemplateUrl())) 
-            {
+        try {
+            if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword())
+                    && StringUtils.hasLength(srvCloudUrls.getCaseTemplateUrl())) {
                 System.out.println("Url and Credentials Found!!");
 
-               
-                    url = srvCloudUrls.getCaseTemplateUrl() + caseType;
+                url = srvCloudUrls.getCaseTemplateUrl() + caseType;
 
-                    String encoding = Base64.getEncoder()
-                            .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                String encoding = Base64.getEncoder()
+                        .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
 
-                    HttpGet httpGet = new HttpGet(url);
-                    httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
-                    httpGet.addHeader("accept", "application/json");
+                HttpGet httpGet = new HttpGet(url);
+                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                httpGet.addHeader("accept", "application/json");
 
-                   
-                        // Fire the Url
-                        response = httpClient.execute(httpGet);
+                // Fire the Url
+                response = httpClient.execute(httpGet);
 
-                        // verify the valid error code first
-                        int statusCode = response.getStatusLine().getStatusCode();
-                        if (statusCode != HttpStatus.SC_OK) 
-                        {
+                // verify the valid error code first
+                int statusCode = response.getStatusLine().getStatusCode();
+                if (statusCode != HttpStatus.SC_OK) {
 
-                            if(statusCode ==  HttpStatus.SC_NOT_FOUND)
-                            {
-                                throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[] { caseType },
-                                 Locale.ENGLISH));
+                    if (statusCode == HttpStatus.SC_NOT_FOUND) {
+                        throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[] { caseType },
+                                Locale.ENGLISH));
+                    } else {
+                        throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                    }
+
+                }
+
+                // Try and Get Entity from Response
+                HttpEntity entity = response.getEntity();
+                String apiOutput = EntityUtils.toString(entity);
+                // Lets see what we got from API
+                // System.out.println(apiOutput);
+
+                // Conerting to JSON
+                ObjectMapper mapper = new ObjectMapper();
+                jsonNode = mapper.readTree(apiOutput);
+
+                if (jsonNode != null) {
+                    JsonNode rootNode = jsonNode.path("value");
+                    if (rootNode != null) {
+                        System.out.println("Customizing Bound!!");
+                        List<TY_CaseCatalogCustomizing> caseCusList = new ArrayList<TY_CaseCatalogCustomizing>();
+
+                        Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
+                        while (payloadItr.hasNext()) {
+                            // System.out.println("Payload Iterator Bound");
+                            Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                            String payloadFieldName = payloadEnt.getKey();
+                            // System.out.println("Payload Field Scanned: " + payloadFieldName);
+
+                            if (payloadFieldName.equals("value")) {
+                                Iterator<JsonNode> cusItr = payloadEnt.getValue().elements();
+                                // System.out.println("Cases Iterator Bound");
+                                while (cusItr.hasNext()) {
+
+                                    JsonNode cusEnt = cusItr.next();
+                                    if (cusEnt != null) {
+                                        String caseTypePL = null, statusSchema = null, status = null,
+                                                partyScheme = null, cataglogId = null;
+
+                                        Iterator<String> fieldNames = cusEnt.fieldNames();
+                                        while (fieldNames.hasNext()) {
+                                            String cusFieldName = fieldNames.next();
+                                            // System.out.println("Case Entity Field Scanned: " + caseFieldName);
+                                            if (cusFieldName.equals("caseType")) {
+                                                // System.out.println("Case GUID Added : " +
+                                                // caseEnt.get(caseFieldName).asText());
+                                                if (StringUtils.hasText(cusEnt.get(cusFieldName).asText())) {
+                                                    caseTypePL = cusEnt.get(cusFieldName).asText();
+                                                }
+                                            }
+
+                                            if (cusFieldName.equals("statusSchema")) {
+                                                // System.out.println("Case Id Added : " +
+                                                // caseEnt.get(caseFieldName).asText());
+                                                if (StringUtils.hasText(cusEnt.get(cusFieldName).asText())) {
+                                                    statusSchema = cusEnt.get(cusFieldName).asText();
+                                                }
+                                            }
+
+                                            if (cusFieldName.equals("status")) {
+                                                // System.out.println("Case Id Added : " +
+                                                // caseEnt.get(caseFieldName).asText());
+                                                if (StringUtils.hasText(cusEnt.get(cusFieldName).asText())) {
+                                                    status = cusEnt.get(cusFieldName).asText();
+                                                }
+                                            }
+
+                                            if (cusFieldName.equals("partyScheme")) {
+                                                // System.out.println("Case Id Added : " +
+                                                // caseEnt.get(caseFieldName).asText());
+                                                if (StringUtils.hasText(cusEnt.get(cusFieldName).asText())) {
+                                                    partyScheme = cusEnt.get(cusFieldName).asText();
+                                                }
+                                            }
+
+                                            if (cusFieldName.equals("catalog")) {
+                                                // System.out.println("Inside Admin Data: " );
+
+                                                JsonNode catEnt = cusEnt.path("catalog");
+                                                if (catEnt != null) {
+                                                    // System.out.println("AdminData Node Bound");
+
+                                                    Iterator<String> fieldNamesCat = catEnt.fieldNames();
+                                                    while (fieldNamesCat.hasNext()) {
+                                                        String catFieldName = fieldNamesCat.next();
+                                                        if (catFieldName.equals("id")) {
+                                                            // System.out.println( "Created On : " +
+                                                            // admEnt.get(admFieldName).asText());
+                                                            cataglogId = catEnt.get(catFieldName).asText();
+                                                        }
+                                                    }
+
+                                                }
+                                            }
+
+                                        }
+
+                                        if (StringUtils.hasText(cataglogId) && StringUtils.hasText(caseTypePL)) {
+
+                                            caseCusList.add(new TY_CaseCatalogCustomizing(caseTypePL, statusSchema,
+                                                    status, partyScheme, cataglogId));
+
+                                        }
+
+                                    }
+
+                                }
+
                             }
-                            else
-                            {
-                                throw new RuntimeException("Failed with HTTP error code : " + statusCode);
-                            }
 
-                            
                         }
 
-                        // Try and Get Entity from Response
-                        HttpEntity entity = response.getEntity();
-                        String apiOutput = EntityUtils.toString(entity);
-                        // Lets see what we got from API
-                       // System.out.println(apiOutput);
-
-                        // Conerting to JSON
-                        ObjectMapper mapper = new ObjectMapper();
-                        jsonNode = mapper.readTree(apiOutput);
-
-                        if(jsonNode != null)
-                        {
-                                JsonNode rootNode = jsonNode.path("value");
-                                if(rootNode != null)
-                                {
-                                    System.out.println("Customizing Bound!!");
-                                    List<TY_CaseCatalogCustomizing>caseCusList = new ArrayList<TY_CaseCatalogCustomizing>();
-                    
-                                    Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
-                                    while (payloadItr.hasNext()) 
-                                    {
-                                    // System.out.println("Payload Iterator Bound");
-                                        Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
-                                        String   payloadFieldName  = payloadEnt.getKey();
-                                    // System.out.println("Payload Field Scanned:  " + payloadFieldName);
-                    
-                                        if(payloadFieldName.equals("value"))
-                                        {
-                                            Iterator<JsonNode> cusItr = payloadEnt.getValue().elements();
-                                        // System.out.println("Cases Iterator Bound");
-                                            while (cusItr.hasNext()) 
-                                            {
-                                                
-                                                JsonNode cusEnt = cusItr.next();
-                                                if(cusEnt != null)
-                                                {
-                                                    String caseTypePL = null, statusSchema = null, status= null, partyScheme = null, cataglogId= null;
-                                                    
-                                                
-                                                    Iterator<String> fieldNames = cusEnt.fieldNames();
-                                                    while (fieldNames.hasNext()) 
-                                                    {
-                                                        String   cusFieldName  = fieldNames.next();
-                                                    // System.out.println("Case Entity Field Scanned:  " + caseFieldName);
-                                                        if(cusFieldName.equals("caseType"))
-                                                        {
-                                                        //  System.out.println("Case GUID Added : " + caseEnt.get(caseFieldName).asText());
-                                                            if(StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
-                                                            {
-                                                                caseTypePL = cusEnt.get(cusFieldName).asText();
-                                                            }
-                                                        }
-
-                                                        if(cusFieldName.equals("statusSchema"))
-                                                        {
-                                                        // System.out.println("Case Id Added : " + caseEnt.get(caseFieldName).asText());
-                                                            if(StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
-                                                            {
-                                                                statusSchema= cusEnt.get(cusFieldName).asText();
-                                                            }
-                                                        }
-
-                                                        if(cusFieldName.equals("status"))
-                                                        {
-                                                        // System.out.println("Case Id Added : " + caseEnt.get(caseFieldName).asText());
-                                                            if(StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
-                                                            {
-                                                                status = cusEnt.get(cusFieldName).asText();
-                                                            }
-                                                        }
-
-                                                        if(cusFieldName.equals("partyScheme"))
-                                                        {
-                                                        // System.out.println("Case Id Added : " + caseEnt.get(caseFieldName).asText());
-                                                            if(StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
-                                                            {
-                                                                partyScheme = cusEnt.get(cusFieldName).asText();
-                                                            }
-                                                        }
-
-                                                       
-
-                                                        if (cusFieldName.equals("catalog")) 
-                                                                {
-                                                                //   System.out.println("Inside Admin Data:  " );
-
-                                                                    JsonNode catEnt = cusEnt.path("catalog");
-                                                                    if(catEnt != null)
-                                                                    {
-                                                                    // System.out.println("AdminData Node Bound");
-
-                                                                        Iterator<String> fieldNamesCat= catEnt.fieldNames();
-                                                                        while (fieldNamesCat.hasNext()) 
-                                                                        {
-                                                                            String catFieldName = fieldNamesCat.next();
-                                                                            if (catFieldName.equals("id")) 
-                                                                                {
-                                                                                //   System.out.println( "Created On : " + admEnt.get(admFieldName).asText());
-                                                                                    cataglogId = catEnt.get(catFieldName).asText();
-                                                                                }
-                                                                        }
-
-                                                                    }
-                                                                }
-
-                                                    }
-
-                                                    if(StringUtils.hasText(cataglogId) && StringUtils.hasText(caseTypePL))
-                                                    {
-                                 
-                                                        caseCusList.add( new TY_CaseCatalogCustomizing(caseTypePL, statusSchema, status, partyScheme, cataglogId));
-                                              
-                                                        
-                                                    }
-                    
-                                                }
-                                        
-                    
-                                            }
-                    
-                                        }
-                                                
-                                    }
-
-                                    //Get the Active Catalog Assignment
-                                    if(CollectionUtils.isNotEmpty(caseCusList))
-                                    {
-                                        Optional<TY_CaseCatalogCustomizing> caseCusO = caseCusList.stream().filter(r->r.getStatus().equals(GC_Constants.gc_statusACTIVE)).findFirst();
-                                        if(caseCusO.isPresent())
-                                        {
-                                            caseCus = caseCusO.get();
-                                        }
-                                    }
-                                }
-                                
+                        // Get the Active Catalog Assignment
+                        if (CollectionUtils.isNotEmpty(caseCusList)) {
+                            Optional<TY_CaseCatalogCustomizing> caseCusO = caseCusList.stream()
+                                    .filter(r -> r.getStatus().equals(GC_Constants.gc_statusACTIVE)).findFirst();
+                            if (caseCusO.isPresent()) {
+                                caseCus = caseCusO.get();
                             }
+                        }
+                    }
 
-                 
-
-                    
-                    
-                
-
-      }
-   }
-
-   catch( Exception e)
-                {
-                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CATG_LOAD_CASETYP", new Object[] { caseType, e.getMessage()},
-                    Locale.ENGLISH));
-            
                 }
-    finally
-        {
+
+            }
+        }
+
+        catch (Exception e) {
+            throw new EX_ESMAPI(msgSrc.getMessage("ERR_CATG_LOAD_CASETYP", new Object[] { caseType, e.getMessage() },
+                    Locale.ENGLISH));
+
+        } finally {
             httpClient.close();
         }
 
-    return caseCus;
+        return caseCus;
+    }
+
+@Override
+public List<TY_CatalogItem> getActiveCaseCategoriesByCatalogId(String catalogID) throws EX_ESMAPI, IOException 
+{
+    List<TY_CatalogItem> catgTree = null;
+    // JsonNode jsonNode = null;
+    // HttpResponse response = null;
+    // CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+    // String url = null;
+
+    // try 
+    //     {
+    //         if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword()) && StringUtils.hasLength(srvCloudUrls.getCatgTreeUrl())) 
+    //         {
+    //             System.out.println("Url and Credentials Found!!");
+
+               
+    //                // url = replaceURLwithParams(srvCloudUrls.getCatgTreeUrl(), new String[]{catalogID});
+
+    //                 String encoding = Base64.getEncoder()
+    //                         .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+    //                 HttpGet httpGet = new HttpGet(url);
+    //                 httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+    //                 httpGet.addHeader("accept", "application/json");
+
+
+
+
+
+    return catgTree;
 }
 
-    public String createNotes(TY_NotesCreate notes) throws EX_ESMAPI {
+    public String createNotes(TY_NotesCreate notes) throws EX_ESMAPI
+    {
         String noteId = null;
 
         if (StringUtils.hasText(notes.getHtmlContent())) {
@@ -1247,4 +1245,5 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI {
         return url;
     }
 
+    
 }
