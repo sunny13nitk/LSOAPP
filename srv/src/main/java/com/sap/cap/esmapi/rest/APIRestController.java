@@ -24,7 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sap.cap.esmapi.catg.pojos.TY_CaseCatgTree;
+import com.sap.cap.esmapi.catg.pojos.TY_CatalogTree;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
+import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.utilities.StringsUtility;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
@@ -68,6 +70,9 @@ public class APIRestController
 
     @Autowired
     private IF_CatgSrv catgSrv;
+
+    @Autowired
+    private IF_CatalogSrv catalogSrv;
 
    
 
@@ -507,6 +512,11 @@ public class APIRestController
     }
     
 
+    @GetMapping("/catalogDetails")
+    private TY_CatalogTree getCatgTreeCaseType( @RequestParam(name = "caseType",required = true) String caseType)
+    {
+        return catalogSrv.getCaseCatgTree4LoB(EnumCaseTypes.valueOf(caseType));
+    }
         
 
 }

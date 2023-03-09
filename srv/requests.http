@@ -62,10 +62,15 @@ Accept: application/json
 
 
 ### Get Case configuration by Case Type 
-GET http://localhost:9090/api/caseConfig/?caseType=ZLSS
+GET http://localhost:9090/api/caseConfig?caseType=ZLSS
 Accept: application/json 
 Authorization: Basic admin:pass_admin
 
 ### URL Parsing
 GET http://localhost:9090/api/parseURL
+Accept: application/json 
+
+
+### Catalog Tree
+GET http://localhost:9090/api/catalogDetails?caseType=Learning
 Accept: application/json 
