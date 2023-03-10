@@ -113,10 +113,10 @@
                               <option th:each="catg : ${catgsList}"
                                       th:value="${catg.id}"
                                       th:selected="${catg.id}" 
-                                      th:if="${catg.parentName}" !=null}
-                                          th:text="${catg.parentName} + '>' +${catg.name}"
-                                      th:unless="${catg.parentName}" == null}
-                                          th:text="${catg.name}"  >
+
+                                      th:text="${catg.parentName?catg.parentName+ '>' +catg.name? catg.name}"
+                                      <!-- th:text="${catg.parentName} + '>' +${catg.name}" -->
+                                      
                                     
                                     </option>
 <!--    
