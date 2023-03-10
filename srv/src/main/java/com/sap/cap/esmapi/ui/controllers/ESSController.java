@@ -127,84 +127,7 @@ public class ESSController
     }
 
     
-    @GetMapping("/createCasecp/{caseType}")
-	public String showTxnDetails4Scripcp(@PathVariable("caseType") EnumCaseTypes caseType , Model model) throws Exception
-	{
-		
-		
-        String accountId;
-
-        //Only Authenticated user via IDP
-        if(userInfo.isAuthenticated()) 
-        { 
-
-            try
-            {
-
-                if (StringUtils.hasText(caseType.toString()) && userSrv != null)
-                {
-                    System.out.println("Case Type Selected for Creation: " + caseType);
-
-                    TY_UserESS userDetails = new TY_UserESS();
-
-                    //1. Check if Account Exists for the logged in User as A/C is mandatory to create a case
-                    
-                    if(StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
-                    {
-                        
-                        accountId = userSrv.getUserDetails4mSession().getAccountId();
-                    }
-                            
-                    else //Create the Account with logged in User credentials
-                    {
-                        accountId = userSrv.createAccount(); //Implictly refreshed in buffer
-                    }
-
-                    //Prepare Case Model - Form
-                    if(StringUtils.hasText(accountId) && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
-                    {
-                        userDetails.setUserDetails(userSrv.getUserDetails4mSession());
-                        model.addAttribute("userInfo", userDetails);  
-
-                        Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream().filter(g->g.getCaseTypeEnum().toString().equals(caseType.toString())).findFirst();
-                        if(cusItemO.isPresent() && catgTreeSrv != null)
-                        {
-
-                            model.addAttribute("caseTypeStr", caseType.toString());
-
-                            TY_Case_Form caseForm = new TY_Case_Form();
-                            caseForm.setAccId(accountId);   //hidden
-                            caseForm.setCaseTxnType(cusItemO.get().getCaseType()); //hidden
-                            model.addAttribute("caseForm", caseForm);
-
-                            model.addAttribute("formError", null);
-
-                            //also Upload the Catg. Tree as per Case Type
-                            model.addAttribute("catgsList", catgTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
-                    
-
-                        }
-                        else
-                        {
-                            throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]{ caseType.toString()}, Locale.ENGLISH));
-                        }
-
-                    
-                    }
-
-
-                }
-
-            }
-            catch (Exception e)
-            {
-                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_FORM", new Object[]{ e.getLocalizedMessage()}, Locale.ENGLISH));
-            }
-        }
-		
-		return VW_CaseForm;
-	}
-
+   
     @GetMapping("/createCase/{caseType}")
 	public String showTxnDetails4Scrip(@PathVariable("caseType") EnumCaseTypes caseType , Model model) throws Exception
 	{
@@ -315,12 +238,12 @@ public class ESSController
                     model.addAttribute("userInfo", userDetails);     
                 }
              
-                if(cusItemO.isPresent() && catgTreeSrv != null)
+                if(cusItemO.isPresent() && catalogTreeSrv != null)
                 {
                     model.addAttribute("caseTypeStr", cusItemO.get().getCaseTypeEnum().toString());
                     model.addAttribute("caseForm", caseForm);   
                     //also Upload the Catg. Tree as per Case Type
-                    model.addAttribute("catgsList", catgTreeSrv.getCaseCatgTree4LoB(cusItemO.get().getCaseTypeEnum()).getCategories());
+                    model.addAttribute("catgsList", catalogTreeSrv.getCaseCatgTree4LoB(cusItemO.get().getCaseTypeEnum()).getCategories());
 
                     return  "caseForm";
                 }
@@ -335,7 +258,7 @@ public class ESSController
                 newCaseEntity.setSubject(caseForm.getSubject()); // Subject
 
                 //Fetch CatgGuid by description from Customizing - Set Categories
-                if(cusItemO.isPresent() && catgTreeSrv != null)
+                if(cusItemO.isPresent() && catalogTreeSrv != null)
                 {
                     Optional<TY_CatgGuidsDesc> catgGuidDescO = catgTreeSrv.getCaseCatgTree4LoB(cusItemO.get().getCaseTypeEnum()).getCategories().stream()
                     .filter(h->h.getDescription().equals(caseForm.getCatgDesc())).findFirst();
