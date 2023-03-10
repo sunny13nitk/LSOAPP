@@ -111,9 +111,9 @@
    
    
                               <option th:each="catg : ${catgsList}"
-                                      th:value="${catg.description}"
-                                      th:selected="${catg.description}" 
-                                      th:text="${catg.description}"></option>
+                                      th:value="${catg.id}"
+                                      th:selected="${catg.id}" 
+                                      th:text="${catg.parentName} + '>' +${catg.name}"></option>
    
                            </select>
                            <small class="text-muted">Select Service Category from dropdown. </small>

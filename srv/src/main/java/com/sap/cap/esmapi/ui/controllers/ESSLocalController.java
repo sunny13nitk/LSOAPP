@@ -9,6 +9,7 @@ import java.util.Optional;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgGuidsDesc;
+import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
@@ -60,6 +61,9 @@ public class ESSLocalController
 
     @Autowired
     private IF_CatgSrv catgTreeSrv;
+
+    @Autowired
+    private IF_CatalogSrv catalogTreeSrv;
 
   
 
@@ -207,7 +211,7 @@ public class ESSLocalController
                         model.addAttribute("formError", null);
 
                         //also Upload the Catg. Tree as per Case Type
-                        model.addAttribute("catgsList", catgTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
+                        model.addAttribute("catgsList", catalogTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
 
                         
 

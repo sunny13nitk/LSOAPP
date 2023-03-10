@@ -10,6 +10,7 @@ import java.util.Optional;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgGuidsDesc;
+import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
@@ -64,6 +65,9 @@ public class ESSController
 
     @Autowired
     private IF_CatgSrv catgTreeSrv;
+
+    @Autowired
+    private IF_CatalogSrv catalogTreeSrv;
 
     @Autowired
     private IF_SrvCloudAPI srvCloudApiSrv;
@@ -123,8 +127,8 @@ public class ESSController
     }
 
     
-    @GetMapping("/createCase/{caseType}")
-	public String showTxnDetails4Scrip(@PathVariable("caseType") EnumCaseTypes caseType , Model model) throws Exception
+    @GetMapping("/createCasecp/{caseType}")
+	public String showTxnDetails4Scripcp(@PathVariable("caseType") EnumCaseTypes caseType , Model model) throws Exception
 	{
 		
 		
@@ -200,6 +204,87 @@ public class ESSController
 		
 		return VW_CaseForm;
 	}
+
+    @GetMapping("/createCase/{caseType}")
+	public String showTxnDetails4Scrip(@PathVariable("caseType") EnumCaseTypes caseType , Model model) throws Exception
+	{
+		
+		
+        String accountId;
+
+        //Only Authenticated user via IDP
+        if(userInfo.isAuthenticated()) 
+        { 
+
+            try
+            {
+
+                if (StringUtils.hasText(caseType.toString()) && userSrv != null)
+                {
+                    System.out.println("Case Type Selected for Creation: " + caseType);
+
+                    TY_UserESS userDetails = new TY_UserESS();
+
+                    //1. Check if Account Exists for the logged in User as A/C is mandatory to create a case
+                    
+                    if(StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
+                    {
+                        
+                        accountId = userSrv.getUserDetails4mSession().getAccountId();
+                    }
+                            
+                    else //Create the Account with logged in User credentials
+                    {
+                        accountId = userSrv.createAccount(); //Implictly refreshed in buffer
+                    }
+
+                    //Prepare Case Model - Form
+                    if(StringUtils.hasText(accountId) && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+                    {
+                        userDetails.setUserDetails(userSrv.getUserDetails4mSession());
+                        model.addAttribute("userInfo", userDetails);  
+
+                        Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream().filter(g->g.getCaseTypeEnum().toString().equals(caseType.toString())).findFirst();
+                        if(cusItemO.isPresent() && catgTreeSrv != null)
+                        {
+
+                            model.addAttribute("caseTypeStr", caseType.toString());
+
+                            TY_Case_Form caseForm = new TY_Case_Form();
+                            caseForm.setAccId(accountId);   //hidden
+                            caseForm.setCaseTxnType(cusItemO.get().getCaseType()); //hidden
+                            model.addAttribute("caseForm", caseForm);
+
+                            model.addAttribute("formError", null);
+
+                            
+                            //also Upload the Catg. Tree as per Case Type
+                            model.addAttribute("catgsList", catalogTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
+                    
+
+                        }
+                        else
+                        {
+                            throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]{ caseType.toString()}, Locale.ENGLISH));
+                        }
+
+                    
+                    }
+
+
+                }
+
+            }
+            catch (Exception e)
+            {
+                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_FORM", new Object[]{ e.getLocalizedMessage()}, Locale.ENGLISH));
+            }
+        }
+		
+		return VW_CaseForm;
+	}
+
+
 
 
     @PostMapping("/saveCase")

@@ -109,12 +109,17 @@
                               th:field="*{catgDesc}" data-cls-option="fg-grayMouse"
                               data-cls-selected-item="bg-teal fg-white"
                               data-random-color="true" >
-   
+
+                              <option th:each="catg : ${catgsList}"
+                                      th:value="${catg.id}"
+                                      th:selected="${catg.id}" 
+                                      th:text="${catg.parentName} + '>' +${catg.name}"></option>
+<!--    
    
                               <option th:each="catg : ${catgsList}"
                                       th:value="${catg.description}"
                                       th:selected="${catg.description}" 
-                                      th:text="${catg.description}"></option>
+                                      th:text="${catg.description}"></option> -->
    
                            </select>
                            <small class="text-muted">Select Service Category from dropdown. </small>
