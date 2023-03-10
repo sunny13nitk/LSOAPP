@@ -115,7 +115,7 @@
                                       th:selected="${catg.id}" 
                                       th:if="${catg.parentName}" !=null}
                                           th:text="${catg.parentName} + '>' +${catg.name}"
-                                      th:if="${catg.parentName}" == null}
+                                      th:unless="${catg.parentName}" == null}
                                           th:text="${catg.name}"  >
                                     
                                     </option>
