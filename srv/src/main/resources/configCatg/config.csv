@@ -1,4 +1,3 @@
 caseTypeEnum,caseType,catgCsvPath
 Learning,ZLSS,csvCatg/ZLSS.csv
-Travel_Expense,ZTRA
-HR_Payroll,ZPAY
+HR_Mobility,ZMOB
