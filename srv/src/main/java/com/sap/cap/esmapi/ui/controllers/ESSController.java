@@ -1,7 +1,5 @@
 package com.sap.cap.esmapi.ui.controllers;
 
-
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -45,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Controller
 @RequestMapping("/ess")
-public class ESSController 
+public class ESSController
 {
 
     @Autowired
@@ -72,48 +70,50 @@ public class ESSController
     @Autowired
     private IF_SrvCloudAPI srvCloudApiSrv;
 
-    private static final String  VW_ESSListView = "essListView";
-    private static final String  VW_Error = "error";
-    private static final String  VW_CaseForm = "caseForm";
-    private static final String  VW_ESSListViewRedirect = "redirect:/ess/";
+    private static final String VW_ESSListView = "essListView";
+    private static final String VW_Error = "error";
+    private static final String VW_CaseForm = "caseForm";
+    private static final String VW_ESSListViewRedirect = "redirect:/ess/";
 
     @GetMapping("/")
     public String showCasesList4User(@AuthenticationPrincipal Token token, Model model)
     {
-        if(token != null && userInfo != null && userSrv != null)
+        if (token != null && userInfo != null && userSrv != null)
         {
-            //Only Authenticated user via IDP
-            if(userInfo.isAuthenticated()) 
+            // Only Authenticated user via IDP
+            if (userInfo.isAuthenticated())
             {
-                
+
                 /*
-                    //1. Get the Cases and Information for the user
-                */
-                try 
+                 * //1. Get the Cases and Information for the user
+                 */
+                try
                 {
 
-                        TY_UserESS userDetails = userSrv.getESSDetails(token);
-                        if(userDetails != null && uiSrv != null)
-                        {
-                            //Populate User Details in Model
-                            model.addAttribute("userInfo", userDetails);
+                    TY_UserESS userDetails = userSrv.getESSDetails(token);
+                    if (userDetails != null && uiSrv != null)
+                    {
+                        // Populate User Details in Model
+                        model.addAttribute("userInfo", userDetails);
 
-                            //Provision to add Session Messages: Even if No Cases - spl. for Newly Create Account - to enable REfresh button
-                            model.addAttribute( "sessMsgs" , userSrv.getSessionMessages());
-                            
-                            //Only Populate Stats. if there are cases Bound
-                            if(!CollectionUtils.isEmpty(userDetails.getCases()))
-                            {
-                                TY_ESS_Stats stats = uiSrv.getStatsForUserCases(userDetails.getCases());
-                                model.addAttribute("stats", stats);
-                            }
-                            
+                        // Provision to add Session Messages: Even if No Cases - spl. for Newly Create
+                        // Account - to enable REfresh button
+                        model.addAttribute("sessMsgs", userSrv.getSessionMessages());
+
+                        // Only Populate Stats. if there are cases Bound
+                        if (!CollectionUtils.isEmpty(userDetails.getCases()))
+                        {
+                            TY_ESS_Stats stats = uiSrv.getStatsForUserCases(userDetails.getCases());
+                            model.addAttribute("stats", stats);
                         }
+
+                    }
                 }
-                
+
                 catch (Exception e)
                 {
-                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_LIST", new Object[]{ e.getLocalizedMessage()}, Locale.ENGLISH));
+                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_LIST", new Object[]
+                    { e.getLocalizedMessage() }, Locale.ENGLISH));
                 }
             }
 
@@ -126,18 +126,15 @@ public class ESSController
 
     }
 
-    
-   
     @GetMapping("/createCase/{caseType}")
-	public String showTxnDetails4Scrip(@PathVariable("caseType") EnumCaseTypes caseType , Model model) throws Exception
-	{
-		
-		
+    public String showTxnDetails4Scrip(@PathVariable("caseType") EnumCaseTypes caseType, Model model) throws Exception
+    {
+
         String accountId;
 
-        //Only Authenticated user via IDP
-        if(userInfo.isAuthenticated()) 
-        { 
+        // Only Authenticated user via IDP
+        if (userInfo.isAuthenticated())
+        {
 
             try
             {
@@ -148,199 +145,205 @@ public class ESSController
 
                     TY_UserESS userDetails = new TY_UserESS();
 
-                    //1. Check if Account Exists for the logged in User as A/C is mandatory to create a case
-                    
-                    if(StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
+                    // 1. Check if Account Exists for the logged in User as A/C is mandatory to
+                    // create a case
+
+                    if (StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
                     {
-                        
+
                         accountId = userSrv.getUserDetails4mSession().getAccountId();
                     }
-                            
-                    else //Create the Account with logged in User credentials
+
+                    else // Create the Account with logged in User credentials
                     {
-                        accountId = userSrv.createAccount(); //Implictly refreshed in buffer
+                        accountId = userSrv.createAccount(); // Implictly refreshed in buffer
                     }
 
-                    //Prepare Case Model - Form
-                    if(StringUtils.hasText(accountId) && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+                    // Prepare Case Model - Form
+                    if (StringUtils.hasText(accountId) && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
                     {
                         userDetails.setUserDetails(userSrv.getUserDetails4mSession());
-                        model.addAttribute("userInfo", userDetails);  
+                        model.addAttribute("userInfo", userDetails);
 
-                        Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream().filter(g->g.getCaseTypeEnum().toString().equals(caseType.toString())).findFirst();
-                        if(cusItemO.isPresent() && catgTreeSrv != null)
+                        Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+                                .filter(g -> g.getCaseTypeEnum().toString().equals(caseType.toString())).findFirst();
+                        if (cusItemO.isPresent() && catgTreeSrv != null)
                         {
 
                             model.addAttribute("caseTypeStr", caseType.toString());
 
                             TY_Case_Form caseForm = new TY_Case_Form();
-                            caseForm.setAccId(accountId);   //hidden
-                            caseForm.setCaseTxnType(cusItemO.get().getCaseType()); //hidden
+                            caseForm.setAccId(accountId); // hidden
+                            caseForm.setCaseTxnType(cusItemO.get().getCaseType()); // hidden
                             model.addAttribute("caseForm", caseForm);
 
                             model.addAttribute("formError", null);
 
-                            
-                            //also Upload the Catg. Tree as per Case Type
-                            model.addAttribute("catgsList", catalogTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
-                    
+                            // also Upload the Catg. Tree as per Case Type
+                            model.addAttribute("catgsList",
+                                    catalogTreeSrv.getCaseCatgTree4LoB(caseType).getCategories());
 
                         }
                         else
                         {
-                            throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]{ caseType.toString()}, Locale.ENGLISH));
+                            throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]
+                            { caseType.toString() }, Locale.ENGLISH));
                         }
 
-                    
                     }
-
 
                 }
 
             }
             catch (Exception e)
             {
-                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_FORM", new Object[]{ e.getLocalizedMessage()}, Locale.ENGLISH));
+                throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_FORM", new Object[]
+                { e.getLocalizedMessage() }, Locale.ENGLISH));
             }
         }
-		
-		return VW_CaseForm;
-	}
 
-
-
+        return VW_CaseForm;
+    }
 
     @PostMapping("/saveCase")
-	public String saveCase(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model )
-	{
+    public String saveCase(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
+    {
         log.info("Inside SAve Case Method!!");
         System.out.println("Inside SAve Case Method!!");
         TY_UserESS userDetails = new TY_UserESS();
         TY_Case_SrvCloud newCaseEntity = new TY_Case_SrvCloud();
         Optional<TY_CatgCusItem> cusItemO = null;
 
-        if(caseForm != null && userInfo.isAuthenticated())
+        if (caseForm != null && userInfo.isAuthenticated())
         {
             System.out.println("Case Payload: " + caseForm.toString());
 
-            //Validate Case Form
+            // Validate Case Form
             List<String> msgs = validateCaseForm(caseForm);
-            cusItemO = catgCusSrv.getCustomizations().stream().filter(g->g.getCaseType().equals(caseForm.getCaseTxnType())).findFirst();
-            if(!CollectionUtils.isEmpty(msgs))
+            cusItemO = catgCusSrv.getCustomizations().stream()
+                    .filter(g -> g.getCaseType().equals(caseForm.getCaseTxnType())).findFirst();
+            if (!CollectionUtils.isEmpty(msgs))
             {
                 model.addAttribute("formError", msgs);
                 /*
-                 ------ Prepare Model for REload
-                */
-                if(StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
+                 * ------ Prepare Model for REload
+                 */
+                if (StringUtils.hasText(userSrv.getUserDetails4mSession().getAccountId()))
                 {
                     userDetails.setUserDetails(userSrv.getUserDetails4mSession());
-                    model.addAttribute("userInfo", userDetails);     
+                    model.addAttribute("userInfo", userDetails);
                 }
-             
-                if(cusItemO.isPresent() && catalogTreeSrv != null)
+
+                if (cusItemO.isPresent() && catalogTreeSrv != null)
                 {
                     model.addAttribute("caseTypeStr", cusItemO.get().getCaseTypeEnum().toString());
-                    model.addAttribute("caseForm", caseForm);   
-                    //also Upload the Catg. Tree as per Case Type
-                    model.addAttribute("catgsList", catalogTreeSrv.getCaseCatgTree4LoB(cusItemO.get().getCaseTypeEnum()).getCategories());
+                    model.addAttribute("caseForm", caseForm);
+                    // also Upload the Catg. Tree as per Case Type
+                    model.addAttribute("catgsList",
+                            catalogTreeSrv.getCaseCatgTree4LoB(cusItemO.get().getCaseTypeEnum()).getCategories());
 
-                    return  "caseForm";
+                    return "caseForm";
                 }
-            } //CaseForm has errors
+            } // CaseForm has errors
 
-            else //Commit the Case
+            else // Commit the Case
             {
 
-
-                newCaseEntity.setAccount(new TY_Account_CaseCreate(caseForm.getAccId())); //Account ID 
-                newCaseEntity.setCaseType(caseForm.getCaseTxnType());  //Case Txn. Type
+                newCaseEntity.setAccount(new TY_Account_CaseCreate(caseForm.getAccId())); // Account ID
+                newCaseEntity.setCaseType(caseForm.getCaseTxnType()); // Case Txn. Type
                 newCaseEntity.setSubject(caseForm.getSubject()); // Subject
 
-                //Fetch CatgGuid by description from Customizing - Set Categories
-                if(cusItemO.isPresent() && catalogTreeSrv != null)
+                // Fetch CatgGuid by description from Customizing - Set Categories
+                if (cusItemO.isPresent() && catalogTreeSrv != null)
                 {
-                    Optional<TY_CatgGuidsDesc> catgGuidDescO = catgTreeSrv.getCaseCatgTree4LoB(cusItemO.get().getCaseTypeEnum()).getCategories().stream()
-                    .filter(h->h.getDescription().equals(caseForm.getCatgDesc())).findFirst();
-                    if(catgGuidDescO.isPresent())
+                    String[] catTreeSelCatg = catalogTreeSrv.getCatgHierarchyforCatId(caseForm.getCatgDesc(),
+                            cusItemO.get().getCaseTypeEnum());
+                    if (catTreeSelCatg.length > 0)
                     {
-                        TY_CatgGuidsDesc catgGuidDesc = catgGuidDescO.get();
-                        if(catgGuidDesc != null)
+                        switch (catTreeSelCatg.length)
                         {
-                            if(StringUtils.hasText(catgGuidDesc.getLvl1guid()))
-                            {
-                                newCaseEntity.setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catgGuidDesc.getLvl1guid()));
-                            }
-
-                            if(StringUtils.hasText(catgGuidDesc.getLvl2guid()))
-                            {
-                                newCaseEntity.setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catgGuidDesc.getLvl2guid()));
-                            }
-
+                        case 4:
+                            newCaseEntity.setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                            newCaseEntity.setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
+                            newCaseEntity.setCategoryLevel3(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[2]));
+                            newCaseEntity.setCategoryLevel4(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[3]));
+                            break;
+                        case 3:
+                            newCaseEntity.setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                            newCaseEntity.setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
+                            newCaseEntity.setCategoryLevel3(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[2]));
+                            break;
+                        case 2:
+                            newCaseEntity.setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                            newCaseEntity.setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
+                            break;
+                        case 1:
+                            newCaseEntity.setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                        default:
+                            break;
                         }
                     }
-                }
-                
 
-               //Create Notes if There is a description
-               if(StringUtils.hasText(caseForm.getDescription()))
-               {
-                    //Create Note and Get Guid back
-                    String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(caseForm.getDescription()));
-                    if(StringUtils.hasText(noteId))
+                    // Create Notes if There is a description
+                    if (StringUtils.hasText(caseForm.getDescription()))
                     {
-                        newCaseEntity.setDescription(new TY_Description_CaseCreate(noteId));
+                        // Create Note and Get Guid back
+                        String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(caseForm.getDescription()));
+                        if (StringUtils.hasText(noteId))
+                        {
+                            newCaseEntity.setDescription(new TY_Description_CaseCreate(noteId));
+                        }
                     }
-               }
 
-               //Case Payload is now Ready:  Post and get the Case ID back
-               try
-               {
+                    // Case Payload is now Ready: Post and get the Case ID back
+                    try
+                    {
                         String caseID = srvCloudApiSrv.createCase(newCaseEntity);
-                        if(StringUtils.hasText(caseID))
+                        if (StringUtils.hasText(caseID))
                         {
-                                System.out.println("Case ID : " + caseID + " created..");
-                                //Populate Success message in session
-                                userSrv.addSessionMessage(msgSrc.getMessage("SUCC_CASE", new Object[]{caseID, cusItemO.get().getCaseTypeEnum().toString()}, Locale.ENGLISH));
+                            System.out.println("Case ID : " + caseID + " created..");
+                            // Populate Success message in session
+                            userSrv.addSessionMessage(msgSrc.getMessage("SUCC_CASE", new Object[]
+                            { caseID, cusItemO.get().getCaseTypeEnum().toString() }, Locale.ENGLISH));
                         }
-               }
-               catch(Exception e)
-               {
-                    throw new EX_ESMAPI( msgSrc.getMessage("ERR_CASE_POST", new Object[]{ e.getLocalizedMessage()}, Locale.ENGLISH));
-               }
-               
-               
+                    }
+                    catch (Exception e)
+                    {
+                        throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_POST", new Object[]
+                        { e.getLocalizedMessage() }, Locale.ENGLISH));
+                    }
+
+                }
             }
 
         }
         return VW_ESSListViewRedirect;
     }
 
-
     private List<String> validateCaseForm(TY_Case_Form caseForm)
     {
         List<String> msgs = new ArrayList<String>();
 
-        if(!StringUtils.hasLength(caseForm.getAccId()))
+        if (!StringUtils.hasLength(caseForm.getAccId()))
         {
             msgs.add(msgSrc.getMessage("ERR_NO_AC", null, Locale.ENGLISH));
         }
 
-        if(!StringUtils.hasLength(caseForm.getCaseTxnType()))
+        if (!StringUtils.hasLength(caseForm.getCaseTxnType()))
         {
             msgs.add(msgSrc.getMessage("ERR_NO_CASETYPE", null, Locale.ENGLISH));
         }
 
-        if(!StringUtils.hasLength(caseForm.getCatgDesc()))
+        if (!StringUtils.hasLength(caseForm.getCatgDesc()))
         {
             msgs.add(msgSrc.getMessage("ERR_NO_CATG", null, Locale.ENGLISH));
         }
 
-        if(!StringUtils.hasLength(caseForm.getSubject()))
+        if (!StringUtils.hasLength(caseForm.getSubject()))
         {
             msgs.add(msgSrc.getMessage("ERR_NO_SUBJECT", null, Locale.ENGLISH));
         }
-        
+
         return msgs;
     }
 
