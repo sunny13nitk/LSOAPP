@@ -13,6 +13,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatalogTree;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
@@ -37,6 +38,8 @@ public class CL_CatalogSrv implements IF_CatalogSrv
 
     @Autowired
     private MessageSource msgSrc;
+
+    private static final int maxCatgLevels = 4;
 
     @Override
     public TY_CatalogTree getCaseCatgTree4LoB(EnumCaseTypes caseType) throws EX_ESMAPI
@@ -68,6 +71,51 @@ public class CL_CatalogSrv implements IF_CatalogSrv
 
         return caseCatgTree;
 
+    }
+
+    @Override
+    public String[] getCatgHierarchyforCatId(String catId, EnumCaseTypes caseType) throws EX_ESMAPI
+    {
+        String[] catTree = null;
+        int idx = 0;
+
+        if (StringUtils.hasText(catId) && caseType != null)
+        {
+            String catCurr = catId;
+
+            // Get Complete Catalog Details
+            TY_CatalogTree catalogTree = this.loadCatgTree4CaseType(caseType);
+            if (CollectionUtils.isNotEmpty(catalogTree.getCategories()))
+            {
+                catTree = new String[maxCatgLevels]; //Max upto 4 levels
+                while (StringUtils.hasText(catCurr))
+                {
+                    String catScan = catCurr;
+                    // Scan for Category in Catalog Tree
+                    Optional<TY_CatalogItem> itemSel = catalogTree.getCategories().stream()
+                            .filter(t -> t.getId().equals(catScan)).findFirst();
+                    if (itemSel.isPresent())
+                    {
+                        catTree[idx] = catCurr;
+
+                        //Seek Parent
+                        if(StringUtils.hasText(itemSel.get().getParentId()))
+                        {
+                            catCurr = itemSel.get().getParentId();
+                        }
+                        else
+                        {
+                            catCurr = null;
+                        }
+
+                        idx++;
+                    }
+
+                }
+            }
+        }
+
+        return catTree;
     }
 
     private TY_CatalogTree loadCatgTree4CaseType(EnumCaseTypes caseType)
