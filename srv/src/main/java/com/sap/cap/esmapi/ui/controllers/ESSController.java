@@ -1,13 +1,26 @@
 package com.sap.cap.esmapi.ui.controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
-import com.sap.cap.esmapi.catg.pojos.TY_CatgGuidsDesc;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
@@ -26,18 +39,6 @@ import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cds.services.request.UserInfo;
 import com.sap.cloud.security.xsuaa.token.Token;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -258,9 +259,9 @@ public class ESSController
                 {
                     String[] catTreeSelCatg = catalogTreeSrv.getCatgHierarchyforCatId(caseForm.getCatgDesc(),
                             cusItemO.get().getCaseTypeEnum());
-                    if (catTreeSelCatg.length > 0)
+                    if (Arrays.stream(catTreeSelCatg).filter(e -> e != null).count() > 0)
                     {
-                        switch (catTreeSelCatg.length)
+                        switch ((int) Arrays.stream(catTreeSelCatg).filter(e -> e != null).count())
                         {
                         case 4:
                             newCaseEntity.setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
@@ -280,8 +281,14 @@ public class ESSController
                         case 1:
                             newCaseEntity.setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
                         default:
-                            break;
+                            throw new EX_ESMAPI(msgSrc.getMessage("ERR_INVALID_CATG", new Object[]
+                            { cusItemO.get().getCaseTypeEnum().toString(), caseForm.getCatgDesc() }, Locale.ENGLISH));
                         }
+                    }
+                    else
+                    {
+                        throw new EX_ESMAPI(msgSrc.getMessage("ERR_INVALID_CATG", new Object[]
+                        { cusItemO.get().getCaseTypeEnum().toString(), caseForm.getCatgDesc() }, Locale.ENGLISH));
                     }
 
                     // Create Notes if There is a description
