@@ -2,5 +2,5 @@ package com.sap.cap.esmapi.utilities.enums;
 
 public enum EnumCaseTypes
 {
-    Learning,Controlling,Finance    
+    Learning,Travel_Expense,HR_Payroll    
 }
