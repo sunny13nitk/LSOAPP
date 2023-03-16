@@ -309,6 +309,30 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                 }
                                             }
 
+                                            if (caseFieldName.equals("individualCustomer") && (!StringUtils.hasText(accountId)))
+                                            {
+                                                // System.out.println("Inside Account: " );
+
+                                                JsonNode accEnt = caseEnt.path("individualCustomer");
+                                                if (accEnt != null)
+                                                {
+                                                    // System.out.println("Account Node Bound");
+
+                                                    Iterator<String> fieldNamesAcc = accEnt.fieldNames();
+                                                    while (fieldNamesAcc.hasNext())
+                                                    {
+                                                        String accFieldName = fieldNamesAcc.next();
+                                                        if (accFieldName.equals("id"))
+                                                        {
+                                                            // System.out.println(
+                                                            // "Account ID : " + accEnt.get(accFieldName).asText());
+                                                            accountId = accEnt.get(accFieldName).asText();
+                                                        }
+                                                    }
+
+                                                }
+                                            }
+
                                             if (caseFieldName.equals("reporter"))
                                             {
                                                 // System.out.println("Inside Reporter: " );
