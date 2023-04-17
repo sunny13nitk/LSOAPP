@@ -3,7 +3,7 @@ applications:
   instances: 1
   memory: 896M
   routes:
-    - route: esmapiapp.cfapps.eu10.hana.ondemand.com
+    - route: esmapi.cfapps.eu10-004.hana.ondemand.com
   path: srv/target/esmapi-exec.jar
   services:
     - esmapi-xsuaa
@@ -17,14 +17,16 @@ applications:
     - nodejs_buildpack
   memory: 128M
   routes:
-    - route: esmapiapp-web.cfapps.eu10.hana.ondemand.com
+    - route: esmapi-web.cfapps.eu10-004.hana.ondemand.com
   services:
     - esmapi-xsuaa
   env:
     destinations: >
       [
-        {"name":"token-destination",
-         "url":"https://esmapiapp.cfapps.eu10.hana.ondemand.com",
-         "forwardAuthToken": true}
+        {
+          "name":"token-destination",
+          "url":"https://esmapi.cfapps.eu10-004.hana.ondemand.com",
+          "forwardAuthToken": true
+        }
       ]
 ...
