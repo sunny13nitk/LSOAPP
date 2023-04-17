@@ -12,6 +12,8 @@ public class GC_Constants
 
     public static final String gc_statusSolnProvided = "Solution Provided";
 
+    public static final String gc_UrlReplParam = "_";
+
         
 
 }

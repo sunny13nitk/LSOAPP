@@ -4,3 +4,11 @@ spring:
 cds:
   datasource:
     auto-config.enabled: false
+  security:
+    mock:
+      users:
+        - name: admin
+          password: pass_admin
+          roles:
+            - Administrators
+

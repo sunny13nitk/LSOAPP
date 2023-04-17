@@ -11,23 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.sap.cap.esmapi.catg.pojos.TY_CaseCatgTree;
-import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
-import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
-import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
-import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
-import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
-import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
-import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
-import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
-import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
-import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
-import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
-import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
-import com.sap.cloud.security.xsuaa.token.Token;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -38,6 +21,28 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.sap.cap.esmapi.catg.pojos.TY_CaseCatgTree;
+import com.sap.cap.esmapi.catg.pojos.TY_CatalogTree;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
+import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
+import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
+import com.sap.cap.esmapi.utilities.StringsUtility;
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
+import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
+import com.sap.cap.esmapi.utilities.pojos.JSONAnotamy;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
+import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
+import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
+import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
+import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
+import com.sap.cloud.security.xsuaa.token.Token;
 
 
 @RestController
@@ -65,6 +70,9 @@ public class APIRestController
 
     @Autowired
     private IF_CatgSrv catgSrv;
+
+    @Autowired
+    private IF_CatalogSrv catalogSrv;
 
    
 
@@ -478,6 +486,15 @@ public class APIRestController
         return srvCloudApiSrv.createAccount(email, userName);
     }
 
+    
+    @GetMapping("/caseConfig")
+    private TY_CaseCatalogCustomizing getCaseConfig( @RequestParam(name = "caseType", required = true) String caseType ) throws IOException
+    {
+       
+            return srvCloudApiSrv.getActiveCaseTemplateConfig4CaseType(caseType);
+        
+    }
+
     @GetMapping("/notesURL")
     private String createNotes( )
     {
@@ -486,8 +503,20 @@ public class APIRestController
 
         return srvCloudApiSrv.createNotes(newNote);
     }
+
+    @GetMapping("/parseURL")
+    private String parseUrl( )
+    {
+        System.out.println(StringsUtility.replaceURLwithParams(srvCloudUrls.getCatgTreeUrl(), new String[] {"24d8e296-403d-4551-b29b-bbdfbb5e5c9c"}, GC_Constants.gc_UrlReplParam));
+        return StringsUtility.replaceURLwithParams(srvCloudUrls.getCatgTreeUrl(), new String[] {"24d8e296-403d-4551-b29b-bbdfbb5e5c9c"}, GC_Constants.gc_UrlReplParam);
+    }
     
 
+    @GetMapping("/catalogDetails")
+    private TY_CatalogTree getCatgTreeCaseType( @RequestParam(name = "caseType",required = true) String caseType)
+    {
+        return catalogSrv.getCaseCatgTree4LoB(EnumCaseTypes.valueOf(caseType));
+    }
         
 
 }
