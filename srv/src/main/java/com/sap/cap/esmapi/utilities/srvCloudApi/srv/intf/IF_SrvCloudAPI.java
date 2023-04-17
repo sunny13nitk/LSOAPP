@@ -31,13 +31,15 @@ public interface IF_SrvCloudAPI
 
     public String getAccountIdByUserEmail(String userEmail) throws EX_ESMAPI;
 
+    public String createCase(TY_Case_SrvCloud caseEntity) throws EX_ESMAPI;
+
     public String getContactPersonIdByUserEmail(String userEmail) throws EX_ESMAPI;
 
     public String createAccount(String userEmail, String userName) throws EX_ESMAPI;
 
     public String createNotes(TY_NotesCreate notes) throws EX_ESMAPI;
 
-    public String createCase(TY_Case_SrvCloud caseEntity) throws EX_ESMAPI;
+
 
     public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType) throws EX_ESMAPI, IOException;
 
