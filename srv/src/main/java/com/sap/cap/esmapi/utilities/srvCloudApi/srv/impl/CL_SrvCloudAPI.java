@@ -415,6 +415,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         {
             casesESSList4User = casesESSList.stream().filter(e ->
             {
+                //#ESMModule
+                //If no Account Itself in Present in Case - Ignore Such Cases --Add Employee with an and condition once ESM module is enabled
+                if(!StringUtils.hasText(e.getAccountId()))
+                {
+                    return false;
+                }
 
                 if (StringUtils.hasText(e.getContactId()))
                 {
