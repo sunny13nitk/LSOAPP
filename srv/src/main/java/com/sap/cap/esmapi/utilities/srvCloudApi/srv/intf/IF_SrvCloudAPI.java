@@ -6,6 +6,8 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
+import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
@@ -38,6 +40,8 @@ public interface IF_SrvCloudAPI
     public String createAccount(String userEmail, String userName) throws EX_ESMAPI;
 
     public String createNotes(TY_NotesCreate notes) throws EX_ESMAPI;
+
+    public TY_AttachmentResponse createAttachment(TY_Attachment attachment) throws EX_ESMAPI;
 
 
 

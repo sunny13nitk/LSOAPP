@@ -1,5 +1,7 @@
 package com.sap.cap.esmapi.ui.pojos;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +18,7 @@ public class TY_Case_Form
     private String catgDesc;
     private String subject;
     private String description;
+    private MultipartFile attachment;
     @Override
     public String toString() {
         return "TY_Case_Form [accId=" + accId + ", caseTxnType=" + caseTxnType + ", catgDesc=" + catgDesc

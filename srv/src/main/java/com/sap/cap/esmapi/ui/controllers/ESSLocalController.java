@@ -6,25 +6,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
-import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
-import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
-import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
-import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
-import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
-import com.sap.cap.esmapi.ui.pojos.TY_ESS_Stats;
-import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
-import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
-import com.sap.cap.esmapi.utilities.pojos.TY_Account_CaseCreate;
-import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
-import com.sap.cap.esmapi.utilities.pojos.TY_CatgLvl1_CaseCreate;
-import com.sap.cap.esmapi.utilities.pojos.TY_Description_CaseCreate;
-import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
-import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
-import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
-import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
-
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -37,8 +19,33 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
+import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
+import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
+import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
+import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
+import com.sap.cap.esmapi.ui.pojos.TY_ESS_Stats;
+import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
+import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
+import com.sap.cap.esmapi.utilities.pojos.TY_Account_CaseCreate;
+import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
+import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
+import com.sap.cap.esmapi.utilities.pojos.TY_CatgLvl1_CaseCreate;
+import com.sap.cap.esmapi.utilities.pojos.TY_Description_CaseCreate;
+import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
+import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
+import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
+
+import lombok.extern.slf4j.Slf4j;
+
 @Controller
 @RequestMapping("/esslocal")
+@Slf4j
 public class ESSLocalController
 {
     @Autowired
@@ -283,7 +290,7 @@ public class ESSLocalController
                 {
                     String[] catTreeSelCatg = catalogTreeSrv.getCatgHierarchyforCatId(caseForm.getCatgDesc(),
                             cusItemO.get().getCaseTypeEnum());
-                    if (Arrays.stream(catTreeSelCatg).filter(e -> e != null).count()> 0)
+                    if (Arrays.stream(catTreeSelCatg).filter(e -> e != null).count() > 0)
                     {
                         switch ((int) Arrays.stream(catTreeSelCatg).filter(e -> e != null).count())
                         {
@@ -325,6 +332,24 @@ public class ESSLocalController
                     if (StringUtils.hasText(noteId))
                     {
                         newCaseEntity.setDescription(new TY_Description_CaseCreate(noteId));
+                    }
+                }
+
+                // Check if Attachment needs to be Created
+                if (caseForm.getAttachment() != null)
+                {
+                    // Create Attachment
+                    TY_Attachment newAttachment = new TY_Attachment(FilenameUtils.getName(caseForm.getAttachment().getOriginalFilename()),
+                            GC_Constants.gc_Attachment_Category, false);
+                    TY_AttachmentResponse attR = srvCloudApiSrv.createAttachment(newAttachment);
+                    if (attR != null)
+                    {
+                        if(StringUtils.hasText(attR.getId()) && StringUtils.hasText(attR.getUploadUrl()))
+                        {
+                            log.info("Attachment id :" + attR.getId() + " generated for Upload Url : " + attR.getUploadUrl());
+                        }
+                        
+
                     }
                 }
 

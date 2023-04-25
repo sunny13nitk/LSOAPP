@@ -14,11 +14,7 @@
 
 <body>
 
-<<<<<<< HEAD
-   <div class="frame" style="padding: 20px; overflow: auto; background-color: #FFFFFF">
-=======
    <div class="frame" style="padding: 20px;  overflow: auto; background-color: #FFFFFF">
->>>>>>> 3c5e40753f78856c4fae4eec74ab72408baeb1a6
 
       <div class="row flex-justify-center">
 
@@ -82,7 +78,8 @@
                <h6 style="color: #54627B; margin-left: 10px">Create new Case.
                   <span style="color: #B1365B" th:text="${caseTypeStr}"></span> !
                </h6>
-               <form th:object="${caseForm}" th:action="@{/esslocal/saveCase}" method="post">
+               <form th:object="${caseForm}" enctype="multipart/form-data" th:action="@{/esslocal/saveCase}"
+                  method="post">
 
 
                   <input type="hidden" th:field="*{accId}" />
@@ -123,6 +120,14 @@
                            </textarea>
                      <small class="text-muted">Enter Issue Description in detail. </small>
                   </div>
+
+                  <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px">
+                     <label>Attachment</label>
+                     <input type="file" data-role="file" name="attachment" th:field="*{attachment}" data-mode="drop">
+
+                  </div>
+
+
 
                   <div class="d-flex flex-row-r" style="margin-top: 30px; margin-bottom: 10px; margin-right: 20px;">
                      <button class="button rounded " style="color: #004466; background: #00ffb3" data-role="hint"

@@ -14,6 +14,8 @@ public class GC_Constants
 
     public static final String gc_UrlReplParam = "_";
 
+    public static final String gc_Attachment_Category = "DOCUMENT";
+
         
 
 }

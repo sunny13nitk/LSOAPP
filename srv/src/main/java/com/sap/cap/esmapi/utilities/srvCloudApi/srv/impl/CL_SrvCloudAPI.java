@@ -42,9 +42,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
 import com.sap.cap.esmapi.utilities.StringsUtility;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.pojos.TY_AccountCreate;
+import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
@@ -55,7 +57,10 @@ import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 {
 
@@ -309,7 +314,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                 }
                                             }
 
-                                            if (caseFieldName.equals("individualCustomer") && (!StringUtils.hasText(accountId)))
+                                            if (caseFieldName.equals("individualCustomer")
+                                                    && (!StringUtils.hasText(accountId)))
                                             {
                                                 // System.out.println("Inside Account: " );
 
@@ -415,9 +421,10 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         {
             casesESSList4User = casesESSList.stream().filter(e ->
             {
-                //#ESMModule
-                //If no Account Itself in Present in Case - Ignore Such Cases --Add Employee with an and condition once ESM module is enabled
-                if(!StringUtils.hasText(e.getAccountId()))
+                // #ESMModule
+                // If no Account Itself in Present in Case - Ignore Such Cases --Add Employee
+                // with an and condition once ESM module is enabled
+                if (!StringUtils.hasText(e.getAccountId()))
                 {
                     return false;
                 }
@@ -1241,13 +1248,14 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 String encoding = Base64.getEncoder()
                         .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
 
-                //Query URL Encoding to avoid Illegal character error in Query        
+                // Query URL Encoding to avoid Illegal character error in Query
                 URL url = new URL(urlLink);
-                URI uri = new URI(url.getProtocol(), url.getUserInfo(), IDN.toASCII(url.getHost()), url.getPort(), url.getPath(), url.getQuery(), url.getRef());        
+                URI uri = new URI(url.getProtocol(), url.getUserInfo(), IDN.toASCII(url.getHost()), url.getPort(),
+                        url.getPath(), url.getQuery(), url.getRef());
                 String correctEncodedURL = uri.toASCIIString();
-                
+
                 HttpGet httpGet = new HttpGet(correctEncodedURL);
-                
+
                 httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
                 httpGet.addHeader("accept", "application/json");
 
@@ -1630,6 +1638,148 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         }
 
         return caseId;
+    }
+
+    @Override
+    public TY_AttachmentResponse createAttachment(TY_Attachment attachment) throws EX_ESMAPI
+    {
+        TY_AttachmentResponse attR = null;
+
+        if (attachment != null)
+        {
+            // Populate the Attachment POJO for getting the POST Url for Saving the
+            // attachment
+            if (StringUtils.hasText(attachment.getFileName()))
+            {
+                HttpClient httpclient = HttpClients.createDefault();
+                String docPOSTURL = srvCloudUrls.getDocSrvUrl();
+
+                // Call Attachment POST to generate the Document Store Url
+                String encoding = Base64.getEncoder()
+                        .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                HttpPost httpPost = new HttpPost(docPOSTURL);
+                httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                httpPost.addHeader("Content-Type", "application/json");
+
+                ObjectMapper objMapper = new ObjectMapper();
+                String requestBody;
+                try
+                {
+                    requestBody = objMapper.writeValueAsString(attachment);
+                    log.info(requestBody);
+
+                    if (requestBody != null)
+                    {
+                        StringEntity entity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
+                        httpPost.setEntity(entity);
+                        // POST Notes in Service Cloud
+                        try
+                        {
+                            // Fire the Url
+                            HttpResponse response = httpclient.execute(httpPost);
+
+                            // verify the valid error code first
+                            int statusCode = response.getStatusLine().getStatusCode();
+                            if (statusCode != HttpStatus.SC_CREATED && statusCode != HttpStatus.SC_OK )
+                            {
+                                throw new RuntimeException("Failed with HTTP error code : " + statusCode + " Message - "
+                                        + response.getStatusLine().toString());
+                            }
+
+                            // Try and Get Entity from Response
+                            HttpEntity entityResp = response.getEntity();
+                            String apiOutput = EntityUtils.toString(entityResp);
+
+                            // Conerting to JSON
+                            ObjectMapper mapper = new ObjectMapper();
+                            JsonNode jsonNode = mapper.readTree(apiOutput);
+
+                            if (jsonNode != null)
+                            {
+                                JsonNode rootNode = jsonNode.path("value");
+                                if (rootNode != null)
+                                {
+
+                                    log.info("Attachments Bound!!");
+
+                                    Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
+                                    while (payloadItr.hasNext())
+                                    {
+                                        log.info("Payload Iterator Bound");
+                                        Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                                        String payloadFieldName = payloadEnt.getKey();
+                                        log.info("Payload Field Scanned:  " + payloadFieldName);
+
+                                        if (payloadFieldName.equals("value"))
+                                        {
+                                            JsonNode attEnt = payloadEnt.getValue();
+                                            log.info("New Attachment Entity Bound");
+                                            if (attEnt != null)
+                                            {
+                                                // Initailize Response Entity
+                                                attR = new TY_AttachmentResponse();
+
+                                                log.info("Attachments Entity Bound - Reading Attachments Response...");
+                                                Iterator<String> fieldNames = attEnt.fieldNames();
+                                                while (fieldNames.hasNext())
+                                                {
+                                                    String attFieldName = fieldNames.next();
+                                                    log.info("Notes Entity Field Scanned:  " + attFieldName);
+
+                                                    // attachment ID
+                                                    if (attFieldName.equals("id"))
+                                                    {
+                                                        log.info("Attachment GUID Added : "
+                                                                + attEnt.get(attFieldName).asText());
+                                                        if (StringUtils.hasText(attEnt.get(attFieldName).asText()))
+                                                        {
+                                                            attR.setId(attEnt.get(attFieldName).asText());
+
+                                                        }
+                                                    }
+
+                                                    // attachment Upload URL
+                                                    if (attFieldName.equals("uploadUrl"))
+                                                    {
+                                                        log.info("Attachment Upload Url Added : "
+                                                                + attEnt.get(attFieldName).asText());
+                                                        if (StringUtils.hasText(attEnt.get(attFieldName).asText()))
+                                                        {
+                                                            attR.setUploadUrl(attEnt.get(attFieldName).asText());
+
+                                                        }
+                                                    }
+
+                                                }
+
+                                            }
+
+                                        }
+
+                                    }
+                                }
+                            }
+
+                        }
+                        catch (IOException e)
+                        {
+                            throw new EX_ESMAPI(msgSrc.getMessage("ERR_DOCS_POST", new Object[]
+                            { e.getLocalizedMessage() }, Locale.ENGLISH));
+                        }
+
+                    }
+                }
+                catch (JsonProcessingException e)
+                {
+                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_NEW_DOCS_JSON", new Object[]
+                    { e.getLocalizedMessage(), attachment.toString() }, Locale.ENGLISH));
+                }
+
+            }
+        }
+
+        return attR;
+
     }
 
     private String getPOSTURL4BaseUrl(String urlBase)

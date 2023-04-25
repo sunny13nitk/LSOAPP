@@ -21,6 +21,7 @@ public class TY_SrvCloudUrls
     private String topSuffix;
     private String caseTemplateUrl;
     private String catgTreeUrl;
+    private String docSrvUrl;
 
     
 }
