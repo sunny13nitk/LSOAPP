@@ -26,6 +26,8 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -36,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -1539,7 +1542,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 try
                 {
                     String requestBody = objMapper.writeValueAsString(caseEntity);
-                    System.out.println(requestBody);
+                    log.info(requestBody);
 
                     StringEntity entity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
                     httpPost.setEntity(entity);
@@ -1680,7 +1683,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                             // verify the valid error code first
                             int statusCode = response.getStatusLine().getStatusCode();
-                            if (statusCode != HttpStatus.SC_CREATED && statusCode != HttpStatus.SC_OK )
+                            if (statusCode != HttpStatus.SC_CREATED && statusCode != HttpStatus.SC_OK)
                             {
                                 throw new RuntimeException("Failed with HTTP error code : " + statusCode + " Message - "
                                         + response.getStatusLine().toString());
@@ -1780,6 +1783,38 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
         return attR;
 
+    }
+
+    @Override
+    public boolean persistAttachment(String url, MultipartFile file) throws EX_ESMAPI, IOException
+    {
+        boolean isPersisted = false;
+        if (StringUtils.hasText(url))
+        {
+            HttpClient httpclient = HttpClients.createDefault();
+            HttpPut httpPut = new HttpPut(url);
+            if (httpPut != null)
+            {
+                ByteArrayEntity requestEntity = new ByteArrayEntity(file.getBytes());
+                if (requestEntity != null)
+                {
+                    httpPut.setEntity(requestEntity);
+
+                    // Fire the Url
+                    HttpResponse response = httpclient.execute(httpPut);
+                    // verify the valid error code first
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    if (statusCode == HttpStatus.SC_OK)
+                    {
+                        isPersisted = true;
+                    }
+
+                }
+            }
+
+        }
+
+        return isPersisted;
     }
 
     private String getPOSTURL4BaseUrl(String urlBase)

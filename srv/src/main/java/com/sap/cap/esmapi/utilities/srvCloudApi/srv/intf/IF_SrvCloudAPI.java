@@ -3,6 +3,8 @@ package com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
@@ -43,7 +45,7 @@ public interface IF_SrvCloudAPI
 
     public TY_AttachmentResponse createAttachment(TY_Attachment attachment) throws EX_ESMAPI;
 
-
+    public boolean persistAttachment(String url, MultipartFile file) throws EX_ESMAPI, IOException;
 
     public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType) throws EX_ESMAPI, IOException;
 

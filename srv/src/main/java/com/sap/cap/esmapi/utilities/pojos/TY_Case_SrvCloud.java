@@ -1,5 +1,7 @@
 package com.sap.cap.esmapi.utilities.pojos;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TY_Case_SrvCloud
 {
-    private String subject;    
+    private String subject;
     private String caseType;
     private TY_Account_CaseCreate account;
     private TY_CatgLvl1_CaseCreate categoryLevel1;
@@ -20,6 +22,8 @@ public class TY_Case_SrvCloud
     private TY_CatgLvl1_CaseCreate categoryLevel3;
     private TY_CatgLvl1_CaseCreate categoryLevel4;
     private TY_Description_CaseCreate description;
+    private List<TY_Attachment_CaseCreate> attachments = new ArrayList<TY_Attachment_CaseCreate>();
+
     @Override
     public String toString()
     {
@@ -27,9 +31,5 @@ public class TY_Case_SrvCloud
                 + ", categoryLevel1=" + categoryLevel1 + ", categoryLevel2=" + categoryLevel2 + ", categoryLevel3="
                 + categoryLevel3 + ", categoryLevel4=" + categoryLevel4 + ", description=" + description + "]";
     }
-    
-    
-
-    
 
 }

@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.ui.controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +33,7 @@ import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.TY_Account_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
+import com.sap.cap.esmapi.utilities.pojos.TY_Attachment_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_CatgLvl1_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Description_CaseCreate;
@@ -238,6 +240,7 @@ public class ESSLocalController
         TY_UserESS userDetails = new TY_UserESS();
         TY_Case_SrvCloud newCaseEntity = new TY_Case_SrvCloud();
         Optional<TY_CatgCusItem> cusItemO = null;
+        TY_AttachmentResponse attR = null;
 
         if (caseForm != null)
         {
@@ -338,18 +341,54 @@ public class ESSLocalController
                 // Check if Attachment needs to be Created
                 if (caseForm.getAttachment() != null)
                 {
-                    // Create Attachment
-                    TY_Attachment newAttachment = new TY_Attachment(FilenameUtils.getName(caseForm.getAttachment().getOriginalFilename()),
-                            GC_Constants.gc_Attachment_Category, false);
-                    TY_AttachmentResponse attR = srvCloudApiSrv.createAttachment(newAttachment);
-                    if (attR != null)
+                    try
                     {
-                        if(StringUtils.hasText(attR.getId()) && StringUtils.hasText(attR.getUploadUrl()))
+                        if (caseForm.getAttachment().getBytes() != null)
                         {
-                            log.info("Attachment id :" + attR.getId() + " generated for Upload Url : " + attR.getUploadUrl());
-                        }
-                        
+                            // Create Attachment
+                            TY_Attachment newAttachment = new TY_Attachment(
+                                    FilenameUtils.getName(caseForm.getAttachment().getOriginalFilename()),
+                                    GC_Constants.gc_Attachment_Category, false);
+                            attR = srvCloudApiSrv.createAttachment(newAttachment);
+                            if (attR != null)
+                            {
+                                if (StringUtils.hasText(attR.getId()) && StringUtils.hasText(attR.getUploadUrl()))
+                                {
+                                    log.info("Attachment id :" + attR.getId() + " generated for Upload Url : "
+                                            + attR.getUploadUrl());
 
+                                    if (srvCloudApiSrv.persistAttachment(attR.getUploadUrl(), caseForm.getAttachment()))
+                                    {
+                                        log.info("Attachment with id : " + attR.getId()
+                                                + " Persisted in Document Container..");
+
+                                        // Prepare POJOdetails for TY_Case_SrvCloud newCaseEntity
+                                        List<TY_Attachment_CaseCreate> caseAttachmentsNew = new ArrayList<TY_Attachment_CaseCreate>();
+                                        TY_Attachment_CaseCreate caseAttachment = new TY_Attachment_CaseCreate(
+                                                attR.getId());
+                                        caseAttachmentsNew.add(caseAttachment);
+                                        newCaseEntity.setAttachments(caseAttachmentsNew);
+
+                                    }
+
+                                }
+
+                            }
+                        }
+                    }
+                    catch (EX_ESMAPI | IOException e)
+                    {
+                        if (e instanceof IOException)
+                        {
+                            throw new EX_ESMAPI(msgSrc.getMessage("FILE_NO_DATA", new Object[]
+                            { caseForm.getAttachment().getOriginalFilename() }, Locale.ENGLISH));
+                        }
+                        else if (e instanceof EX_ESMAPI)
+                        {
+                            throw new EX_ESMAPI(msgSrc.getMessage("ERROR_DOCS_PERSIST", new Object[]
+                            { attR.getUploadUrl(), caseForm.getAttachment().getOriginalFilename(),
+                                    e.getLocalizedMessage() }, Locale.ENGLISH));
+                        }
                     }
                 }
 
