@@ -78,7 +78,7 @@
                <h6 style="color: #54627B; margin-left: 10px">Create new Case.
                   <span style="color: #B1365B" th:text="${caseTypeStr}"></span> !
                </h6>
-               <form th:object="${caseForm}" th:action="@{/ess/saveCase}" method="post">
+               <form th:object="${caseForm}" enctype="multipart/form-data"  th:action="@{/ess/saveCase}" method="post">
 
                   <input type="hidden" th:field="*{accId}" />
                   <input type="hidden" th:field="*{caseTxnType}" />
