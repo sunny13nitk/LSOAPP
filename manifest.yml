@@ -9,6 +9,7 @@ applications:
     - esmapi-xsuaa
   env:
     IAS_XSUAA_XCHANGE_ENABLED: true
+    SEND_XFRAMEOPTIONS: false
 
 # Application Router as web server
 - name: app-esmapi
