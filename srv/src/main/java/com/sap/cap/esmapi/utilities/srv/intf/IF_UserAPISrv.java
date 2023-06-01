@@ -2,13 +2,12 @@ package com.sap.cap.esmapi.utilities.srv.intf;
 
 import java.util.List;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
 import com.sap.cloud.security.xsuaa.token.Token;
-
-import org.apache.http.HttpResponse;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 
 

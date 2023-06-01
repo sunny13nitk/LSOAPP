@@ -10,6 +10,12 @@
       "authenticationType": "none"
     },
     {
+      "source": "^/poc",
+      "target": "/poc",
+      "destination": "token-destination",
+      "authenticationType": "none"
+    },
+    {
       "source": "^/api",
       "target": "/api",
       "destination": "token-destination",
