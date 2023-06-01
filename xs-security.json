@@ -2,7 +2,8 @@
   "xsappname": "esmapi",
   "oauth2-configuration": {
     "credential-types": [
-      "x509"
+      "instance-secret",
+      "binding-secret"
     ],
     "redirect-uris": 
     [
