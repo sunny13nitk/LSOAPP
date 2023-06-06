@@ -8,7 +8,7 @@ import java.util.Locale;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cloud.security.xsuaa.token.Token;
@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
 @Scope(value = "session", proxyMode=ScopedProxyMode.TARGET_CLASS)
 public class CL_UserAPISrv implements IF_UserAPISrv
 {
-    private Ty_UserAccountContact userData;
+    private Ty_UserAccountContactEmployee userData;
 
     private List<String> sessionMessages;
     
@@ -42,7 +42,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
    
 
     @Override
-    public Ty_UserAccountContact getUserDetails(@AuthenticationPrincipal Token token) throws EX_ESMAPI 
+    public Ty_UserAccountContactEmployee getUserDetails(@AuthenticationPrincipal Token token) throws EX_ESMAPI 
     {
         if(token == null)
         {
@@ -55,7 +55,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
             if(userData == null)
             {
                 //Fetch and Return
-                this.userData = new Ty_UserAccountContact();
+                this.userData = new Ty_UserAccountContactEmployee();
                 userData.setUserId(token.getLogonName());
                 userData.setUserName(token.getGivenName() + " " + token.getFamilyName());
                 userData.setUserEmail(token.getEmail());
@@ -143,7 +143,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
 
 
     @Override
-    public Ty_UserAccountContact getUserDetails4mSession() 
+    public Ty_UserAccountContactEmployee getUserDetails4mSession() 
     {
         return this.userData;
     }
@@ -176,7 +176,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
 
     //Temporary Method - To be deleted later
     @Override
-    public void setUserAccount(Ty_UserAccountContact userDetails)
+    public void setUserAccount(Ty_UserAccountContactEmployee userDetails)
     {
         this.userData = userDetails;
     }

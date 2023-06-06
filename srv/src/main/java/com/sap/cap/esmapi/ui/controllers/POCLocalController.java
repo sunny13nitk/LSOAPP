@@ -28,7 +28,7 @@ import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +67,7 @@ public class POCLocalController
         // Mocking the authentication
 
         // Local Load for Testing
-        Ty_UserAccountContact userAcc = getUserAccount();
+        Ty_UserAccountContactEmployee userAcc = getUserAccount();
         userSrv.setUserAccount(userAcc);
 
         TY_UserESS userDetails = new TY_UserESS();
@@ -126,13 +126,14 @@ public class POCLocalController
 
             // Valid Payload - log the details and fire the Event
             TY_CaseFormAsync payload = new TY_CaseFormAsync();
-            Ty_UserAccountContact userdata = getUserAccount();
+            Ty_UserAccountContactEmployee userdata = getUserAccount();
             if (userdata != null)
             {
                 if (StringUtils.hasText(userdata.getUserEmail()))
                 {
-                    payload.setAuthenticated(true);
-                    payload.setEmailId(userdata.getUserEmail());
+
+                    payload.setValid(true); // Validation Succ Simulation
+                    payload.setUserId(userdata.getUserId());
                     payload.setSubmGuid(UUID.randomUUID().toString());
                     payload.setTimestamp(Timestamp.from(Instant.now()));
                     payload.setCaseForm(caseForm);
@@ -147,7 +148,7 @@ public class POCLocalController
                     userSrv.addSessionMessage(msgSrc.getMessage("SUCC_CASE_SUBM", new Object[]
                     { payload.getSubmGuid(), caseForm.getCaseTxnType() }, Locale.ENGLISH));
 
-                    log.info("Case Form Submit completed.... " );
+                    log.info("Case Form Submit completed.... ");
                 }
 
             }
@@ -156,10 +157,11 @@ public class POCLocalController
         return "redirect:/poclocal/";
     }
 
-    private Ty_UserAccountContact getUserAccount()
+    private Ty_UserAccountContactEmployee getUserAccount()
     {
-        return new Ty_UserAccountContact("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
-                "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00");
+        return new Ty_UserAccountContactEmployee("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
+                "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00",
+                "11ed17c5-47d5-c4de-afdb-818bd8010a00",false);
 
     }
 }

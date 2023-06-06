@@ -9,11 +9,13 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Ty_UserAccountContact
+public class Ty_UserAccountContactEmployee
 {
     private String userId;
     private String userName;
     private String userEmail;
     private String accountId;
-    private String contactId;    
+    private String contactId;
+    private String employeeId;
+    private boolean employee;
 }

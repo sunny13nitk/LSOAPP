@@ -12,54 +12,45 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
 @Configuration
-@PropertySources
-(
-    { @PropertySource("classpath:messages.properties") ,@PropertySource("classpath:srvcloudurls.properties")}
-)
+@PropertySources(
+{ @PropertySource("classpath:messages.properties"), @PropertySource("classpath:srvcloudurls.properties") })
 public class PropertyConfig
 {
-    @Bean
+	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
 	{
 		PropertySourcesPlaceholderConfigurer pSConf = new PropertySourcesPlaceholderConfigurer();
 		return pSConf;
 	}
 
-    @Bean
+	@Bean
 	public ResourceBundleMessageSource messageSource()
 	{
-		
+
 		ResourceBundleMessageSource source = new ResourceBundleMessageSource();
 		source.addBasenames("messages");
 		source.setUseCodeAsDefaultMessage(true);
-		
+
 		return source;
 	}
 
-
 	@Bean
 	@Autowired // For PropertySourcesPlaceholderConfigurer
-	public TY_SrvCloudUrls SrvCloudUrls
-	(
-	        @Value("${username}") final String userName, 
-			@Value("${password}") final String password,
-	        @Value("${casesurl}") final String casesUrl,
-			@Value("${cpurl}") final String cpUrl,
-			@Value("${accountsurl}") final String acUrl,
-			@Value("${notesurl}") final String notesUrl,
-			@Value("${topN}") final String topN,
+	public TY_SrvCloudUrls SrvCloudUrls(@Value("${username}") final String userName,
+			@Value("${password}") final String password, @Value("${casesurl}") final String casesUrl,
+			@Value("${cpurl}") final String cpUrl, @Value("${accountsurl}") final String acUrl,
+			@Value("${notesurl}") final String notesUrl, @Value("${topN}") final String topN,
 			@Value("${caseTemplateUrl}") final String caseTemplateUrl,
-			@Value("${catgTreeUrl}") final String catgTreeUrl,
-			@Value("${docSrvUrl}") final String docSrvUrl
-			
+			@Value("${catgTreeUrl}") final String catgTreeUrl, @Value("${docSrvUrl}") final String docSrvUrl,
+			@Value("${emplSrvUrl}") final String emplSrvUrl
+
 	)
-	
+
 	{
-		TY_SrvCloudUrls srvClUrls = new TY_SrvCloudUrls(userName, password, casesUrl, cpUrl, acUrl, notesUrl, topN, caseTemplateUrl, catgTreeUrl, docSrvUrl );
-		
+		TY_SrvCloudUrls srvClUrls = new TY_SrvCloudUrls(userName, password, casesUrl, cpUrl, acUrl, notesUrl, topN,
+				caseTemplateUrl, catgTreeUrl, docSrvUrl, emplSrvUrl);
+
 		return srvClUrls;
 	}
 
-
-    
 }

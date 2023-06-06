@@ -22,6 +22,7 @@ public class TY_SrvCloudUrls
     private String caseTemplateUrl;
     private String catgTreeUrl;
     private String docSrvUrl;
+    private String emplUrl;
 
     
 }

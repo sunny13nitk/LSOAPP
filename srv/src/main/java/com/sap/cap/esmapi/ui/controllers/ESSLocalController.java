@@ -39,7 +39,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CatgLvl1_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Description_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContact;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
@@ -83,7 +83,7 @@ public class ESSLocalController
              */
 
             // Local Load for Testing
-            Ty_UserAccountContact userAcc = getUserAccount();
+            Ty_UserAccountContactEmployee userAcc = getUserAccount();
             userSrv.setUserAccount(userAcc);
 
             TY_UserESS userDetails = new TY_UserESS();
@@ -120,10 +120,10 @@ public class ESSLocalController
         return "essListViewLocal";
     }
 
-    private Ty_UserAccountContact getUserAccount()
+    private Ty_UserAccountContactEmployee getUserAccount()
     {
-        return new Ty_UserAccountContact("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
-                "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00");
+        return new Ty_UserAccountContactEmployee("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
+                "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00","11ed17c5-47d5-c4de-afdb-818bd8010a00",false);
 
         // return new Ty_UserAccountContact("Dummy ESS2", "ESS Portal Test1",
         // "testess2@gmail.com",
