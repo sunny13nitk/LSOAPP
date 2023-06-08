@@ -57,6 +57,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_DefaultComm;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
@@ -710,6 +711,73 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         if (statusCode != HttpStatus.SC_OK)
                         {
                             throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                        }
+
+                        // Try and Get Entity from Response
+                        org.apache.http.HttpEntity entity = response.getEntity();
+                        String apiOutput = EntityUtils.toString(entity);
+                        // Lets see what we got from API
+                        System.out.println(apiOutput);
+
+                        // Conerting to JSON
+                        ObjectMapper mapper = new ObjectMapper();
+                        jsonNode = mapper.readTree(apiOutput);
+
+                    }
+                    catch (IOException e)
+                    {
+
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+
+        }
+        finally
+        {
+            httpClient.close();
+        }
+        return jsonNode;
+    }
+
+    @Override
+    public JsonNode getAllEmployees() throws IOException
+    {
+        JsonNode jsonNode = null;
+        HttpResponse response = null;
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        String url = null;
+
+        try
+        {
+            if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword())
+                    && StringUtils.hasLength(srvCloudUrls.getEmplUrl()))
+            {
+                System.out.println("Url and Credentials Found!!");
+
+                long numEmpl = apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getEmplUrl());
+                if (numEmpl > 0)
+                {
+                    url = srvCloudUrls.getEmplUrl() + srvCloudUrls.getTopSuffix() + GC_Constants.equalsString + numEmpl;
+                    String encoding = Base64.getEncoder()
+                            .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                    HttpGet httpGet = new HttpGet(url);
+                    httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                    httpGet.addHeader("accept", "application/json");
+
+                    try
+                    {
+                        // Fire the Url
+                        response = httpClient.execute(httpGet);
+
+                        // verify the valid error code first
+                        int statusCode = response.getStatusLine().getStatusCode();
+                        if (statusCode != HttpStatus.SC_OK)
+                        {
+                            throw new RuntimeException(
+                                    "Failed with HTTP error code : " + statusCode + "on Employees Read API");
                         }
 
                         // Try and Get Entity from Response
@@ -1815,6 +1883,110 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         }
 
         return isPersisted;
+    }
+
+    @Override
+    public String getEmployeeIdByUserId(String userId) throws EX_ESMAPI
+    {
+
+        String empID = null;
+        Map<String, String> empUserIds = new HashMap<String, String>();
+        if (StringUtils.hasText(userId) && srvCloudUrls != null)
+        {
+            if (StringUtils.hasText(srvCloudUrls.getEmplUrl()))
+            {
+                try
+                {
+                    JsonNode empResp = getAllEmployees();
+                    if (empResp != null)
+                    {
+                        JsonNode rootNode = empResp.path("value");
+                        if (rootNode != null)
+                        {
+                            System.out.println("Employees Bound!!");
+
+                            Iterator<Map.Entry<String, JsonNode>> payloadItr = empResp.fields();
+                            while (payloadItr.hasNext())
+                            {
+                                System.out.println("Payload Iterator Bound");
+                                Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                                String payloadFieldName = payloadEnt.getKey();
+                                System.out.println("Payload Field Scanned:  " + payloadFieldName);
+
+                                if (payloadFieldName.equals("value"))
+                                {
+                                    Iterator<JsonNode> empItr = payloadEnt.getValue().elements();
+                                    System.out.println("Employee Iterator Bound");
+                                    while (empItr.hasNext())
+                                    {
+
+                                        JsonNode empEnt = empItr.next();
+                                        if (empEnt != null)
+                                        {
+                                            String empid = null, empUserId = null;
+                                            System.out.println("Employee Entity Bound - Reading Employee...");
+                                            Iterator<String> fieldNames = empEnt.fieldNames();
+                                            while (fieldNames.hasNext())
+                                            {
+                                                String empFieldName = fieldNames.next();
+                                                System.out.println("Employee Entity Field Scanned:  " + empFieldName);
+                                                if (empFieldName.equals("id"))
+                                                {
+                                                    System.out.println(
+                                                            "Employee Id Added : " + empEnt.get(empFieldName).asText());
+                                                    empid = empEnt.get(empFieldName).asText();
+                                                }
+
+                                                if (empFieldName.equals("employeeDisplayId"))
+                                                {
+                                                    System.out.println("Employee User Id Added : "
+                                                            + empEnt.get(empFieldName).asText());
+                                                    empUserId = empEnt.get(empFieldName).asText();
+                                                }
+
+                                            }
+                                            // avoid null email accounts
+                                            if (StringUtils.hasText(empid) && StringUtils.hasText(empUserId))
+                                            {
+                                                empUserIds.put(empid, empUserId);
+                                            }
+
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+
+                            // Filter by Email
+                            Optional<Map.Entry<String, String>> OptionalEmp = empUserIds.entrySet().stream()
+                                    .filter(u -> u.getValue().equals(userId)).findFirst();
+                            if (OptionalEmp.isPresent())
+                            {
+                                Map.Entry<String, String> employee = OptionalEmp.get();
+                                empID = employee.getKey(); // Return Account ID
+                            }
+
+                        }
+                    }
+                }
+                catch (IOException e)
+                {
+                    throw new EX_ESMAPI(msgSrc.getMessage("API_EMP_ERROR", new Object[]
+                    { e.getLocalizedMessage() }, Locale.ENGLISH));
+                }
+            }
+
+        }
+        return empID;
+    }
+
+    @Override
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails) throws IOException
+    {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getCases4User'");
     }
 
     private String getPOSTURL4BaseUrl(String urlBase)

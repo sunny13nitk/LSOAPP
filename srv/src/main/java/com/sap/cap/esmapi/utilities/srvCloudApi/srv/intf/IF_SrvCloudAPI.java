@@ -15,15 +15,18 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 
 /*
  * Impl with comments
  */
 public interface IF_SrvCloudAPI
 {
-    public JsonNode getAllCases() throws IOException;    
+    public JsonNode getAllCases() throws IOException;
 
-    public List<TY_CaseESS> getCases4User(String accountIdUser, String contactIdUser)throws IOException;
+    public List<TY_CaseESS> getCases4User(String accountIdUser, String contactIdUser) throws IOException;
+
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails) throws IOException;
 
     public List<TY_CaseGuidId> getCaseGuidIdList();
 
@@ -31,9 +34,13 @@ public interface IF_SrvCloudAPI
 
     public JsonNode getAllAccounts() throws IOException;
 
+    public JsonNode getAllEmployees() throws IOException;
+
     public JsonNode getAllContacts() throws IOException;
 
     public String getAccountIdByUserEmail(String userEmail) throws EX_ESMAPI;
+
+    public String getEmployeeIdByUserId(String userId) throws EX_ESMAPI;
 
     public String createCase(TY_Case_SrvCloud caseEntity) throws EX_ESMAPI;
 
@@ -47,8 +54,9 @@ public interface IF_SrvCloudAPI
 
     public boolean persistAttachment(String url, MultipartFile file) throws EX_ESMAPI, IOException;
 
-    public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType) throws EX_ESMAPI, IOException;
+    public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType)
+            throws EX_ESMAPI, IOException;
 
-    public List<TY_CatalogItem>getActiveCaseCategoriesByCatalogId(String catalogID) throws EX_ESMAPI, IOException;
-    
+    public List<TY_CatalogItem> getActiveCaseCategoriesByCatalogId(String catalogID) throws EX_ESMAPI, IOException;
+
 }

@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.ui.srv.impl;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import com.sap.cap.esmapi.ui.pojos.TY_NameValueLPair;
 import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -103,4 +105,12 @@ public class CL_ESS_UISrv implements IF_ESS_UISrv
         }
         return stats;
     }
+
+    @Override
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails) throws IOException
+    {
+        return null;
+    }
+
+   
 }

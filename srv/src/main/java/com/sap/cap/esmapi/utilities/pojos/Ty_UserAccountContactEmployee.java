@@ -18,4 +18,5 @@ public class Ty_UserAccountContactEmployee
     private String contactId;
     private String employeeId;
     private boolean employee;
+    private boolean external;
 }
