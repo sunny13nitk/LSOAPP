@@ -1,5 +1,11 @@
 package com.sap.cap.esmapi.utilities.srv.impl;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -13,6 +19,12 @@ import org.springframework.web.context.annotation.SessionScope;
 
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
+import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
+import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
+import com.sap.cap.esmapi.utilities.enums.EnumStatus;
+import com.sap.cap.esmapi.utilities.pojos.TY_FormSubmissions;
+import com.sap.cap.esmapi.utilities.pojos.TY_Message;
+import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserSessionInfo;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
@@ -37,6 +49,12 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
     @Autowired
     private IF_SrvCloudAPI srvCloudApiSrv;
+
+    @Autowired
+    private IF_ESS_UISrv essSrv;
+
+    @Autowired
+    private TY_RLConfig rlConfig;
 
     // Properties
 
@@ -110,8 +128,42 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     @Override
     public TY_UserSessionInfo getESSDetails(Token token, boolean refresh) throws EX_ESMAPI
     {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getESSDetails'");
+        // Token must be present
+        if (token != null)
+        {
+            // get User Details with Token
+            getUserDetails(token);
+
+            // Reload Cases if Refresh Requested or Cases List Blank
+            if (refresh || CollectionUtils.isEmpty(userSessInfo.getCases()))
+            {
+                if (userSessInfo.getUserDetails() != null)
+                {
+                    try
+                    {
+                        // Get the cases for User
+                        userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl()));
+                        // Once the cases are in Get the Stats too
+                        userSessInfo.setStats(essSrv.getStatsForUserCases(userSessInfo.getCases()));
+                    }
+                    catch (Exception e)
+                    {
+                        // Log error
+                        log.error(msgSrc.getMessage("ERR_CASES_USER", new Object[]
+                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), e.getLocalizedMessage() },
+                                Locale.ENGLISH));
+
+                        // Raise Exception to be handled at UI via Central Aspect
+                        throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_USER", new Object[]
+                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), e.getLocalizedMessage() },
+                                Locale.ENGLISH));
+                    }
+                }
+            }
+
+        }
+
+        return this.userSessInfo;
     }
 
     @Override
@@ -124,36 +176,157 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     @Override
     public String createAccount() throws EX_ESMAPI
     {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createAccount'");
+        String accountId = null;
+        // Only if no Account or Employee Identified in Current Session
+        // No Account Determined
+        if (!StringUtils.hasText(userSessInfo.getUserDetails().getUsAcConEmpl().getAccountId()))
+        {
+            // No Employee determined
+            if (!StringUtils.hasText(userSessInfo.getUserDetails().getUsAcConEmpl().getEmployeeId()))
+            {
+                // Create new Individual Customer Account with User Credentials
+                // User Email and UserName Bound
+                if (StringUtils.hasText(userSessInfo.getUserDetails().getUsAcConEmpl().getUserEmail())
+                        && StringUtils.hasText(userSessInfo.getUserDetails().getUsAcConEmpl().getUserName()))
+                {
+
+                    try
+                    {
+                        accountId = srvCloudApiSrv.createAccount(
+                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserEmail(),
+                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserName());
+                        // Also update in the session for newly created Account
+                        if (StringUtils.hasText(accountId))
+                        {
+                            userSessInfo.getUserDetails().getUsAcConEmpl().setAccountId(accountId);
+                            // Session Display Message
+                            this.addSessionMessage(msgSrc.getMessage("NEW_AC", new Object[]
+                            { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
+                            // Add to Log
+                            log.info(msgSrc.getMessage("NEW_AC", new Object[]
+                            { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
+                            // For Logging Framework
+                            userSessInfo.getMessagesStack()
+                                    .add(new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                            Timestamp.from(Instant.now()), EnumStatus.Success,
+                                            EnumMessageType.SUCC_ACC_CREATE, accountId,
+                                            msgSrc.getMessage("NEW_AC", new Object[]
+                                            { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() },
+                                                    Locale.ENGLISH)));
+                        }
+                    }
+                    catch (EX_ESMAPI ex) // Any Error During Individual Customer Creation for the User
+                    {
+                        log.error(msgSrc.getMessage("ERR_API_AC", new Object[]
+                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
+                        // For Logging Framework
+                        userSessInfo.getMessagesStack()
+                                .add(new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                        Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ACC_CREATE,
+                                        userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                        msgSrc.getMessage("ERR_API_AC", new Object[]
+                                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() },
+                                                Locale.ENGLISH)));
+                    }
+
+                }
+
+            }
+        }
+
+        return accountId;
     }
 
     @Override
     public Ty_UserAccountContactEmployee getUserDetails4mSession()
     {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUserDetails4mSession'");
+        if (this.userSessInfo.getUserDetails() != null)
+        {
+            return userSessInfo.getUserDetails().getUsAcConEmpl();
+        }
+
+        return null;
     }
 
     @Override
     public void addSessionMessage(String msg)
     {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addSessionMessage'");
+        if (StringUtils.hasText(msg))
+        {
+            userSessInfo.getMessages().add(msg);
+        }
     }
 
     @Override
     public List<String> getSessionMessages()
     {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getSessionMessages'");
+        return userSessInfo.getMessages();
     }
 
     @Override
     public boolean isWithinRateLimit()
     {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isWithinRateLimit'");
+
+        boolean withinRateLimit = true;
+
+        // Rate Config Specified
+        if (rlConfig != null)
+        {
+            if (CollectionUtils.isNotEmpty(userSessInfo.getFormSubmissions().getFormSubmissions()))
+            {
+                // Current # Submissions more than or equals to # configurable - check
+                if (userSessInfo.getFormSubmissions().getFormSubmissions().size() > rlConfig.getNumFormSubms())
+                {
+                    // Get Current Time Stamp
+                    Timestamp currTS = Timestamp.from(Instant.now());
+                    // Get Top N :latest Submissions since submissions are always appended
+                    // chronologically
+                    List<Timestamp> topNSubmList = new ArrayList<Timestamp>();
+                    topNSubmList = userSessInfo.getFormSubmissions().getFormSubmissions();
+                    Collections.reverse(topNSubmList);
+
+                    // Compare the Time difference from the latest one
+                    long secsElapsedLastSubmit = (currTS.getTime() - topNSubmList.get(0).getTime()) / 1000;
+                    // Last Submission elapsed time less than
+                    if (secsElapsedLastSubmit < rlConfig.getIntvSecs())
+                    {
+                        withinRateLimit = false;
+                        log.error(msgSrc.getMessage("ERR_RATE_LIMIT", new Object[]
+                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(currTS) }, Locale.ENGLISH));
+
+                        // For Logging Framework
+                        userSessInfo.getMessagesStack()
+                                .add(new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), currTS,
+                                        EnumStatus.Error, EnumMessageType.ERR_RATELIMIT,
+                                        userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                        msgSrc.getMessage("ERR_RATE_LIMIT", new Object[]
+                                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                                new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(currTS) },
+                                                Locale.ENGLISH)));
+
+                    }
+                    else
+                    {
+                        // Clear the older Submissions Details - Since now the clock is refreshed for
+                        // Current Session after Waiting
+                        userSessInfo.getFormSubmissions().getFormSubmissions().clear();
+                        withinRateLimit = true;
+                        userSessInfo.getFormSubmissions().getFormSubmissions().add(currTS);
+                    }
+
+                }
+                else // Just add the Form Submission time Stamp to Session
+                {
+                    userSessInfo.getFormSubmissions().getFormSubmissions().add(Timestamp.from(Instant.now()));
+                    withinRateLimit = true;
+                }
+
+            }
+
+        }
+
+        return withinRateLimit;
     }
 
     @Override
