@@ -979,7 +979,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         if (StringUtils.hasText(userEmail) && StringUtils.hasText(userName))
         {
             TY_AccountCreate newAccount = new TY_AccountCreate(userName, GC_Constants.gc_roleCustomer,
-                    GC_Constants.gc_statusACTIVE, new TY_DefaultComm(userEmail));
+                    GC_Constants.gc_statusACTIVE, true, new TY_DefaultComm(userEmail));
 
             if (newAccount != null)
             {

@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.config;
 
+import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,8 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 
 @Configuration
 @PropertySources(
-{ @PropertySource("classpath:messages.properties"), @PropertySource("classpath:srvcloudurls.properties") })
+{ @PropertySource("classpath:messages.properties"), @PropertySource("classpath:srvcloudurls.properties"),
+		@PropertySource("classpath:appconfig.properties") })
 public class PropertyConfig
 {
 	@Bean
@@ -51,6 +53,15 @@ public class PropertyConfig
 				caseTemplateUrl, catgTreeUrl, docSrvUrl, emplSrvUrl);
 
 		return srvClUrls;
+	}
+
+	@Bean
+	@Autowired // For PropertySourcesPlaceholderConfigurer
+	public TY_RLConfig RatelimitConfigLoad(@Value("${numFormSubms}") final int numFormSubms,
+			@Value("${intvSecs}") final long intvSecs)
+	{
+		TY_RLConfig rlConfig = new TY_RLConfig(numFormSubms, intvSecs);
+		return rlConfig;
 	}
 
 }

@@ -15,5 +15,7 @@ public class TY_AccountCreate
     private String firstLineName;
     private String customerRole;
     private String lifeCycleStatus;
-    private TY_DefaultComm defaultCommunication;    
+    private boolean isNaturalPerson; 
+    private TY_DefaultComm defaultCommunication;
+     
 }
