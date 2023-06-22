@@ -332,8 +332,42 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     @Override
     public boolean isCaseFormValid()
     {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isCaseFormValid'");
+        boolean isValid = true;
+
+        // Get the Latest Form Submission from Session and Validate
+        if (userSessInfo.getCurrentForm4Submission() != null)
+        {
+            if (userSessInfo.getCurrentForm4Submission().getCaseForm() != null)
+            {
+                // Subject and Category are Mandatory fields
+                if (!StringUtils.hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getSubject())
+                        || !StringUtils.hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc()))
+                {
+                    // Payload error
+                    log.error(msgSrc.getMessage("ERR_CASE_PAYLOAD", new Object[]
+                    { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                            new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(Timestamp.from(Instant.now())) },
+                            Locale.ENGLISH));
+
+                    // For Logging Framework
+                    userSessInfo.getMessagesStack()
+                            .add(new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                    Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
+                                    userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                    msgSrc.getMessage("ERR_CASE_PAYLOAD", new Object[]
+                                    { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                            new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss")
+                                                    .format(Timestamp.from(Instant.now())) },
+                                            Locale.ENGLISH)));
+
+                    isValid = false;
+                }
+
+                // Also check for Allowed Attachment Type(s) if provided by the business
+            }
+        }
+
+        return isValid;
     }
 
     @Override
