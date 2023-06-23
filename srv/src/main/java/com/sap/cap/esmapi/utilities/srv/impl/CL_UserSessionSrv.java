@@ -5,24 +5,24 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.annotation.SessionScope;
 
+import com.sap.cap.esmapi.events.event.EV_LogMessage;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.enums.EnumStatus;
-import com.sap.cap.esmapi.utilities.pojos.TY_FormSubmissions;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
@@ -55,6 +55,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
     @Autowired
     private TY_RLConfig rlConfig;
+
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
     // Properties
 
@@ -169,8 +172,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     @Override
     public boolean SubmitCaseForm(TY_Case_Form caseForm)
     {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'SubmitCaseForm'");
+        boolean isSubmitted = true;
+
+        return isSubmitted;
     }
 
     @Override
@@ -205,28 +209,35 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                             // Add to Log
                             log.info(msgSrc.getMessage("NEW_AC", new Object[]
                             { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
+
+                            TY_Message message = new TY_Message(
+                                    userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                    Timestamp.from(Instant.now()), EnumStatus.Success, EnumMessageType.SUCC_ACC_CREATE,
+                                    accountId, msgSrc.getMessage("NEW_AC", new Object[]
+                                    { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
                             // For Logging Framework
-                            userSessInfo.getMessagesStack()
-                                    .add(new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                            Timestamp.from(Instant.now()), EnumStatus.Success,
-                                            EnumMessageType.SUCC_ACC_CREATE, accountId,
-                                            msgSrc.getMessage("NEW_AC", new Object[]
-                                            { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() },
-                                                    Locale.ENGLISH)));
+                            userSessInfo.getMessagesStack().add(message);
+                            // Instantiate and Fire the Event
+                            EV_LogMessage logMsgEvent = new EV_LogMessage(this, message);
+                            applicationEventPublisher.publishEvent(logMsgEvent);
                         }
                     }
                     catch (EX_ESMAPI ex) // Any Error During Individual Customer Creation for the User
                     {
                         log.error(msgSrc.getMessage("ERR_API_AC", new Object[]
                         { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
+
+                        TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ACC_CREATE,
+                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                msgSrc.getMessage("ERR_API_AC", new Object[]
+                                { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
                         // For Logging Framework
-                        userSessInfo.getMessagesStack()
-                                .add(new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                        Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ACC_CREATE,
-                                        userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                        msgSrc.getMessage("ERR_API_AC", new Object[]
-                                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() },
-                                                Locale.ENGLISH)));
+                        userSessInfo.getMessagesStack().add(message);
+                        // Instantiate and Fire the Event
+                        EV_LogMessage logMsgEvent = new EV_LogMessage(this, message);
+                        applicationEventPublisher.publishEvent(logMsgEvent);
+
                     }
 
                 }
@@ -295,15 +306,17 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
                                 new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(currTS) }, Locale.ENGLISH));
 
+                        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                currTS, EnumStatus.Error, EnumMessageType.ERR_RATELIMIT,
+                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                msgSrc.getMessage("ERR_RATE_LIMIT", new Object[]
+                                { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                        new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(currTS) }, Locale.ENGLISH));
                         // For Logging Framework
-                        userSessInfo.getMessagesStack()
-                                .add(new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), currTS,
-                                        EnumStatus.Error, EnumMessageType.ERR_RATELIMIT,
-                                        userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                        msgSrc.getMessage("ERR_RATE_LIMIT", new Object[]
-                                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                                new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(currTS) },
-                                                Locale.ENGLISH)));
+                        userSessInfo.getMessagesStack().add(logMsg);
+                        // Instantiate and Fire the Event
+                        EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
+                        applicationEventPublisher.publishEvent(logMsgEvent);
 
                     }
                     else
@@ -349,19 +362,25 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                             new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(Timestamp.from(Instant.now())) },
                             Locale.ENGLISH));
 
+                    TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                            Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
+                            userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                            msgSrc.getMessage("ERR_CASE_PAYLOAD", new Object[]
+                            { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                    new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(Timestamp.from(Instant.now())) },
+                                    Locale.ENGLISH));
+
                     // For Logging Framework
-                    userSessInfo.getMessagesStack()
-                            .add(new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                    Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
-                                    userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                    msgSrc.getMessage("ERR_CASE_PAYLOAD", new Object[]
-                                    { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                            new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss")
-                                                    .format(Timestamp.from(Instant.now())) },
-                                            Locale.ENGLISH)));
+                    userSessInfo.getMessagesStack().add(message);
+                    // Instantiate and Fire the Event
+                    EV_LogMessage logMsgEvent = new EV_LogMessage(this, message);
+                    applicationEventPublisher.publishEvent(logMsgEvent);
 
                     isValid = false;
                 }
+
+                // Also to Include Country mandatory check for certain category if requested by
+                // business.
 
                 // Also check for Allowed Attachment Type(s) if provided by the business
             }
