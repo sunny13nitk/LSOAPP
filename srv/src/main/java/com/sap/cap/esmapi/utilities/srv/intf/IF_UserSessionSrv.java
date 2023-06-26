@@ -6,6 +6,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
+import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserSessionInfo;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
@@ -27,11 +28,19 @@ public interface IF_UserSessionSrv
      */
     public TY_UserSessionInfo getESSDetails(@AuthenticationPrincipal Token token, boolean refresh) throws EX_ESMAPI;
 
-    /*
-     * -- Submit Case Form : After comsumer Call to Rate Limit Pass --Validate Case
-     * Form - Implicit Call ---- Fail - Messages{TY_Messages} :push in messagesStack
-     * ---- Succ - Create and Publish Case Submit Event
-     */
+    // @formatter:off -- Submit Case Form
+    // : After comsumer Call to Rate Limit is Successful - Caller Resp.
+    // : Form Data Saved in session :currentForm4Submission
+    // --Validate Case Form - Implicit Call
+    // ---- Fail
+    // ------- Message Logging Event
+    //
+    // ------- Message Stack in Session Populated and REturn false
+    // ---- Succ
+    // ------- Create and Publish Case Submit Event
+    // ------- session :currentForm4Submission to be picked up by Event Handler
+    // @formatter:on
+
     public boolean SubmitCaseForm(TY_Case_Form caseForm);
 
     public String createAccount() throws EX_ESMAPI;
@@ -39,6 +48,10 @@ public interface IF_UserSessionSrv
     public Ty_UserAccountContactEmployee getUserDetails4mSession();
 
     public void addSessionMessage(String msg);
+
+    public void addMessagetoStack(TY_Message msg);
+
+    public List<TY_Message> getMessageStack();
 
     public List<String> getSessionMessages();
 

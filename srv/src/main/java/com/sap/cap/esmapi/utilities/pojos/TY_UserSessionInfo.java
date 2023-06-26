@@ -22,4 +22,5 @@ public class TY_UserSessionInfo
     private List<TY_CaseESS> cases; // Every Roundtrip Refresh - Event Case Form Submit/Status Change TBD
     private TY_ESS_Stats stats; // Every RoundTrip Refresh - Event Case Form Submit/Status Change TBD
     private List<TY_Message> messagesStack = new ArrayList<TY_Message>(); // Session Messages Flow Stack 
+    private  String formErrorMsg;
 }

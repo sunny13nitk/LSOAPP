@@ -4,6 +4,9 @@ import org.springframework.context.ApplicationEvent;
 
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 
+import lombok.Getter;
+
+@Getter
 public class EV_CaseFormSubmit extends ApplicationEvent
 {
     private TY_CaseFormAsync payload;
