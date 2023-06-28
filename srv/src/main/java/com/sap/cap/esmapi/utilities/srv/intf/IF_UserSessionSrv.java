@@ -15,6 +15,9 @@ import com.sap.cloud.security.xsuaa.token.Token;
 public interface IF_UserSessionSrv
 {
 
+    //For Test Purpose Only to TEst the Controller
+    public void loadUser4Test();
+
     /*
      * Get User Credentials via Token - Get and persist in Session if Not Bound -
      * Get only if Already bound for a session

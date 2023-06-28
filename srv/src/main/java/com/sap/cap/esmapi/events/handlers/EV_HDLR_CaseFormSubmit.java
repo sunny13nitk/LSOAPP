@@ -1,11 +1,15 @@
 package com.sap.cap.esmapi.events.handlers;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
@@ -20,10 +24,13 @@ import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
 import com.sap.cap.esmapi.events.event.EV_LogMessage;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.enums.EnumStatus;
 import com.sap.cap.esmapi.utilities.pojos.TY_Account_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
+import com.sap.cap.esmapi.utilities.pojos.TY_Attachment_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_CatgLvl1_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Description_CaseCreate;
@@ -157,6 +164,80 @@ public class EV_HDLR_CaseFormSubmit
                                     }
                                 }
 
+                                // Check if Attachment needs to be Created
+                                if (evCaseFormSubmit.getPayload().getCaseForm().getAttachment() != null)
+                                {
+                                    try
+                                    {
+                                        if (evCaseFormSubmit.getPayload().getCaseForm().getAttachment()
+                                                .getBytes() != null)
+                                        {
+                                            // Create Attachment
+                                            TY_Attachment newAttachment = new TY_Attachment(
+                                                    FilenameUtils.getName(evCaseFormSubmit.getPayload().getCaseForm()
+                                                            .getAttachment().getOriginalFilename()),
+                                                    GC_Constants.gc_Attachment_Category, false);
+                                            attR = srvCloudApiSrv.createAttachment(newAttachment);
+                                            if (attR != null)
+                                            {
+                                                if (StringUtils.hasText(attR.getId())
+                                                        && StringUtils.hasText(attR.getUploadUrl()))
+                                                {
+                                                    log.info("Attachment id :" + attR.getId()
+                                                            + " generated for Upload Url : " + attR.getUploadUrl());
+
+                                                    if (srvCloudApiSrv.persistAttachment(attR.getUploadUrl(),
+                                                            evCaseFormSubmit.getPayload().getCaseForm()
+                                                                    .getAttachment()))
+                                                    {
+                                                        log.info("Attachment with id : " + attR.getId()
+                                                                + " Persisted in Document Container..");
+
+                                                        // Prepare POJOdetails for TY_Case_SrvCloud newCaseEntity
+                                                        List<TY_Attachment_CaseCreate> caseAttachmentsNew = new ArrayList<TY_Attachment_CaseCreate>();
+                                                        TY_Attachment_CaseCreate caseAttachment = new TY_Attachment_CaseCreate(
+                                                                attR.getId());
+                                                        caseAttachmentsNew.add(caseAttachment);
+                                                        newCaseEntity.setAttachments(caseAttachmentsNew);
+
+                                                    }
+
+                                                }
+
+                                            }
+                                        }
+                                    }
+                                    catch (EX_ESMAPI | IOException e)
+                                    {
+
+                                        if (e instanceof IOException)
+                                        {
+                                            handleNoFileDataAttachment(evCaseFormSubmit);
+                                        }
+                                        else if (e instanceof EX_ESMAPI)
+                                        {
+                                            handleAttachmentPersistError(evCaseFormSubmit, attR, e);
+                                        }
+                                    }
+                                }
+
+                                // Case Payload is now Ready: Post and get the Case ID back
+                                try
+                                {
+                                    String caseID = srvCloudApiSrv.createCase(newCaseEntity);
+                                    if (StringUtils.hasText(caseID))
+                                    {
+                                        handleCaseSuccCreated(evCaseFormSubmit, cusItemO, caseID);
+
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+
+                                    handleCaseCreationError(evCaseFormSubmit, e);
+
+                                }
+
                             }
 
                         }
@@ -164,6 +245,88 @@ public class EV_HDLR_CaseFormSubmit
                 }
             }
         }
+    }
+
+    private void handleCaseCreationError(EV_CaseFormSubmit evCaseFormSubmit, Exception e)
+    {
+        String msg;
+        msg = msgSrc.getMessage("ERR_CASE_POST", new Object[]
+        { e.getLocalizedMessage(), evCaseFormSubmit.getPayload().getSubmGuid() },
+                Locale.ENGLISH);
+
+        log.error(msg);
+        TY_Message logMsg = new TY_Message(evCaseFormSubmit.getPayload().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error,
+                EnumMessageType.ERR_CASE_CREATE, evCaseFormSubmit.getPayload().getSubmGuid(),
+                msg);
+        userSessSrv.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage(
+                (Object) evCaseFormSubmit.getPayload().getSubmGuid(), logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+        // Should be handled Centrally via Aspect
+        throw new EX_ESMAPI(msg);
+    }
+
+    private void handleCaseSuccCreated(EV_CaseFormSubmit evCaseFormSubmit, Optional<TY_CatgCusItem> cusItemO,
+            String caseID)
+    {
+        String msg = "Case ID : " + caseID + " created..";
+        log.info(msg);
+        msg = msgSrc.getMessage("SUCC_CASE", new Object[]
+        { caseID, cusItemO.get().getCaseTypeEnum().toString(), evCaseFormSubmit.getPayload().getSubmGuid() },
+                Locale.ENGLISH);
+        // Populate Success message in session
+        userSessSrv.addSessionMessage(msg);
+
+        TY_Message logMsg = new TY_Message(evCaseFormSubmit.getPayload().getUserId(), Timestamp.from(Instant.now()),
+                EnumStatus.Success, EnumMessageType.SUCC_CASE_CREATE, evCaseFormSubmit.getPayload().getSubmGuid(), msg);
+        userSessSrv.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) evCaseFormSubmit.getPayload().getSubmGuid(), logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+    }
+
+    private void handleAttachmentPersistError(EV_CaseFormSubmit evCaseFormSubmit, TY_AttachmentResponse attR,
+            Exception e)
+    {
+        String msg;
+        msg = msgSrc.getMessage("ERROR_DOCS_PERSIST", new Object[]
+        { attR.getUploadUrl(), evCaseFormSubmit.getPayload().getCaseForm().getAttachment().getOriginalFilename(),
+                e.getLocalizedMessage() }, Locale.ENGLISH);
+
+        log.error(msg);
+        TY_Message logMsg = new TY_Message(evCaseFormSubmit.getPayload().getUserId(), Timestamp.from(Instant.now()),
+                EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT, evCaseFormSubmit.getPayload().getSubmGuid(), msg);
+        userSessSrv.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) evCaseFormSubmit.getPayload().getSubmGuid(), logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+        // Should be handled Centrally via Aspect
+        throw new EX_ESMAPI(msg);
+    }
+
+    private void handleNoFileDataAttachment(EV_CaseFormSubmit evCaseFormSubmit)
+    {
+        String msg;
+        msg = msgSrc.getMessage("FILE_NO_DATA", new Object[]
+        { evCaseFormSubmit.getPayload().getCaseForm().getAttachment().getOriginalFilename() }, Locale.ENGLISH);
+
+        log.error(msg);
+        TY_Message logMsg = new TY_Message(evCaseFormSubmit.getPayload().getUserId(), Timestamp.from(Instant.now()),
+                EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT, evCaseFormSubmit.getPayload().getSubmGuid(), msg);
+        userSessSrv.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) evCaseFormSubmit.getPayload().getSubmGuid(), logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+        // Should be handled Centrally via Aspect
+        throw new EX_ESMAPI(msg);
     }
 
     private void handleCatgError(EV_CaseFormSubmit evCaseFormSubmit, Optional<TY_CatgCusItem> cusItemO)
