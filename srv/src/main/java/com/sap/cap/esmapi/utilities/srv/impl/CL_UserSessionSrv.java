@@ -102,6 +102,11 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     // unassigned Role
                 }
 
+                if (userSessInfo == null)
+                {
+                    userSessInfo = new TY_UserSessionInfo();
+                }
+
                 // Return from Session if Populated else make some effort
                 if (userSessInfo.getUserDetails() == null)
                 {
@@ -154,8 +159,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     {
                         // Get the cases for User
                         userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl()));
-                        // Once the cases are in Get the Stats too
-                        userSessInfo.setStats(essSrv.getStatsForUserCases(userSessInfo.getCases()));
+
                     }
                     catch (Exception e)
                     {
@@ -336,6 +340,10 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     {
         if (StringUtils.hasText(msg))
         {
+            if (userSessInfo.getMessages() == null)
+            {
+                userSessInfo.setMessages(new ArrayList<String>());
+            }
             userSessInfo.getMessages().add(msg);
         }
     }
@@ -504,6 +512,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     @Override
     public void addMessagetoStack(TY_Message msg)
     {
+
         userSessInfo.getMessagesStack().add(msg);
     }
 
@@ -513,9 +522,14 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         return userSessInfo.getMessagesStack();
     }
 
+    // #Test
     @Override
     public void loadUser4Test()
     {
+        if (userSessInfo == null)
+        {
+            userSessInfo = new TY_UserSessionInfo();
+        }
         if (userSessInfo.getUserDetails() == null)
         {
 
@@ -529,7 +543,33 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             userDetails.setUsAcConEmpl(usAccConEmpl);
             userSessInfo.setUserDetails(userDetails); // Set in Session
 
+            try
+            {
+                // Get the cases for User
+                userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl()));
+
+            }
+            catch (Exception e)
+            {
+                // Log error
+                log.error(msgSrc.getMessage("ERR_CASES_USER", new Object[]
+                { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), e.getLocalizedMessage() },
+                        Locale.ENGLISH));
+
+                // Raise Exception to be handled at UI via Central Aspect
+                throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_USER", new Object[]
+                { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), e.getLocalizedMessage() },
+                        Locale.ENGLISH));
+            }
+
         }
+    }
+
+    // #Test
+    @Override
+    public TY_UserSessionInfo getSessionInfo4Test()
+    {
+        return this.userSessInfo;
     }
 
 }

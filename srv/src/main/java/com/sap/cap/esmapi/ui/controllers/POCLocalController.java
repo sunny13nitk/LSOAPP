@@ -30,6 +30,7 @@ import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,6 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class POCLocalController
 {
+    @Autowired
+    private IF_UserSessionSrv userSessSrv;
 
     @Autowired
     private IF_UserAPISrv userSrv;
@@ -62,58 +65,83 @@ public class POCLocalController
     {
 
         final String viewName = "caseFormPOCLocal";
-        String accountId = null;
+        TY_UserESS userDetails = new TY_UserESS();
 
         // Mocking the authentication
 
-        // Local Load for Testing
-        Ty_UserAccountContactEmployee userAcc = getUserAccount();
-        userSrv.setUserAccount(userAcc);
-
-        TY_UserESS userDetails = new TY_UserESS();
-        userDetails.setUserDetails(userAcc);
-
-        if (StringUtils.hasText(getUserAccount().getAccountId()))
+        if (userSessSrv != null)
         {
-            accountId = getUserAccount().getAccountId();
-        }
-
-        if (StringUtils.hasText(accountId) && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
-        {
-
-            Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
-                    .filter(g -> g.getCaseTypeEnum().toString().equals(EnumCaseTypes.Learning.toString())).findFirst();
-            if (cusItemO.isPresent() && catgTreeSrv != null)
+            userSessSrv.loadUser4Test();
+            // check User and Account Bound
+            if (userSessSrv.getUserDetails4mSession() != null)
             {
+                if (StringUtils.hasText(userSessSrv.getUserDetails4mSession().getAccountId())
+                        || StringUtils.hasText(userSessSrv.getUserDetails4mSession().getEmployeeId()))
+                {
+                    if (!CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+                    {
 
-                // For TEST ONLY: Starts
-                userDetails.setUserDetails(getUserAccount());
-                model.addAttribute("userInfo", userDetails);
-                // For TEST ONLY: ENDS
+                        Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+                                .filter(g -> g.getCaseTypeEnum().toString().equals(EnumCaseTypes.Learning.toString()))
+                                .findFirst();
+                        if (cusItemO.isPresent() && catgTreeSrv != null)
+                        {
+                            userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                            userDetails.setCases(userSessSrv.getSessionInfo4Test().getCases());
+                            model.addAttribute("userInfo", userDetails);
+                            model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
 
-                model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
+                            // Even if No Cases - spl. for Newly Create Acc - to enable REfresh button
+                            model.addAttribute("sessMsgs", userSessSrv.getSessionMessages());
 
-                TY_Case_Form caseForm = new TY_Case_Form();
-                caseForm.setAccId(accountId); // hidden
-                caseForm.setCaseTxnType(cusItemO.get().getCaseType()); // hidden
-                model.addAttribute("caseForm", caseForm);
+                        }
 
-                model.addAttribute("formError", null);
+                        else
+                        {
 
-                // also Upload the Catg. Tree as per Case Type
-                model.addAttribute("catgsList",
-                        catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
+                            throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]
+                            { EnumCaseTypes.Learning.toString() }, Locale.ENGLISH));
+                        }
+                    }
 
-            }
-            else
-            {
-
-                throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]
-                { EnumCaseTypes.Learning.toString() }, Locale.ENGLISH));
+                }
             }
 
         }
-        return viewName;
+
+        // if (StringUtils.hasText(accountId) &&
+        // !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+        // {
+
+        // Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+        // .filter(g ->
+        // g.getCaseTypeEnum().toString().equals(EnumCaseTypes.Learning.toString())).findFirst();
+        // if (cusItemO.isPresent() && catgTreeSrv != null)
+        // {
+
+        // model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
+
+        // TY_Case_Form caseForm = new TY_Case_Form();
+        // caseForm.setAccId(accountId); // hidden
+        // caseForm.setCaseTxnType(cusItemO.get().getCaseType()); // hidden
+        // model.addAttribute("caseForm", caseForm);
+
+        // model.addAttribute("formError", null);
+
+        // // also Upload the Catg. Tree as per Case Type
+        // model.addAttribute("catgsList",
+        // catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
+
+        // }
+        // else
+        // {
+
+        // throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]
+        // { EnumCaseTypes.Learning.toString() }, Locale.ENGLISH));
+        // }
+
+        // }
+        return "essListViewPOCLocal";
 
     }
 
