@@ -60,11 +60,12 @@ public class POCLocalController
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
+    private final String caseListVWRedirect = "redirect:/poclocal/";
+
     @GetMapping("/")
-    public String showCaseFormASynch(Model model)
+    public String showCasesList(Model model)
     {
 
-        final String viewName = "caseFormPOCLocal";
         TY_UserESS userDetails = new TY_UserESS();
 
         // Mocking the authentication
@@ -90,6 +91,8 @@ public class POCLocalController
                             userDetails.setCases(userSessSrv.getSessionInfo4Test().getCases());
                             model.addAttribute("userInfo", userDetails);
                             model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
+                            // Rate Limit Simulation
+                            model.addAttribute("rateLimitBreached", userSessSrv.getCurrentRateLimitBreachedValue());
 
                             // Even if No Cases - spl. for Newly Create Acc - to enable REfresh button
                             model.addAttribute("sessMsgs", userSessSrv.getSessionMessages());
@@ -109,40 +112,75 @@ public class POCLocalController
 
         }
 
-        // if (StringUtils.hasText(accountId) &&
-        // !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
-        // {
-
-        // Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
-        // .filter(g ->
-        // g.getCaseTypeEnum().toString().equals(EnumCaseTypes.Learning.toString())).findFirst();
-        // if (cusItemO.isPresent() && catgTreeSrv != null)
-        // {
-
-        // model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
-
-        // TY_Case_Form caseForm = new TY_Case_Form();
-        // caseForm.setAccId(accountId); // hidden
-        // caseForm.setCaseTxnType(cusItemO.get().getCaseType()); // hidden
-        // model.addAttribute("caseForm", caseForm);
-
-        // model.addAttribute("formError", null);
-
-        // // also Upload the Catg. Tree as per Case Type
-        // model.addAttribute("catgsList",
-        // catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
-
-        // }
-        // else
-        // {
-
-        // throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]
-        // { EnumCaseTypes.Learning.toString() }, Locale.ENGLISH));
-        // }
-
-        // }
         return "essListViewPOCLocal";
 
+    }
+
+    @GetMapping("/createCase/")
+    public String showCaseAsyncForm(Model model)
+    {
+        String viewCaseForm = "caseFormPOCLocal";
+
+        if ((StringUtils.hasText(userSessSrv.getUserDetails4mSession().getAccountId())
+                || StringUtils.hasText(userSessSrv.getUserDetails4mSession().getEmployeeId()))
+                && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+        {
+
+            Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+                    .filter(g -> g.getCaseTypeEnum().toString().equals(EnumCaseTypes.Learning.toString())).findFirst();
+            if (cusItemO.isPresent() && catgTreeSrv != null)
+            {
+
+                model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
+
+                // Before case form Inititation we must check the Rate Limit for the Current
+                // User Session --current Form Submission added for Rate Limit Evaulation
+                if (userSessSrv.isWithinRateLimit())
+                {
+                    // Populate User Details
+                    TY_UserESS userDetails = new TY_UserESS();
+                    userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                    model.addAttribute("userInfo", userDetails);
+
+                    // Populate Case Form Details
+                    TY_Case_Form caseForm = new TY_Case_Form();
+                    if (userSessSrv.getUserDetails4mSession().isEmployee())
+                    {
+                        caseForm.setAccId(userSessSrv.getUserDetails4mSession().getAccountId()); // hidden
+                    }
+                    else
+                    {
+                        caseForm.setAccId(userSessSrv.getUserDetails4mSession().getEmployeeId()); // hidden
+                    }
+
+                    caseForm.setCaseTxnType(cusItemO.get().getCaseType()); // hidden
+                    model.addAttribute("caseForm", caseForm);
+
+                    model.addAttribute("formError", null);
+
+                    // also Upload the Catg. Tree as per Case Type
+                    model.addAttribute("catgsList",
+                            catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
+
+                }
+                else
+                {
+                    // Not Within Rate Limit - REdirect to List View
+                    viewCaseForm = caseListVWRedirect;
+
+                }
+
+            }
+            else
+            {
+
+                throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]
+                { EnumCaseTypes.Learning.toString() }, Locale.ENGLISH));
+            }
+
+        }
+
+        return viewCaseForm;
     }
 
     @PostMapping("/saveCase")

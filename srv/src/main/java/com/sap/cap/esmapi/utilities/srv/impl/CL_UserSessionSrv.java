@@ -366,7 +366,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             if (CollectionUtils.isNotEmpty(userSessInfo.getFormSubmissions().getFormSubmissions()))
             {
                 // Current # Submissions more than or equals to # configurable - check
-                if (userSessInfo.getFormSubmissions().getFormSubmissions().size() > rlConfig.getNumFormSubms())
+                if (userSessInfo.getFormSubmissions().getFormSubmissions().size() >= rlConfig.getNumFormSubms())
                 {
                     // Get Current Time Stamp
                     Timestamp currTS = Timestamp.from(Instant.now());
@@ -382,6 +382,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     if (secsElapsedLastSubmit < rlConfig.getIntvSecs())
                     {
                         withinRateLimit = false;
+                        userSessInfo.setRateLimitBreached(true);
                         log.error(msgSrc.getMessage("ERR_RATE_LIMIT", new Object[]
                         { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
                                 new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(currTS) }, Locale.ENGLISH));
@@ -405,6 +406,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         // Current Session after Waiting
                         userSessInfo.getFormSubmissions().getFormSubmissions().clear();
                         withinRateLimit = true;
+                        userSessInfo.setRateLimitBreached(false);
                         userSessInfo.getFormSubmissions().getFormSubmissions().add(currTS);
                     }
 
@@ -412,9 +414,17 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                 else // Just add the Form Submission time Stamp to Session
                 {
                     userSessInfo.getFormSubmissions().getFormSubmissions().add(Timestamp.from(Instant.now()));
+                    userSessInfo.setRateLimitBreached(false);
                     withinRateLimit = true;
                 }
 
+            }
+
+            else // Just add the Form Submission time Stamp to Session
+            {
+                userSessInfo.getFormSubmissions().getFormSubmissions().add(Timestamp.from(Instant.now()));
+                userSessInfo.setRateLimitBreached(false);
+                withinRateLimit = true;
             }
 
         }
@@ -520,6 +530,18 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     public List<TY_Message> getMessageStack()
     {
         return userSessInfo.getMessagesStack();
+    }
+
+    @Override
+    public boolean getCurrentRateLimitBreachedValue()
+    {
+        boolean rateLimitBreachedVal = false;
+        if (userSessInfo != null)
+        {
+            rateLimitBreachedVal = userSessInfo.isRateLimitBreached();
+        }
+
+        return rateLimitBreachedVal;
     }
 
     // #Test

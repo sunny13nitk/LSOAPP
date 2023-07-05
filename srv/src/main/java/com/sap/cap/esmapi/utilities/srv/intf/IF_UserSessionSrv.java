@@ -66,6 +66,11 @@ public interface IF_UserSessionSrv
     public boolean isCaseFormValid();
 
     /*
+     * Just to get the Flag rateLimitBreached from Session
+     */
+    public boolean getCurrentRateLimitBreachedValue();
+
+    /*
      * Update Session Messages and Log(s) for a submission event result with Case Id
      * to notify user and update DB
      */

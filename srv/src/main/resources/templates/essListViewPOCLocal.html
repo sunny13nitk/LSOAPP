@@ -58,7 +58,7 @@
             </a>
 
             <a href="#" class="button primary outline cycle " style="margin-right: 20px;" data-role="hint"
-               th:href="@{/esslocal/}" role="button" data-hint-position="bottom" data-cls-hint="fg-black"
+               th:href="@{/poclocal/}" role="button" data-hint-position="bottom" data-cls-hint="fg-black"
                data-hint-text="Refresh">
                <span class="mif-refresh" style="margin-left: 0px">
                </span>
@@ -106,6 +106,8 @@
 
 
       </div>
+
+
 
 
 
@@ -177,12 +179,39 @@
 
    </div>
 
+   <div class="slot" id="slot1" th:if="${rateLimitBreached == true}"></div>
+
+
+
+   <script>
+      function runToast()
+      {
+         var toast = Metro.toast.create("Rate Limit Exceeded!! ", function ()
+         {
+            alert('Rate Limit Exceeded!! You can only submit a maximum of 2 incidents in a 2 min slot for an Active Session.')
+         });
+
+      }
+
+      $(document).ready(function ()
+      {
+         $('div.slot').each(function (i, d)
+         {
+            runToast.call($(this));
+         });
+      });
+
+   </script>
+
+
 
 
 
 
    <!-- Metro 4 -->
    <script src="https://cdn.metroui.org.ua/v4.3.2/js/metro.min.js"></script>
+
+
 </body>
 
 </html>
