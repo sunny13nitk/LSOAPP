@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TY_Case_Form 
+public class TY_Case_Form
 {
     private String accId;
     private String caseTxnType;
@@ -19,12 +19,13 @@ public class TY_Case_Form
     private String subject;
     private String description;
     private MultipartFile attachment;
+    private boolean employee;
+
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "TY_Case_Form [accId=" + accId + ", caseTxnType=" + caseTxnType + ", catgDesc=" + catgDesc
                 + ", description=" + description + ", subject=" + subject + "]";
     }
 
-    
-    
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
@@ -15,10 +16,10 @@ import com.sap.cloud.security.xsuaa.token.Token;
 public interface IF_UserSessionSrv
 {
 
-    //For Test Purpose Only to TEst the Controller - #Test
+    // For Test Purpose Only to TEst the Controller - #Test
     public void loadUser4Test();
 
-    //For Test Purpose Only to Test the Controller - #Test
+    // For Test Purpose Only to Test the Controller - #Test
     public TY_UserSessionInfo getSessionInfo4Test();
 
     /*
@@ -48,6 +49,8 @@ public interface IF_UserSessionSrv
     // @formatter:on
 
     public boolean SubmitCaseForm(TY_Case_Form caseForm);
+
+    public TY_CaseFormAsync getCurrentForm4Submission();
 
     public String createAccount() throws EX_ESMAPI;
 

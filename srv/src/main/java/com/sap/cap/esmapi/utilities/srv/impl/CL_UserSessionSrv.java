@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.utilities.srv.impl;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -7,10 +8,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
@@ -18,14 +21,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.annotation.SessionScope;
 
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
 import com.sap.cap.esmapi.events.event.EV_LogMessage;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
-import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.enums.EnumStatus;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
@@ -60,6 +66,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
     @Autowired
     private TY_RLConfig rlConfig;
+
+    @Autowired
+    private TY_CatgCus catgCusSrv;
 
     @Autowired
     private IF_CatalogSrv catalogSrv;
@@ -198,7 +207,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     public boolean SubmitCaseForm(TY_Case_Form caseForm)
     {
         boolean isSubmitted = true;
-        if (caseForm != null)
+        if (caseForm != null && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
         {
             // Push Form data to Session
             TY_CaseFormAsync caseFormAsync = new TY_CaseFormAsync();
@@ -206,40 +215,88 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             caseFormAsync.setCaseForm(caseForm);
             caseFormAsync.setSubmGuid(UUID.randomUUID().toString());
             // Latest time Stamp from Form Submissions
-            caseFormAsync.setTimestamp(userSessInfo.getFormSubmissions().getFormSubmissions()
-                    .get(userSessInfo.getFormSubmissions().getFormSubmissions().size() - 1));
+            caseFormAsync.setTimestamp(Timestamp.from(Instant.now()));
             caseFormAsync.setUserId(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId());
 
-            userSessInfo.setCurrentForm4Submission(caseFormAsync);
-
-            // Validate Case Form : Implicit Call
-            if (this.isCaseFormValid())
+            // Attchments to be handled Here in Session service
+            try
             {
-                userSessInfo.getCurrentForm4Submission().setValid(true);
+                if (caseForm.getAttachment() != null)
+                {
+                    if (caseForm.getAttachment().getBytes() != null)
+                    {
+                        // Create Attachment here to prevent Data loss in ASyncronous Thread
+                        // Create Attachment
+                        TY_Attachment newAttachment = new TY_Attachment(
+                                FilenameUtils.getName(caseForm.getAttachment().getOriginalFilename()),
+                                GC_Constants.gc_Attachment_Category, false);
+                        caseFormAsync.setAttR(srvCloudApiSrv.createAttachment(newAttachment));
+                        if (caseFormAsync.getAttR() != null)
+                        {
+                            if (srvCloudApiSrv.persistAttachment(caseFormAsync.getAttR().getUploadUrl(),
+                                    caseForm.getAttachment()))
+                            {
+                                log.info("Attachment with id : " + caseFormAsync.getAttR()
+                                        + " Persisted in Document Container..");
+                            }
+                        }
 
-                // SUCC_CASE_SUBM=Case with submission id - {0} of Type - {1} submitted
-                // Successfully for User - {2}!
-                String msg = msgSrc.getMessage("SUCC_CASE_SUBM", new Object[]
-                { caseFormAsync.getSubmGuid(), caseFormAsync.getCaseForm().getCaseTxnType(),
-                        caseFormAsync.getUserId() }, Locale.ENGLISH);
-                log.info(msg); // System Log
+                    }
+                }
 
-                // Fire Case Submission Event - To be processed Asyncronously
-                EV_CaseFormSubmit eventCaseSubmit = new EV_CaseFormSubmit(this, caseFormAsync);
-                applicationEventPublisher.publishEvent(eventCaseSubmit);
+            }
+            catch (EX_ESMAPI | IOException e)
+            {
 
-                // Logging Framework
-                TY_Message logMsg = new TY_Message(caseFormAsync.getUserId(), caseFormAsync.getTimestamp(),
-                        EnumStatus.Success, EnumMessageType.SUCC_CASE_SUBM, caseFormAsync.getSubmGuid(), msg);
-                userSessInfo.getMessagesStack().add(logMsg);
-                // Instantiate and Fire the Event : Syncronous processing
-                EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
-                applicationEventPublisher.publishEvent(logMsgEvent);
+                if (e instanceof IOException)
+                {
+                    handleNoFileDataAttachment(caseFormAsync);
+                }
+                else if (e instanceof EX_ESMAPI)
+                {
+                    handleAttachmentPersistError(caseFormAsync, e);
+                }
+            }
 
-                // Add to Display Messages : to be shown to User or Successful Submission
-                this.addSessionMessage(msg);
+            if (!CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+            {
+                Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+                        .filter(g -> g.getCaseType().equals(caseForm.getCaseTxnType())).findFirst();
+                if (cusItemO.isPresent() && catalogSrv != null)
+                {
+                    String[] catTreeSelCatg = catalogSrv.getCatgHierarchyforCatId(caseForm.getCatgDesc(),
+                            cusItemO.get().getCaseTypeEnum());
+                    caseFormAsync.setCatTreeSelCatg(catTreeSelCatg);
+                }
 
-                isSubmitted = true;
+                userSessInfo.setCurrentForm4Submission(caseFormAsync);
+
+                // Validate Case Form : Implicit Call
+                if (this.isCaseFormValid())
+                {
+                    userSessInfo.getCurrentForm4Submission().setValid(true);
+
+                    // SUCC_CASE_SUBM=Case with submission id - {0} of Type - {1} submitted
+                    // Successfully for User - {2}!
+                    String msg = msgSrc.getMessage("SUCC_CASE_SUBM", new Object[]
+                    { caseFormAsync.getSubmGuid(), caseFormAsync.getCaseForm().getCaseTxnType(),
+                            caseFormAsync.getUserId() }, Locale.ENGLISH);
+                    log.info(msg); // System Log
+
+                    // Logging Framework
+                    TY_Message logMsg = new TY_Message(caseFormAsync.getUserId(), caseFormAsync.getTimestamp(),
+                            EnumStatus.Success, EnumMessageType.SUCC_CASE_SUBM, caseFormAsync.getSubmGuid(), msg);
+                    userSessInfo.getMessagesStack().add(logMsg);
+                    // Instantiate and Fire the Event : Syncronous processing
+                    EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
+                    applicationEventPublisher.publishEvent(logMsgEvent);
+
+                    // Add to Display Messages : to be shown to User or Successful Submission
+                    this.addSessionMessage(msg);
+
+                    isSubmitted = true;
+
+                }
 
             }
             else // Error Handling :Payload Error
@@ -374,7 +431,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     // chronologically
                     List<Timestamp> topNSubmList = new ArrayList<Timestamp>();
                     topNSubmList = userSessInfo.getFormSubmissions().getFormSubmissions();
-                    Collections.reverse(topNSubmList);
+                    Collections.sort(topNSubmList, Collections.reverseOrder());
 
                     // Compare the Time difference from the latest one
                     long secsElapsedLastSubmit = (currTS.getTime() - topNSubmList.get(0).getTime()) / 1000;
@@ -438,67 +495,77 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         boolean isValid = true;
 
         // Get the Latest Form Submission from Session and Validate
-        if (userSessInfo.getCurrentForm4Submission() != null && catalogSrv != null)
+        if (userSessInfo.getCurrentForm4Submission() != null && catalogSrv != null
+                && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
         {
             if (userSessInfo.getCurrentForm4Submission().getCaseForm() != null)
             {
                 // Subject and Category are Mandatory fields
-                if (!StringUtils.hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getSubject())
-                        || !StringUtils.hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc()))
+                if (StringUtils.hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getSubject())
+                        && StringUtils.hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc()))
                 {
 
-                    // Check that Category is not a level 1 - Base Category
-                    if ((catalogSrv.getCatgHierarchyforCatId(
-                            userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc(),
-                            EnumCaseTypes.valueOf(userSessInfo.getCurrentForm4Submission().getCaseForm()
-                                    .getCaseTxnType()))).length <= 1)
+                    Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+                            .filter(g -> g.getCaseType()
+                                    .equals(userSessInfo.getCurrentForm4Submission().getCaseForm().getCaseTxnType()))
+                            .findFirst();
+
+                    if (cusItemO.isPresent())
                     {
-                        // Payload Error as Category level shuld be atleast 2
-                        String msg = msgSrc.getMessage("ERR_CATG_LVL", new Object[]
-                        { userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc() }, Locale.ENGLISH);
-                        log.error(msg); // System Log
+                        // Check that Category is not a level 1 - Base Category
+                        if ((catalogSrv.getCatgHierarchyforCatId(
+                                userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc(),
+                                cusItemO.get().getCaseTypeEnum())).length <= 1)
+                        {
+                            // Payload Error as Category level shuld be atleast 2
+                            String msg = msgSrc.getMessage("ERR_CATG_LVL", new Object[]
+                            { userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc() }, Locale.ENGLISH);
+                            log.error(msg); // System Log
 
-                        // Logging Framework
-                        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
-                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
-                        userSessInfo.getMessagesStack().add(logMsg);
+                            // Logging Framework
+                            TY_Message logMsg = new TY_Message(
+                                    userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                    Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
+                                    userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+                            userSessInfo.getMessagesStack().add(logMsg);
 
-                        // Instantiate and Fire the Event : Syncronous processing
-                        EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
-                        applicationEventPublisher.publishEvent(logMsgEvent);
+                            // Instantiate and Fire the Event : Syncronous processing
+                            EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
+                            applicationEventPublisher.publishEvent(logMsgEvent);
 
-                        userSessInfo.setFormErrorMsg(msg); // For Form Display
+                            userSessInfo.setFormErrorMsg(msg); // For Form Display
 
-                        // Add to Display Messages : to be shown to User or Successful Submission
-                        isValid = false;
+                            // Add to Display Messages : to be shown to User or Successful Submission
+                            isValid = false;
 
+                        }
                     }
 
-                    if (isValid) // Only if Category Fairly Granular
-                    {
-                        // Payload error
+                }
+                else
+                {
 
-                        String msg = msgSrc.getMessage("ERR_CASE_PAYLOAD", new Object[]
-                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(Timestamp.from(Instant.now())) },
-                                Locale.ENGLISH);
-                        log.error(msg);
+                    // Payload error
 
-                        TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
-                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+                    String msg = msgSrc.getMessage("ERR_CASE_PAYLOAD", new Object[]
+                    { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                            new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(Timestamp.from(Instant.now())) },
+                            Locale.ENGLISH);
+                    log.error(msg);
 
-                        // For Logging Framework
-                        userSessInfo.getMessagesStack().add(message);
-                        // Instantiate and Fire the Event
-                        EV_LogMessage logMsgEvent = new EV_LogMessage(this, message);
-                        applicationEventPublisher.publishEvent(logMsgEvent);
+                    TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                            Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
+                            userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
 
-                        userSessInfo.setFormErrorMsg(msg); // For Form Display
+                    // For Logging Framework
+                    userSessInfo.getMessagesStack().add(message);
+                    // Instantiate and Fire the Event
+                    EV_LogMessage logMsgEvent = new EV_LogMessage(this, message);
+                    applicationEventPublisher.publishEvent(logMsgEvent);
 
-                        isValid = false;
-                    }
+                    userSessInfo.setFormErrorMsg(msg); // For Form Display
+
+                    isValid = false;
 
                 }
 
@@ -548,6 +615,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     @Override
     public void loadUser4Test()
     {
+
         if (userSessInfo == null)
         {
             userSessInfo = new TY_UserSessionInfo();
@@ -592,6 +660,58 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     public TY_UserSessionInfo getSessionInfo4Test()
     {
         return this.userSessInfo;
+    }
+
+    @Override
+    public TY_CaseFormAsync getCurrentForm4Submission()
+    {
+        TY_CaseFormAsync currCaseForm = null;
+        if (userSessInfo != null)
+        {
+            currCaseForm = userSessInfo.getCurrentForm4Submission();
+        }
+
+        return currCaseForm;
+    }
+
+    private void handleAttachmentPersistError(TY_CaseFormAsync caseFormAsync, Exception e)
+    {
+        String msg;
+        msg = msgSrc.getMessage("ERROR_DOCS_PERSIST", new Object[]
+        { caseFormAsync.getAttR().getUploadUrl(), caseFormAsync.getCaseForm().getAttachment().getOriginalFilename(),
+                e.getLocalizedMessage() }, Locale.ENGLISH);
+
+        log.error(msg);
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
+                caseFormAsync.getSubmGuid(), msg);
+        this.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) caseFormAsync.getSubmGuid(), logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+        // Should be handled Centrally via Aspect
+        throw new EX_ESMAPI(msg);
+    }
+
+    private void handleNoFileDataAttachment(TY_CaseFormAsync caseFormAsync)
+    {
+        String msg;
+        msg = msgSrc.getMessage("FILE_NO_DATA", new Object[]
+        { caseFormAsync.getCaseForm().getAttachment().getOriginalFilename() }, Locale.ENGLISH);
+
+        log.error(msg);
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
+                caseFormAsync.getSubmGuid(), msg);
+        this.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) caseFormAsync.getSubmGuid(), logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+        // Should be handled Centrally via Aspect
+        throw new EX_ESMAPI(msg);
     }
 
 }

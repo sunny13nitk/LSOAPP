@@ -23,10 +23,14 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
+import com.sap.cap.esmapi.events.event.EV_LogMessage;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
+import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
+import com.sap.cap.esmapi.utilities.enums.EnumStatus;
+import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
@@ -61,6 +65,7 @@ public class POCLocalController
     private ApplicationEventPublisher applicationEventPublisher;
 
     private final String caseListVWRedirect = "redirect:/poclocal/";
+    private final String caseFormErrorRedirect = "redirect:/poclocal/errForm";
 
     @GetMapping("/")
     public String showCasesList(Model model)
@@ -187,41 +192,35 @@ public class POCLocalController
     public String saveCase(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
     {
 
-        if (caseForm != null && userSrv != null)
+        String viewName = caseListVWRedirect;
+        if (caseForm != null && userSessSrv != null)
         {
-            // Perform Validation(s) or Send errors
-
-            // Valid Payload - log the details and fire the Event
-            TY_CaseFormAsync payload = new TY_CaseFormAsync();
-            Ty_UserAccountContactEmployee userdata = getUserAccount();
-            if (userdata != null)
+            if (userSessSrv.getUserDetails4mSession().isEmployee())
             {
-                if (StringUtils.hasText(userdata.getUserEmail()))
-                {
-
-                    payload.setValid(true); // Validation Succ Simulation
-                    payload.setUserId(userdata.getUserId());
-                    payload.setSubmGuid(UUID.randomUUID().toString());
-                    payload.setTimestamp(Timestamp.from(Instant.now()));
-                    payload.setCaseForm(caseForm);
-
-                    log.info("Case Creation Request with ID: " + payload.getSubmGuid() + " submitted..");
-
-                    // Instantiate and Fire the Event
-                    EV_CaseFormSubmit eventCaseSubmit = new EV_CaseFormSubmit(this, payload);
-                    applicationEventPublisher.publishEvent(eventCaseSubmit);
-
-                    // Populate Success message in session
-                    userSrv.addSessionMessage(msgSrc.getMessage("SUCC_CASE_SUBM", new Object[]
-                    { payload.getSubmGuid(), caseForm.getCaseTxnType() }, Locale.ENGLISH));
-
-                    log.info("Case Form Submit completed.... ");
-                }
-
+                caseForm.setEmployee(true);
             }
 
+            log.info("Processing of Case Form - UI layer :Begins....");
+
+            // Any Validation Error(s) on the Form or Submission not possible
+            if (!userSessSrv.SubmitCaseForm(caseForm))
+            {
+                // Redirect to Error Processing of Form
+                viewName = caseFormErrorRedirect;
+            }
+            else
+            {
+                // Fire Case Submission Event - To be processed Asyncronously
+                EV_CaseFormSubmit eventCaseSubmit = new EV_CaseFormSubmit(this,
+                        userSessSrv.getCurrentForm4Submission());
+                applicationEventPublisher.publishEvent(eventCaseSubmit);
+            }
+
+            log.info("Processing of Case Form - UI layer :Ends....");
         }
-        return "redirect:/poclocal/";
+
+        return viewName;
+
     }
 
     private Ty_UserAccountContactEmployee getUserAccount()
