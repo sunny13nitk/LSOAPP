@@ -5,9 +5,11 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,10 +23,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.annotation.SessionScope;
 
+import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
+import com.sap.cap.esmapi.catg.pojos.TY_CatalogTree;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
-import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
 import com.sap.cap.esmapi.events.event.EV_LogMessage;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
@@ -218,46 +221,6 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             caseFormAsync.setTimestamp(Timestamp.from(Instant.now()));
             caseFormAsync.setUserId(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId());
 
-            // Attchments to be handled Here in Session service
-            try
-            {
-                if (caseForm.getAttachment() != null)
-                {
-                    if (caseForm.getAttachment().getBytes() != null)
-                    {
-                        // Create Attachment here to prevent Data loss in ASyncronous Thread
-                        // Create Attachment
-                        TY_Attachment newAttachment = new TY_Attachment(
-                                FilenameUtils.getName(caseForm.getAttachment().getOriginalFilename()),
-                                GC_Constants.gc_Attachment_Category, false);
-                        caseFormAsync.setAttR(srvCloudApiSrv.createAttachment(newAttachment));
-                        if (caseFormAsync.getAttR() != null)
-                        {
-                            if (srvCloudApiSrv.persistAttachment(caseFormAsync.getAttR().getUploadUrl(),
-                                    caseForm.getAttachment()))
-                            {
-                                log.info("Attachment with id : " + caseFormAsync.getAttR()
-                                        + " Persisted in Document Container..");
-                            }
-                        }
-
-                    }
-                }
-
-            }
-            catch (EX_ESMAPI | IOException e)
-            {
-
-                if (e instanceof IOException)
-                {
-                    handleNoFileDataAttachment(caseFormAsync);
-                }
-                else if (e instanceof EX_ESMAPI)
-                {
-                    handleAttachmentPersistError(caseFormAsync, e);
-                }
-            }
-
             if (!CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
             {
                 Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
@@ -274,6 +237,50 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                 // Validate Case Form : Implicit Call
                 if (this.isCaseFormValid())
                 {
+
+                    // Attchments to be handled Here in Session service Only once the Form is
+                    // Validated Successfully
+                    try
+                    {
+                        if (caseForm.getAttachment() != null)
+                        {
+                            if (caseForm.getAttachment().getBytes() != null)
+                            {
+                                // Create Attachment here to prevent Data loss in ASyncronous Thread
+                                // Create Attachment
+                                TY_Attachment newAttachment = new TY_Attachment(
+                                        FilenameUtils.getName(caseForm.getAttachment().getOriginalFilename()),
+                                        GC_Constants.gc_Attachment_Category, false);
+                                caseFormAsync.setAttR(srvCloudApiSrv.createAttachment(newAttachment));
+                                if (caseFormAsync.getAttR() != null)
+                                {
+                                    if (srvCloudApiSrv.persistAttachment(caseFormAsync.getAttR().getUploadUrl(),
+                                            caseForm.getAttachment()))
+                                    {
+                                        log.info("Attachment with id : " + caseFormAsync.getAttR()
+                                                + " Persisted in Document Container.. for Submission ID: "
+                                                + caseFormAsync.getSubmGuid());
+                                    }
+                                }
+
+                            }
+                        }
+
+                    }
+                    catch (EX_ESMAPI | IOException e)
+                    {
+
+                        if (e instanceof IOException)
+                        {
+                            handleNoFileDataAttachment(caseFormAsync);
+                        }
+                        else if (e instanceof EX_ESMAPI)
+                        {
+                            handleAttachmentPersistError(caseFormAsync, e);
+                        }
+
+                        isSubmitted = false;
+                    }
                     userSessInfo.getCurrentForm4Submission().setValid(true);
 
                     // SUCC_CASE_SUBM=Case with submission id - {0} of Type - {1} submitted
@@ -297,12 +304,12 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     isSubmitted = true;
 
                 }
+                else // Error Handling :Payload Error
+                {
+                    // Message Handling Implicitly done via call to Form Validity Check
+                    isSubmitted = false;
+                }
 
-            }
-            else // Error Handling :Payload Error
-            {
-                // Message Handling Implicitly done via call to Form Validity Check
-                isSubmitted = false;
             }
 
         }
@@ -512,28 +519,46 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                     if (cusItemO.isPresent())
                     {
-                        // Check that Category is not a level 1 - Base Category
-                        if ((catalogSrv.getCatgHierarchyforCatId(
+                        long catLen = Arrays.stream(catalogSrv.getCatgHierarchyforCatId(
                                 userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc(),
-                                cusItemO.get().getCaseTypeEnum())).length <= 1)
+                                cusItemO.get().getCaseTypeEnum())).filter(Objects::nonNull).count();
+                        // Check that Category is not a level 1 - Base Category
+                        if (catLen <= 1)
                         {
-                            // Payload Error as Category level shuld be atleast 2
-                            String msg = msgSrc.getMessage("ERR_CATG_LVL", new Object[]
-                            { userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc() }, Locale.ENGLISH);
-                            log.error(msg); // System Log
+                            // Extract Category Description
+                            TY_CatalogTree catgTree = catalogSrv.getCaseCatgTree4LoB(cusItemO.get().getCaseTypeEnum());
+                            if (catgTree != null)
+                            {
+                                if (CollectionUtils.isNotEmpty(catgTree.getCategories()))
+                                {
+                                    Optional<TY_CatalogItem> currCatgDetailsO = catgTree
+                                            .getCategories().stream().filter(f -> f.getId().equals(userSessInfo
+                                                    .getCurrentForm4Submission().getCaseForm().getCatgDesc()))
+                                            .findFirst();
+                                    if (currCatgDetailsO.isPresent())
+                                    {
+                                        // Payload Error as Category level shuld be atleast 2
+                                        String msg = msgSrc.getMessage("ERR_CATG_LVL", new Object[]
+                                        { currCatgDetailsO.get().getName() }, Locale.ENGLISH);
+                                        log.error(msg); // System Log
 
-                            // Logging Framework
-                            TY_Message logMsg = new TY_Message(
-                                    userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                                    Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
-                                    userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
-                            userSessInfo.getMessagesStack().add(logMsg);
+                                        // Logging Framework
+                                        TY_Message logMsg = new TY_Message(
+                                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                                Timestamp.from(Instant.now()), EnumStatus.Error,
+                                                EnumMessageType.ERR_PAYLOAD,
+                                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+                                        userSessInfo.getMessagesStack().add(logMsg);
 
-                            // Instantiate and Fire the Event : Syncronous processing
-                            EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
-                            applicationEventPublisher.publishEvent(logMsgEvent);
+                                        // Instantiate and Fire the Event : Syncronous processing
+                                        EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
+                                        applicationEventPublisher.publishEvent(logMsgEvent);
 
-                            userSessInfo.setFormErrorMsg(msg); // For Form Display
+                                        this.addFormErrors(msg);// For Form Display
+
+                                    }
+                                }
+                            }
 
                             // Add to Display Messages : to be shown to User or Successful Submission
                             isValid = false;
@@ -563,7 +588,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     EV_LogMessage logMsgEvent = new EV_LogMessage(this, message);
                     applicationEventPublisher.publishEvent(logMsgEvent);
 
-                    userSessInfo.setFormErrorMsg(msg); // For Form Display
+                    this.addFormErrors(msg);// For Form Display
 
                     isValid = false;
 
@@ -633,6 +658,10 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             userDetails.setUsAcConEmpl(usAccConEmpl);
             userSessInfo.setUserDetails(userDetails); // Set in Session
 
+        }
+
+        if (userSessInfo.getUserDetails().getUsAcConEmpl() != null)
+        {
             try
             {
                 // Get the cases for User
@@ -653,6 +682,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             }
 
         }
+
     }
 
     // #Test
@@ -674,6 +704,35 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         return currCaseForm;
     }
 
+    @Override
+    public void clearFormErrors()
+    {
+        this.userSessInfo.getFormErrorMsgs().clear();
+    }
+
+    @Override
+    public List<String> getFormErrors()
+    {
+        return this.getFormErrors();
+    }
+
+    @Override
+    public void addFormErrors(String errorMsg)
+    {
+        if (StringUtils.hasText(errorMsg))
+        {
+            if (userSessInfo.getFormErrorMsgs() != null)
+            {
+                userSessInfo.getFormErrorMsgs().add(errorMsg);
+            }
+            else
+            {
+                userSessInfo.setFormErrorMsgs(new ArrayList<String>());
+                userSessInfo.getFormErrorMsgs().add(errorMsg);
+            }
+        }
+    }
+
     private void handleAttachmentPersistError(TY_CaseFormAsync caseFormAsync, Exception e)
     {
         String msg;
@@ -682,6 +741,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                 e.getLocalizedMessage() }, Locale.ENGLISH);
 
         log.error(msg);
+
+        this.addFormErrors(msg);// For Form Display
+
         TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
                 Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
                 caseFormAsync.getSubmGuid(), msg);

@@ -1,10 +1,7 @@
 package com.sap.cap.esmapi.ui.controllers;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,16 +20,12 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
-import com.sap.cap.esmapi.events.event.EV_LogMessage;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
-import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
-import com.sap.cap.esmapi.utilities.enums.EnumStatus;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 
@@ -65,7 +58,8 @@ public class POCLocalController
     private ApplicationEventPublisher applicationEventPublisher;
 
     private final String caseListVWRedirect = "redirect:/poclocal/";
-    private final String caseFormErrorRedirect = "redirect:/poclocal/errForm";
+    private final String caseFormErrorRedirect = "redirect:/poclocal/errForm/";
+    private final String caseFormView = "caseFormPOCLocal";
 
     @GetMapping("/")
     public String showCasesList(Model model)
@@ -124,7 +118,7 @@ public class POCLocalController
     @GetMapping("/createCase/")
     public String showCaseAsyncForm(Model model)
     {
-        String viewCaseForm = "caseFormPOCLocal";
+        String viewCaseForm = caseFormView;
 
         if ((StringUtils.hasText(userSessSrv.getUserDetails4mSession().getAccountId())
                 || StringUtils.hasText(userSessSrv.getUserDetails4mSession().getEmployeeId()))
@@ -151,17 +145,17 @@ public class POCLocalController
                     TY_Case_Form caseForm = new TY_Case_Form();
                     if (userSessSrv.getUserDetails4mSession().isEmployee())
                     {
-                        caseForm.setAccId(userSessSrv.getUserDetails4mSession().getAccountId()); // hidden
+                        caseForm.setAccId(userSessSrv.getUserDetails4mSession().getEmployeeId()); // hidden
                     }
                     else
                     {
-                        caseForm.setAccId(userSessSrv.getUserDetails4mSession().getEmployeeId()); // hidden
+                        caseForm.setAccId(userSessSrv.getUserDetails4mSession().getAccountId()); // hidden
                     }
 
                     caseForm.setCaseTxnType(cusItemO.get().getCaseType()); // hidden
                     model.addAttribute("caseForm", caseForm);
 
-                    model.addAttribute("formError", null);
+                    model.addAttribute("formErrors", null);
 
                     // also Upload the Catg. Tree as per Case Type
                     model.addAttribute("catgsList",
@@ -223,11 +217,79 @@ public class POCLocalController
 
     }
 
-    private Ty_UserAccountContactEmployee getUserAccount()
+    @GetMapping("/errForm/")
+    public String showErrorCaseForm(Model model)
     {
-        return new Ty_UserAccountContactEmployee("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
-                "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00",
-                "11ed17c5-47d5-c4de-afdb-818bd8010a00", false, false);
 
+        if ((StringUtils.hasText(userSessSrv.getUserDetails4mSession().getAccountId())
+                || StringUtils.hasText(userSessSrv.getUserDetails4mSession().getEmployeeId()))
+                && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations())
+                && userSessSrv.getCurrentForm4Submission() != null)
+        {
+
+            Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+                    .filter(g -> g.getCaseTypeEnum().toString().equals(EnumCaseTypes.Learning.toString())).findFirst();
+            if (cusItemO.isPresent() && catgTreeSrv != null)
+            {
+
+                model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
+
+                // Populate User Details
+                TY_UserESS userDetails = new TY_UserESS();
+                userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                model.addAttribute("userInfo", userDetails);
+
+                // Populate Case Form Details
+                TY_Case_Form caseForm = new TY_Case_Form();
+                if (userSessSrv.getUserDetails4mSession().isEmployee())
+                {
+                    caseForm.setAccId(userSessSrv.getUserDetails4mSession().getAccountId()); // hidden
+                }
+                else
+                {
+                    caseForm.setAccId(userSessSrv.getUserDetails4mSession().getEmployeeId()); // hidden
+                }
+
+                caseForm.setCaseTxnType(cusItemO.get().getCaseType()); // hidden
+                caseForm.setCatgDesc(userSessSrv.getCurrentForm4Submission().getCaseForm().getCatgDesc()); // Curr Catg
+                caseForm.setDescription(userSessSrv.getCurrentForm4Submission().getCaseForm().getDescription()); // Curr
+                                                                                                                 // Notes
+                caseForm.setSubject(userSessSrv.getCurrentForm4Submission().getCaseForm().getSubject()); // Curr Subject
+
+                model.addAttribute("formErrors", userSessSrv.getFormErrors());
+
+                // Not Feasible to have a Validation Error in Form and Attachment Persisted -
+                // But just to handle theoratically in case there is an Error in Attachment
+                // Persistence only- Remove the attachment otherwise let it persist
+                if (CollectionUtils.isNotEmpty(userSessSrv.getMessageStack()))
+                {
+                    Optional<TY_Message> attErrO = userSessSrv.getMessageStack().stream()
+                            .filter(e -> e.getMsgType().equals(EnumMessageType.ERR_ATTACHMENT)).findFirst();
+                    if (!attErrO.isPresent())
+                    {
+                        // Attachment able to presist do not remove it from Current Payload
+                        caseForm.setAttachment(userSessSrv.getCurrentForm4Submission().getCaseForm().getAttachment());
+
+                    }
+                }
+
+                model.addAttribute("caseForm", caseForm);
+
+                // also Upload the Catg. Tree as per Case Type
+                model.addAttribute("catgsList",
+                        catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
+
+            }
+            else
+            {
+
+                throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]
+                { EnumCaseTypes.Learning.toString() }, Locale.ENGLISH));
+            }
+
+        }
+
+        return caseFormView;
     }
+
 }

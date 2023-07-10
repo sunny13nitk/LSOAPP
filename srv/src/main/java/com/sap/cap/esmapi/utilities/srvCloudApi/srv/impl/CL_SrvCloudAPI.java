@@ -1876,6 +1876,14 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     {
                         isPersisted = true;
                     }
+                    else
+                    {
+                        HttpEntity entityResp = response.getEntity();
+                        String apiOutput = EntityUtils.toString(entityResp);
+                        System.out.println(apiOutput);
+                        throw new EX_ESMAPI("Error peristing Attachment for filename : " + file.getOriginalFilename()
+                                + "HTTPSTATUS Code" + statusCode);
+                    }
 
                 }
             }

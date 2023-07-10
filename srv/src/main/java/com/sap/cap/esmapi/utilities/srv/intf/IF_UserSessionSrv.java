@@ -50,6 +50,12 @@ public interface IF_UserSessionSrv
 
     public boolean SubmitCaseForm(TY_Case_Form caseForm);
 
+    public void clearFormErrors();
+
+    public List<String> getFormErrors();
+
+    public void addFormErrors(String errorMsg);
+
     public TY_CaseFormAsync getCurrentForm4Submission();
 
     public String createAccount() throws EX_ESMAPI;

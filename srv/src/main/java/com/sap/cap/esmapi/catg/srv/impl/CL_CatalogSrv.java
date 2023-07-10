@@ -84,10 +84,10 @@ public class CL_CatalogSrv implements IF_CatalogSrv
             String catCurr = catId;
 
             // Get Complete Catalog Details
-            TY_CatalogTree catalogTree = this.loadCatgTree4CaseType(caseType);
+            TY_CatalogTree catalogTree = this.getCaseCatgTree4LoB(caseType);
             if (CollectionUtils.isNotEmpty(catalogTree.getCategories()))
             {
-                catTree = new String[maxCatgLevels]; //Max upto 4 levels
+                catTree = new String[maxCatgLevels]; // Max upto 4 levels
                 while (StringUtils.hasText(catCurr))
                 {
                     String catScan = catCurr;
@@ -98,8 +98,8 @@ public class CL_CatalogSrv implements IF_CatalogSrv
                     {
                         catTree[idx] = catCurr;
 
-                        //Seek Parent
-                        if(StringUtils.hasText(itemSel.get().getParentId()))
+                        // Seek Parent
+                        if (StringUtils.hasText(itemSel.get().getParentId()))
                         {
                             catCurr = itemSel.get().getParentId();
                         }

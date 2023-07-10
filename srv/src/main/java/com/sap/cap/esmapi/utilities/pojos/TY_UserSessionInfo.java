@@ -21,6 +21,6 @@ public class TY_UserSessionInfo
     private List<String> messages; // Cases ESS List Messages only - New Cases Created
     private List<TY_CaseESS> cases; // Every Roundtrip Refresh - Event Case Form Submit/Status Change TBD
     private List<TY_Message> messagesStack = new ArrayList<TY_Message>(); // Session Messages Flow Stack
-    private String formErrorMsg;
+    private List<String> formErrorMsgs;
     private boolean rateLimitBreached;
 }

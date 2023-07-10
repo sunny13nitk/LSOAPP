@@ -72,12 +72,15 @@ public class EV_HDLR_CaseFormSubmit
                 if (evCaseFormSubmit.getPayload().isValid())
                 {
                     log.info("Case Payload is found to be successfully validated .......");
+                    Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream().filter(
+                            g -> g.getCaseType().equals(evCaseFormSubmit.getPayload().getCaseForm().getCaseTxnType()))
+                            .findFirst();
 
                     // Submission Id found on Case
-                    if (StringUtils.hasText(evCaseFormSubmit.getPayload().getSubmGuid()))
+                    if (StringUtils.hasText(evCaseFormSubmit.getPayload().getSubmGuid()) && cusItemO.isPresent())
                     {
                         TY_Case_SrvCloud newCaseEntity = new TY_Case_SrvCloud();
-                        Optional<TY_CatgCusItem> cusItemO = null;
+
                         TY_AttachmentResponse attR = null;
 
                         // If An Employee has not logged in
