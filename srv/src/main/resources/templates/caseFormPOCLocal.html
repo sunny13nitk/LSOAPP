@@ -58,12 +58,25 @@
 
          <div class="col-xs-15">
             <div th:if="${formErrors != null}">
-
                <!-- Check for Form error -->
+               <div data-role="panel" data-title-caption="Case Form Validation Error(s)" data-collapsed="true"
+                  data-collapsible="true" data-cls-panel="shadow-3" data-cls-title="bg-lightRed fg-white"
+                   data-cls-content="bg-lightRed fg-white">
 
-               <div class="remark alert" style="padding-top: 10px; margin: 2px">
-                  <label th:text="'Error Creating Case : ' + ${formError}"></label>
+                  <div class="cell-11">
+                     <table class="table  table compact">
+                        <tbody>
+                           <tr th:each="msg : ${formErrors}">
+
+                              <td style="text-align: left; padding: 8px;" th:text="${msg}"></td>
+                           </tr>
+                        </tbody>
+                     </table>
+
+                  </div>
                </div>
+
+
             </div>
          </div>
 

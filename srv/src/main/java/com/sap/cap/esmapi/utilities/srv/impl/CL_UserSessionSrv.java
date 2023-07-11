@@ -210,6 +210,11 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     public boolean SubmitCaseForm(TY_Case_Form caseForm)
     {
         boolean isSubmitted = true;
+        if (CollectionUtils.isNotEmpty(userSessInfo.getFormErrorMsgs()))
+        {
+            this.clearFormErrors();
+        }
+
         if (caseForm != null && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
         {
             // Push Form data to Session
@@ -713,7 +718,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     @Override
     public List<String> getFormErrors()
     {
-        return this.getFormErrors();
+        return this.userSessInfo.getFormErrorMsgs();
     }
 
     @Override
