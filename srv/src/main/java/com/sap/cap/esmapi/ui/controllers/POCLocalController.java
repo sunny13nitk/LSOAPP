@@ -243,11 +243,11 @@ public class POCLocalController
                 TY_Case_Form caseForm = new TY_Case_Form();
                 if (userSessSrv.getUserDetails4mSession().isEmployee())
                 {
-                    caseForm.setAccId(userSessSrv.getUserDetails4mSession().getAccountId()); // hidden
+                    caseForm.setAccId(userSessSrv.getUserDetails4mSession().getEmployeeId()); // hidden
                 }
                 else
                 {
-                    caseForm.setAccId(userSessSrv.getUserDetails4mSession().getEmployeeId()); // hidden
+                    caseForm.setAccId(userSessSrv.getUserDetails4mSession().getAccountId()); // hidden
                 }
 
                 caseForm.setCaseTxnType(cusItemO.get().getCaseType()); // hidden

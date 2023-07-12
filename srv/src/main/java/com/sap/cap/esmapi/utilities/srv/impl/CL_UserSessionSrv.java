@@ -210,10 +210,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     public boolean SubmitCaseForm(TY_Case_Form caseForm)
     {
         boolean isSubmitted = true;
-        if (CollectionUtils.isNotEmpty(userSessInfo.getFormErrorMsgs()))
-        {
-            this.clearFormErrors();
-        }
+
+        // Clear Buffer for Previous Form Submission
+        clearPreviousSubmission4mSessionBuffer();
 
         if (caseForm != null && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
         {
@@ -569,6 +568,51 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                             isValid = false;
 
                         }
+
+                        // Also check for Allowed Attachment Type(s) as provided by the business
+                        if (rlConfig != null
+                                && userSessInfo.getCurrentForm4Submission().getCaseForm().getAttachment() != null)
+                        {
+                            if (CollectionUtils.isEmpty(userSessInfo.getAllowedAttachmentTypes()))
+                            {
+                                // Populate Attachment Types allowed in Session
+                                userSessInfo.setAllowedAttachmentTypes(
+                                        Arrays.asList(rlConfig.getAllowedAttachments().split("\\|")));
+
+                            }
+                            if (StringUtils
+                                    .hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getAttachment()
+                                            .getOriginalFilename())
+                                    && CollectionUtils.isNotEmpty(userSessInfo.getAllowedAttachmentTypes()))
+                            {
+                                // Get the Extension Type for Attachment
+                                String filename = userSessInfo.getCurrentForm4Submission().getCaseForm().getAttachment()
+                                        .getOriginalFilename();
+                                String[] fNameSplits = filename.split("\\.");
+
+                                if (fNameSplits != null)
+                                {
+                                    String extensionAttachment = null;
+                                    if (fNameSplits.length >= 1)
+                                    {
+                                        extensionAttachment = fNameSplits[fNameSplits.length - 1];
+                                    }
+                                    if (StringUtils.hasText(extensionAttachment))
+                                    {
+                                        String extnType = extensionAttachment;
+                                        Optional<String> extnfoundO = userSessInfo.getAllowedAttachmentTypes().stream()
+                                                .filter(a -> a.equals(extnType)).findFirst();
+                                        if (!extnfoundO.isPresent())
+                                        {
+                                            // Invalid Attachment TYpe Error
+                                            handleInvalidAttachment(filename, extnType);
+                                            isValid = false;
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
                     }
 
                 }
@@ -602,11 +646,11 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                 // Also to Include Country mandatory check for certain category as requested by
                 // business.
 
-                // Also check for Allowed Attachment Type(s) as provided by the business
             }
         }
 
         return isValid;
+
     }
 
     @Override
@@ -738,6 +782,26 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         }
     }
 
+    private void handleInvalidAttachment(String filename, String extnType)
+    {
+        String msg;
+        msg = msgSrc.getMessage("ERR_INVALID_ATT_TYPE", new Object[]
+        { extnType, filename }, Locale.ENGLISH);
+
+        log.error(msg);
+        this.addFormErrors(msg);
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
+                userSessInfo.getCurrentForm4Submission().getSubmGuid(), msg);
+        this.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) userSessInfo.getCurrentForm4Submission().getSubmGuid(),
+                logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+    }
+
     private void handleAttachmentPersistError(TY_CaseFormAsync caseFormAsync, Exception e)
     {
         String msg;
@@ -779,6 +843,28 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
         // Should be handled Centrally via Aspect
         throw new EX_ESMAPI(msg);
+    }
+
+    @Override
+    public void clearPreviousSubmission4mSessionBuffer()
+    {
+        // clear Previous Run Form Error Messages
+        if (CollectionUtils.isNotEmpty(userSessInfo.getFormErrorMsgs()))
+        {
+            this.clearFormErrors();
+        }
+
+        // Clear previous run attachment error(s) from Messages Stack
+        if (CollectionUtils.isNotEmpty(userSessInfo.getMessagesStack()))
+        {
+            Optional<TY_Message> attErrO = userSessInfo.getMessagesStack().stream()
+                    .filter(e -> e.getMsgType().equals(EnumMessageType.ERR_ATTACHMENT)).findFirst();
+            if (attErrO.isPresent())
+            {
+                userSessInfo.getMessagesStack().remove(attErrO.get());
+
+            }
+        }
     }
 
 }

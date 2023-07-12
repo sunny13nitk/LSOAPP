@@ -58,9 +58,9 @@ public class PropertyConfig
 	@Bean
 	@Autowired // For PropertySourcesPlaceholderConfigurer
 	public TY_RLConfig RatelimitConfigLoad(@Value("${numFormSubms}") final int numFormSubms,
-			@Value("${intvSecs}") final long intvSecs)
+			@Value("${intvSecs}") final long intvSecs,@Value("${allowedAttachments}") final String allowedAttachments)
 	{
-		TY_RLConfig rlConfig = new TY_RLConfig(numFormSubms, intvSecs);
+		TY_RLConfig rlConfig = new TY_RLConfig(numFormSubms, intvSecs,allowedAttachments);
 		return rlConfig;
 	}
 

@@ -23,4 +23,5 @@ public class TY_UserSessionInfo
     private List<TY_Message> messagesStack = new ArrayList<TY_Message>(); // Session Messages Flow Stack
     private List<String> formErrorMsgs;
     private boolean rateLimitBreached;
+    private List<String> allowedAttachmentTypes;
 }

@@ -11,4 +11,5 @@ public class TY_RLConfig
 {
     private int numFormSubms;
     private long intvSecs;
+    private String allowedAttachments;
 }

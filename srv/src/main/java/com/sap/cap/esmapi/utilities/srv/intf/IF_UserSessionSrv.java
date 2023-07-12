@@ -80,6 +80,13 @@ public interface IF_UserSessionSrv
     public boolean getCurrentRateLimitBreachedValue();
 
     /*
+     * Clear Previos Form Error Messages and Message Stack for Form Attachment Error
+     * if any for provisioning new Session Error Messages and hosting new
+     * attachments
+     */
+    public void clearPreviousSubmission4mSessionBuffer();
+
+    /*
      * Update Session Messages and Log(s) for a submission event result with Case Id
      * to notify user and update DB
      */
