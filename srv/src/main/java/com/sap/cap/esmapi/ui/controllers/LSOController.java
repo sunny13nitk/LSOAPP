@@ -75,10 +75,11 @@ public class LSOController
                 if (userSessSrv != null)
                 {
                     // Get User Info. from XSUAA TOken
-                    if (userSessSrv.getUserDetails(token) != null)
+                    if (userSessSrv.getESSDetails(token, true) != null)
                         // check User and Account Bound
                         if (userSessSrv.getUserDetails4mSession() != null)
                         {
+                            log.info("User Details Bound from Session!");
                             if (StringUtils.hasText(userSessSrv.getUserDetails4mSession().getAccountId())
                                     || StringUtils.hasText(userSessSrv.getUserDetails4mSession().getEmployeeId()))
                             {
@@ -92,6 +93,8 @@ public class LSOController
                                     if (cusItemO.isPresent() && catgTreeSrv != null)
                                     {
                                         userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                                        log.info("Fetching Cases for User From Session : "
+                                                + userSessSrv.getUserDetails4mSession());
                                         userDetails.setCases(userSessSrv.getSessionInfo4Test().getCases());
                                         model.addAttribute("userInfo", userDetails);
                                         model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());

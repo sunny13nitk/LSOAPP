@@ -37,6 +37,7 @@ import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.enums.EnumStatus;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
@@ -116,6 +117,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                 if (userSessInfo == null)
                 {
+                    log.info("User Session Info. Instantiated!");
                     userSessInfo = new TY_UserSessionInfo();
                 }
 
@@ -124,6 +126,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                 {
                     // Fetch and Return
                     TY_UserDetails userDetails = new TY_UserDetails();
+                    log.info("Fetching Logged in User Details!!");
                     userDetails.setAuthenticated(true);
                     userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
                     Ty_UserAccountContactEmployee usAccConEmpl = new Ty_UserAccountContactEmployee();
@@ -144,6 +147,8 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     }
                     userDetails.setUsAcConEmpl(usAccConEmpl);
                     userSessInfo.setUserDetails(userDetails); // Set in Session
+                    log.info("User Details populated in Session : "
+                            + userSessInfo.getUserDetails().getUsAcConEmpl().toString());
 
                 }
             }
@@ -714,6 +719,13 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             try
             {
                 // Get the cases for User
+                // Clear from Buffer
+                if (CollectionUtils.isNotEmpty(this.getCases4User4mSession()))
+                {
+                    userSessInfo.getCases().clear();
+                }
+
+                // Fetch Afresh and Reset
                 userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl()));
 
             }
@@ -782,6 +794,28 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         }
     }
 
+    @Override
+    public void clearPreviousSubmission4mSessionBuffer()
+    {
+        // clear Previous Run Form Error Messages
+        if (CollectionUtils.isNotEmpty(userSessInfo.getFormErrorMsgs()))
+        {
+            this.clearFormErrors();
+        }
+
+        // Clear previous run attachment error(s) from Messages Stack
+        if (CollectionUtils.isNotEmpty(userSessInfo.getMessagesStack()))
+        {
+            Optional<TY_Message> attErrO = userSessInfo.getMessagesStack().stream()
+                    .filter(e -> e.getMsgType().equals(EnumMessageType.ERR_ATTACHMENT)).findFirst();
+            if (attErrO.isPresent())
+            {
+                userSessInfo.getMessagesStack().remove(attErrO.get());
+
+            }
+        }
+    }
+
     private void handleInvalidAttachment(String filename, String extnType)
     {
         String msg;
@@ -846,25 +880,16 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     }
 
     @Override
-    public void clearPreviousSubmission4mSessionBuffer()
+    public List<TY_CaseESS> getCases4User4mSession()
     {
-        // clear Previous Run Form Error Messages
-        if (CollectionUtils.isNotEmpty(userSessInfo.getFormErrorMsgs()))
+
+        if (CollectionUtils.isNotEmpty(userSessInfo.getCases()))
         {
-            this.clearFormErrors();
+            log.info("# Cases returned for User From Session : " + userSessInfo.getCases().size());
+            return userSessInfo.getCases();
         }
 
-        // Clear previous run attachment error(s) from Messages Stack
-        if (CollectionUtils.isNotEmpty(userSessInfo.getMessagesStack()))
-        {
-            Optional<TY_Message> attErrO = userSessInfo.getMessagesStack().stream()
-                    .filter(e -> e.getMsgType().equals(EnumMessageType.ERR_ATTACHMENT)).findFirst();
-            if (attErrO.isPresent())
-            {
-                userSessInfo.getMessagesStack().remove(attErrO.get());
-
-            }
-        }
+        return null;
     }
 
 }

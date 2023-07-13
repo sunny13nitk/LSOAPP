@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserSessionInfo;
@@ -21,6 +22,8 @@ public interface IF_UserSessionSrv
 
     // For Test Purpose Only to Test the Controller - #Test
     public TY_UserSessionInfo getSessionInfo4Test();
+
+    public List<TY_CaseESS> getCases4User4mSession();
 
     /*
      * Get User Credentials via Token - Get and persist in Session if Not Bound -
