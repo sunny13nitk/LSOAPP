@@ -26,7 +26,6 @@ import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
-import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,9 +37,6 @@ public class POCLocalController
 {
     @Autowired
     private IF_UserSessionSrv userSessSrv;
-
-    @Autowired
-    private IF_UserAPISrv userSrv;
 
     @Autowired
     private TY_CatgCus catgCusSrv;

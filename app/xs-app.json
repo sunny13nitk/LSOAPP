@@ -15,8 +15,8 @@
       "authenticationType": "none"
     },
     {
-      "source": "^/poc",
-      "target": "/poc",
+      "source": "^/lso",
+      "target": "/lso",
       "destination": "token-destination",
       "authenticationType": "none"
     },

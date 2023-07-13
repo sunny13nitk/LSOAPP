@@ -106,7 +106,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
             else
             {
-
+                // #AUTH
                 // Role Checks to be explicitly handled here
                 if (CollectionUtils.isNotEmpty(userInfo.getRoles()))
                 {
