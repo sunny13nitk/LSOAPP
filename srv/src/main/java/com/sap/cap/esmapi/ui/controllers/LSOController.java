@@ -94,7 +94,7 @@ public class LSOController
                                     {
                                         userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
                                         log.info("Fetching Cases for User From Session : "
-                                                + userSessSrv.getUserDetails4mSession());
+                                                + userSessSrv.getUserDetails4mSession().toString());
                                         userDetails.setCases(userSessSrv.getSessionInfo4Test().getCases());
                                         model.addAttribute("userInfo", userDetails);
                                         model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
