@@ -19,4 +19,13 @@ public class Ty_UserAccountContactEmployee
     private String employeeId;
     private boolean employee;
     private boolean external;
+    @Override
+    public String toString()
+    {
+        return "Ty_UserAccountContactEmployee [userId=" + userId + ", userName=" + userName + ", userEmail=" + userEmail
+                + ", accountId=" + accountId + ", contactId=" + contactId + ", employeeId=" + employeeId + ", employee="
+                + employee + ", external=" + external + "]";
+    }
+
+    
 }
