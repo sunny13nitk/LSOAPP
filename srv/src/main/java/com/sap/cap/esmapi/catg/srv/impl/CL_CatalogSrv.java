@@ -169,6 +169,10 @@ public class CL_CatalogSrv implements IF_CatalogSrv
             { caseType.toString() }, Locale.ENGLISH));
         }
 
+        if(CollectionUtils.isNotEmpty(caseCatgTree.getCategories()))
+        {
+            caseCatgTree.getCategories().add(0, new TY_CatalogItem());
+        }
         return caseCatgTree;
     }
 

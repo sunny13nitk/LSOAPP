@@ -61,7 +61,7 @@
                <!-- Check for Form error -->
                <div data-role="panel" data-title-caption="Case Form Validation Error(s)" data-collapsed="true"
                   data-collapsible="true" data-cls-panel="shadow-3" data-cls-title="bg-lightRed fg-white"
-                   data-cls-content="bg-lightRed fg-white">
+                  data-cls-content="bg-lightRed fg-white">
 
                   <div class="cell-11">
                      <table class="table  table compact">
@@ -108,8 +108,8 @@
                   <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px"
                      th:if="${catgsList != null}">
                      <label>Service Category </label>
-                     <select name="catgDesc" data-role="select" th:field="*{catgDesc}" data-cls-option="fg-grayMouse"
-                        data-cls-selected-item="bg-teal fg-white" data-random-color="true">
+                     <select name="catgDesc"  id="dropDown" data-role="select" th:field="*{catgDesc}" data-cls-option="fg-grayMouse"
+                        data-cls-selected-item="bg-teal fg-white" data-random-color="true" addEmptyValue="true">
 
                         <option th:each="catg : ${catgsList}" th:value="${catg.id}" th:selected="${catg.id}"
                            th:text="${catg.parentName != null} ? ${catg.parentName} + '>' +${catg.name}: ${catg.name}">
@@ -118,7 +118,13 @@
 
 
                      </select>
-                     <small class="text-muted">Select Service Category from dropdown. </small>
+                     <small class="text-muted">Select Service Category from dropdown and Hit Reload to Refresh Form for Chosen Category. </small>
+                     <span>
+                        <button id="refresh" style="margin: 3px;" class="button secondary cycle outline" type="submit" name="action"
+                           value="catgChange">
+                           <span class="mif-replay"></span>
+                        </button>
+                     </span>
 
                   </div>
 
@@ -144,7 +150,7 @@
 
                   <div class="d-flex flex-row-r" style="margin-top: 30px; margin-bottom: 10px; margin-right: 20px;">
                      <button class="button rounded " style="color: #004466; background: #00ffb3" data-role="hint"
-                        data-hint-position="top" data-cls-hint="fg-black" data-hint-text="Submit the Case">
+                        data-hint-position="top" data-cls-hint="fg-black" data-hint-text="Submit the Case" name="action" value="saveCase">
                         <span class="mif-beenhere" style="margin-left: 0px"> </span> <span
                            style="margin-left: 3px">Submit</span>
                      </button>
@@ -187,7 +193,15 @@
 
 
 
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+   <script th:inline="javascript">
 
+      $('#dropDown').change(function ()
+      {
+         $('#refresh').prop( 'disabled', $(this).val() === "" )
+      });
+
+   </script>
 
    <!-- Metro 4 -->
    <script src="https://cdn.metroui.org.ua/v4.3.2/js/metro.min.js"></script>

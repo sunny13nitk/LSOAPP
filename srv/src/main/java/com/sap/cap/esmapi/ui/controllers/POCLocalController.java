@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -178,7 +179,7 @@ public class POCLocalController
         return viewCaseForm;
     }
 
-    @PostMapping("/saveCase")
+    @PostMapping(value = "/saveCase", params = "action=saveCase") 
     public String saveCase(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
     {
 
@@ -288,4 +289,18 @@ public class POCLocalController
         return caseFormView;
     }
 
+
+    @PostMapping(value = "/saveCase", params = "action=catgChange") 
+    public String refreshCaseForm4Catg(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
+    {
+
+        String viewName = caseListVWRedirect;
+        if (caseForm != null && userSessSrv != null)
+        {
+
+        }
+
+        return "success";
+
+    }
 }
