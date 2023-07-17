@@ -540,6 +540,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                             {
                                 if (CollectionUtils.isNotEmpty(catgTree.getCategories()))
                                 {
+
+                                    // Remove blank Categories from Catalog Tree Used for UI Presentation
+                                    catgTree.getCategories().removeIf(x -> x.getId() == null);
                                     Optional<TY_CatalogItem> currCatgDetailsO = catgTree
                                             .getCategories().stream().filter(f -> f.getId().equals(userSessInfo
                                                     .getCurrentForm4Submission().getCaseForm().getCatgDesc()))
@@ -566,6 +569,8 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                                         this.addFormErrors(msg);// For Form Display
 
                                     }
+                                    // Refurbish Blank Category at Top for New Form - Session maintained
+                                    catgTree.getCategories().add(0, new TY_CatalogItem());
                                 }
                             }
 

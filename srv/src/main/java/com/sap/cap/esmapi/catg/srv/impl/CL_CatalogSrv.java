@@ -17,6 +17,8 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatalogTree;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplates;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplatesCus;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
@@ -28,18 +30,21 @@ import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 public class CL_CatalogSrv implements IF_CatalogSrv
 {
 
+    private static final int maxCatgLevels = 4;
+
     private List<TY_CatalogTree> caseCatgContainer;
 
     @Autowired
     private TY_CatgCus catgCus;
 
     @Autowired
+    private TY_CatgTemplatesCus catgTmplCus;
+
+    @Autowired
     private IF_SrvCloudAPI srvCloudApiSrv;
 
     @Autowired
     private MessageSource msgSrc;
-
-    private static final int maxCatgLevels = 4;
 
     @Override
     public TY_CatalogTree getCaseCatgTree4LoB(EnumCaseTypes caseType) throws EX_ESMAPI
@@ -91,6 +96,8 @@ public class CL_CatalogSrv implements IF_CatalogSrv
                 while (StringUtils.hasText(catCurr))
                 {
                     String catScan = catCurr;
+                    // Remove blank Categories from Catalog Tree Used for UI Presentation
+                    catalogTree.getCategories().removeIf(x -> x.getId() == null);
                     // Scan for Category in Catalog Tree
                     Optional<TY_CatalogItem> itemSel = catalogTree.getCategories().stream()
                             .filter(t -> t.getId().equals(catScan)).findFirst();
@@ -112,10 +119,55 @@ public class CL_CatalogSrv implements IF_CatalogSrv
                     }
 
                 }
+                // Refurbish Blank Category at Top for New Form - Session maintained
+                catalogTree.getCategories().add(0, new TY_CatalogItem());
+
             }
         }
 
         return catTree;
+    }
+
+    @Override
+    public TY_CatgTemplates getTemplates4Catg(String catId, EnumCaseTypes caseType) throws EX_ESMAPI
+    {
+        TY_CatgTemplates catgTmpl = null;
+        if (StringUtils.hasText(catId) && CollectionUtils.isNotEmpty(catgTmplCus.getCatgTemplates())
+                && caseType != null)
+        {
+            TY_CatalogTree catgTree = this.getCaseCatgTree4LoB(caseType);
+            if (CollectionUtils.isNotEmpty(catgTree.getCategories()))
+            {
+                // Remove blank Categories from Catalog Tree Used for UI Presentation
+                catgTree.getCategories().removeIf(x -> x.getId() == null);
+
+                Optional<TY_CatalogItem> currCatgDetailsO = catgTree.getCategories().stream()
+                        .filter(f -> f.getId().equals(catId)).findFirst();
+                if (currCatgDetailsO.isPresent())
+                {
+                    // 1. Get Text from Catg Guid selected in form and Convert to Upper Case
+                    String catgTxt = currCatgDetailsO.get().getName().toUpperCase();
+
+                    // 2. Get Template for Catg. Text using Starts with Pattern matching in Stream
+                    // from Catg Tmpl Cus Autowired Bean
+                    if (StringUtils.hasText(catgTxt))
+                    {
+                        Optional<TY_CatgTemplates> catgTmplO = catgTmplCus.getCatgTemplates().stream()
+                                .filter(t -> t.getCatgU().startsWith(catgTxt)).findFirst();
+                        if (catgTmplO.isPresent())
+                        {
+                            catgTmpl = catgTmplO.get();
+                        }
+                    }
+                }
+
+                // Refurbish Blank Category at Top for New Form - Session maintained
+                catgTree.getCategories().add(0, new TY_CatalogItem());
+            }
+
+        }
+
+        return catgTmpl;
     }
 
     private TY_CatalogTree loadCatgTree4CaseType(EnumCaseTypes caseType)
@@ -169,7 +221,7 @@ public class CL_CatalogSrv implements IF_CatalogSrv
             { caseType.toString() }, Locale.ENGLISH));
         }
 
-        if(CollectionUtils.isNotEmpty(caseCatgTree.getCategories()))
+        if (CollectionUtils.isNotEmpty(caseCatgTree.getCategories()))
         {
             caseCatgTree.getCategories().add(0, new TY_CatalogItem());
         }

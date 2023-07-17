@@ -16,8 +16,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
+import com.sap.cap.esmapi.catg.pojos.TY_CatalogTree;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplates;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
@@ -179,7 +182,7 @@ public class POCLocalController
         return viewCaseForm;
     }
 
-    @PostMapping(value = "/saveCase", params = "action=saveCase") 
+    @PostMapping(value = "/saveCase", params = "action=saveCase")
     public String saveCase(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
     {
 
@@ -289,18 +292,66 @@ public class POCLocalController
         return caseFormView;
     }
 
-
-    @PostMapping(value = "/saveCase", params = "action=catgChange") 
+    @PostMapping(value = "/saveCase", params = "action=catgChange")
     public String refreshCaseForm4Catg(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
     {
 
-        String viewName = caseListVWRedirect;
+        String viewCaseForm = caseFormView;
         if (caseForm != null && userSessSrv != null)
         {
 
+            // Normal Scenario - Catg. chosen Not relevant for Notes Template and/or
+            // additional fields
+
+            if ((StringUtils.hasText(userSessSrv.getUserDetails4mSession().getAccountId())
+                    || StringUtils.hasText(userSessSrv.getUserDetails4mSession().getEmployeeId()))
+                    && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+            {
+
+                Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+                        .filter(g -> g.getCaseTypeEnum().toString().equals(EnumCaseTypes.Learning.toString()))
+                        .findFirst();
+                if (cusItemO.isPresent() && catgTreeSrv != null)
+                {
+
+                    model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
+
+                    // Populate User Details
+                    TY_UserESS userDetails = new TY_UserESS();
+                    userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                    model.addAttribute("userInfo", userDetails);
+
+                    // Account Or Employee already set on the Form
+                    model.addAttribute("formErrors", userSessSrv.getFormErrors());
+
+                    // also Upload the Catg. Tree as per Case Type
+                    model.addAttribute("catgsList",
+                            catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
+
+                    // Scan Current Catg for Templ. Load and or Additional Fields
+
+                    // Scan for Template Load
+                    TY_CatgTemplates catgTemplate = catalogTreeSrv.getTemplates4Catg(caseForm.getCatgDesc(),EnumCaseTypes.Learning);
+                    if (catgTemplate != null)
+                    {
+
+                    }
+
+                    // Case Form Model Set at last
+                    model.addAttribute("caseForm", caseForm);
+                }
+                else
+                {
+
+                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]
+                    { EnumCaseTypes.Learning.toString() }, Locale.ENGLISH));
+                }
+
+            }
+
         }
 
-        return "success";
+        return viewCaseForm;
 
     }
 }
