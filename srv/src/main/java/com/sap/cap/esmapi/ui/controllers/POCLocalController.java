@@ -335,6 +335,9 @@ public class POCLocalController
                     if (catgTemplate != null)
                     {
 
+                        //Set Questionnaire for Category
+                        caseForm.setDescription(catgTemplate.getQuestionnaire());
+
                     }
 
                     // Case Form Model Set at last

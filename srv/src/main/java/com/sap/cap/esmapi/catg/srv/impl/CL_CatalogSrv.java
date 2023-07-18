@@ -146,14 +146,24 @@ public class CL_CatalogSrv implements IF_CatalogSrv
                 if (currCatgDetailsO.isPresent())
                 {
                     // 1. Get Text from Catg Guid selected in form and Convert to Upper Case
-                    String catgTxt = currCatgDetailsO.get().getName().toUpperCase();
+                    String catgTxt = null;
+                    if (StringUtils.hasText(currCatgDetailsO.get().getParentName()))
+                    {
+                        catgTxt = currCatgDetailsO.get().getParentName() + ">" + currCatgDetailsO.get().getName();
+                        catgTxt = catgTxt.toUpperCase();
+                    }
+                    else
+                    {
+                        catgTxt = currCatgDetailsO.get().getName().toUpperCase();
+                    }
 
                     // 2. Get Template for Catg. Text using Starts with Pattern matching in Stream
                     // from Catg Tmpl Cus Autowired Bean
                     if (StringUtils.hasText(catgTxt))
                     {
+                        String catTxtToSearch = catgTxt;
                         Optional<TY_CatgTemplates> catgTmplO = catgTmplCus.getCatgTemplates().stream()
-                                .filter(t -> t.getCatgU().startsWith(catgTxt)).findFirst();
+                                .filter(t -> t.getCatgU().startsWith(catTxtToSearch)).findFirst();
                         if (catgTmplO.isPresent())
                         {
                             catgTmpl = catgTmplO.get();

@@ -231,6 +231,7 @@ public class EV_HDLR_CaseFormSubmit
         msg = msgSrc.getMessage("SUCC_CASE", new Object[]
         { caseID, cusItemO.get().getCaseTypeEnum().toString(), evCaseFormSubmit.getPayload().getSubmGuid() },
                 Locale.ENGLISH);
+        log.info(msg);
         // Populate Success message in session
 
         TY_Message logMsg = new TY_Message(evCaseFormSubmit.getPayload().getUserId(), Timestamp.from(Instant.now()),
