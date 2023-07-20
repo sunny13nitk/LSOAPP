@@ -18,6 +18,7 @@ public class TY_Case_Form
     private String catgDesc;
     private String subject;
     private String description;
+    private String template;
     private MultipartFile attachment;
     private boolean employee;
 

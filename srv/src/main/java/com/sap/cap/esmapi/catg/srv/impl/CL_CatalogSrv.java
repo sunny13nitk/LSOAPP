@@ -136,6 +136,7 @@ public class CL_CatalogSrv implements IF_CatalogSrv
                 && caseType != null)
         {
             TY_CatalogTree catgTree = this.getCaseCatgTree4LoB(caseType);
+            boolean isLvl1 = false;
             if (CollectionUtils.isNotEmpty(catgTree.getCategories()))
             {
                 // Remove blank Categories from Catalog Tree Used for UI Presentation
@@ -154,7 +155,10 @@ public class CL_CatalogSrv implements IF_CatalogSrv
                     }
                     else
                     {
+                        // No Level 1 Catg. is valid . Hence do not seek for level 1 catg.
                         catgTxt = currCatgDetailsO.get().getName().toUpperCase();
+                        isLvl1 = true;
+
                     }
 
                     // 2. Get Template for Catg. Text using Starts with Pattern matching in Stream
@@ -162,12 +166,32 @@ public class CL_CatalogSrv implements IF_CatalogSrv
                     if (StringUtils.hasText(catgTxt))
                     {
                         String catTxtToSearch = catgTxt;
-                        Optional<TY_CatgTemplates> catgTmplO = catgTmplCus.getCatgTemplates().stream()
-                                .filter(t -> t.getCatgU().startsWith(catTxtToSearch)).findFirst();
-                        if (catgTmplO.isPresent())
+                        try
                         {
-                            catgTmpl = catgTmplO.get();
+                            Optional<TY_CatgTemplates> catgTmplO = null;
+                            if (!isLvl1)
+                            {
+                                catgTmplO = catgTmplCus.getCatgTemplates().stream()
+                                        .filter(t -> t.getCatgU().startsWith(catTxtToSearch)).findFirst();
+
+                            }
+                            else
+                            {
+                                catgTmplO = catgTmplCus.getCatgTemplates().stream()
+                                        .filter(t -> t.getCatgU().endsWith(catTxtToSearch)).findFirst();
+                            }
+
+                            if (catgTmplO.isPresent())
+                            {
+                                catgTmpl = catgTmplO.get();
+                            }
+
                         }
+                        catch (NullPointerException e)
+                        {
+                            // Do Nothing - No template Relevant Category selected
+                        }
+
                     }
                 }
 

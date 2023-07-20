@@ -132,16 +132,25 @@
 
 
                   <div class="colspan-9 offset-1" style="margin-top: 35px; margin-bottom: 10px">
-                     <label>Template</label>
-                     <div th:utext="${caseForm.description}"></div>
                      <label>Description</label>
+
+                     <div th:if="${caseForm.template != null}" style="padding-top: 15px; padding-bottom: 20px;">
+                        <!-- Panel for Template(s) -->
+                        <div data-role="panel" data-title-caption="Please provide Issue Description with these details. You can copy the text from this section to below field to use it as a template."
+                           data-collapsed="false" data-collapsible="true" data-cls-panel="shadow-3"
+                           data-cls-title="bg-lightGray fg-black" data-cls-content="bg-transparent fg-black">
+                           <div th:utext="*{template}"></div>
+
+                        </div>
+                     </div>
+
                      <p id="chars-counter" style="margin-top: -1px">You enter 0 char(s)</p>
                      <textarea data-role="textarea" data-prepend="<span class='mif-leanpub mif-3x'></span>"
                         data-cls-prepend="bg-light" th:field="*{description}" data-chars-counter="#chars-counter"
                         data-chars-counter-template="You enter $1 char(s)"
                         data-clear-button-icon="<span class='mif-cross fg-black'></span>">
-                           </textarea>
-                     
+                     </textarea>
+
                      <small class="text-muted">Enter Issue Description in detail. </small>
                   </div>
 

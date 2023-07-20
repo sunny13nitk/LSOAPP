@@ -336,7 +336,7 @@ public class POCLocalController
                     {
 
                         //Set Questionnaire for Category
-                        caseForm.setDescription(catgTemplate.getQuestionnaire());
+                        caseForm.setTemplate(catgTemplate.getQuestionnaire());
 
                     }
 
