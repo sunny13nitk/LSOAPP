@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.config;
 
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
@@ -12,12 +13,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplates;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplatesCus;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.vhelps.cus.TY_VHelpsRoot;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +30,7 @@ public class AppInitializrConfig
 {
     private final String configPath = "/configCatg/config.csv";
     private final String configCatgTemplates = "/configCatg/templates.csv";
+    private final String configPathVHelpsJSON = "/vhelps/VHelps.json";
 
     @Autowired
     private MessageSource msgSrc;
@@ -101,6 +105,36 @@ public class AppInitializrConfig
         }
 
         return catgTempCus;
+    }
+
+    @Bean
+    public TY_VHelpsRoot loadLOBVHelpsCus()
+    {
+        TY_VHelpsRoot vHelpCus = null;
+
+        try
+        {
+            ObjectMapper om = new ObjectMapper();
+
+            ClassPathResource classPathResource = new ClassPathResource(configPathVHelpsJSON);
+            if (classPathResource != null && om != null)
+            {
+                Reader reader = new InputStreamReader(classPathResource.getInputStream());
+                if (reader != null)
+                {
+
+                    vHelpCus = om.readValue(reader, TY_VHelpsRoot.class);
+                    log.info("LOB Custom Fields Customization Loaded!");
+
+                }
+
+            }
+        }
+        catch (Exception e)
+        {
+            log.error("LOB Custom Fields Customization Could not be Loaded!");
+        }
+        return vHelpCus;
     }
 
 }

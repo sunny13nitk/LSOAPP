@@ -1,0 +1,9 @@
+{
+    "VHelpFields": {
+        "LOB": "Learning",
+        "fieldNames": [
+            "LSO_Country",
+            "LSO_Language"
+        ]
+    }
+}
