@@ -10,7 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class TY_SrvCloudUrls 
+public class TY_SrvCloudUrls
 {
     private String userName;
     private String password;
@@ -23,6 +23,6 @@ public class TY_SrvCloudUrls
     private String catgTreeUrl;
     private String docSrvUrl;
     private String emplUrl;
+    private String vhlpUrl;
 
-    
 }

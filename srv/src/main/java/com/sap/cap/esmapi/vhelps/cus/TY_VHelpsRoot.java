@@ -1,5 +1,7 @@
 package com.sap.cap.esmapi.vhelps.cus;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -12,5 +14,5 @@ import lombok.NoArgsConstructor;
 public class TY_VHelpsRoot
 {
     @JsonProperty("VHelpFields")
-    public TY_Cus_VHelpsLOB vHelpsCus;
+    public List<TY_Cus_VHelpsLOB> vHelpsCus;
 }

@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.ui.controllers;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -12,12 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
-import com.sap.cap.esmapi.catg.pojos.TY_CatalogTree;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplates;
@@ -31,6 +29,8 @@ import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
+import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
+import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpSrv;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,6 +53,9 @@ public class POCLocalController
 
     @Autowired
     private MessageSource msgSrc;
+
+    @Autowired
+    private IF_VHelpSrv vhlpSrv;
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -152,6 +155,10 @@ public class POCLocalController
                         caseForm.setAccId(userSessSrv.getUserDetails4mSession().getAccountId()); // hidden
                     }
 
+                    if (vhlpSrv != null)
+                    {
+                        List<TY_KeyValue> vHlpDDLB = vhlpSrv.getVHelpDDLB4Field(EnumCaseTypes.Learning, "LSO_Country");
+                    }
                     caseForm.setCaseTxnType(cusItemO.get().getCaseType()); // hidden
                     model.addAttribute("caseForm", caseForm);
 
@@ -331,11 +338,12 @@ public class POCLocalController
                     // Scan Current Catg for Templ. Load and or Additional Fields
 
                     // Scan for Template Load
-                    TY_CatgTemplates catgTemplate = catalogTreeSrv.getTemplates4Catg(caseForm.getCatgDesc(),EnumCaseTypes.Learning);
+                    TY_CatgTemplates catgTemplate = catalogTreeSrv.getTemplates4Catg(caseForm.getCatgDesc(),
+                            EnumCaseTypes.Learning);
                     if (catgTemplate != null)
                     {
 
-                        //Set Questionnaire for Category
+                        // Set Questionnaire for Category
                         caseForm.setTemplate(catgTemplate.getQuestionnaire());
 
                     }

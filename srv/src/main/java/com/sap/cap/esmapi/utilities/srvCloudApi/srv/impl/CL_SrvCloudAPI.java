@@ -60,6 +60,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
+import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -2306,6 +2307,173 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             System.out.println("# Cases returned in call : " + casesESSList4User.size());
         }
         return casesESSList4User;
+    }
+
+    @Override
+    public List<TY_KeyValue> getVHelpDDLB4Field(String fieldName) throws EX_ESMAPI, IOException
+    {
+        List<TY_KeyValue> vhlbDDLB = null;
+
+        JsonNode jsonNode = null;
+        HttpResponse response = null;
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        String urlLink = null;
+        try
+        {
+            if (StringUtils.hasText(fieldName) && StringUtils.hasText(srvCloudUrls.getVhlpUrl()))
+
+            {
+                log.info("Invoking Value help for FieldName : " + fieldName);
+
+                urlLink = srvCloudUrls.getVhlpUrl() + fieldName;
+
+                String encoding = Base64.getEncoder()
+                        .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                // Query URL Encoding to avoid Illegal character error in Query
+                // URL url = new URL(urlLink);
+                // URI uri = new URI(url.getProtocol(), url.getUserInfo(),
+                // IDN.toASCII(url.getHost()), url.getPort(),
+                // url.getPath(), url.getQuery(), url.getRef());
+                // String correctEncodedURL = uri.toASCIIString();
+
+                HttpGet httpGet = new HttpGet(urlLink);
+
+                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                httpGet.addHeader("accept", "application/json");
+
+                // Fire the Url
+                response = httpClient.execute(httpGet);
+
+                // verify the valid error code first
+                int statusCode = response.getStatusLine().getStatusCode();
+                if (statusCode != HttpStatus.SC_OK)
+                {
+
+                    if (statusCode == HttpStatus.SC_NOT_FOUND)
+                    {
+                        String msg = msgSrc.getMessage("ERR_VHLP_FLD_SRVCLOUD_NOTFOUND", new Object[]
+                        { fieldName }, Locale.ENGLISH);
+                        log.error(msg);
+                        throw new EX_ESMAPI(msg);
+                    }
+                    else
+                    {
+                        String msg = msgSrc.getMessage("ERR_VHLP_FLD_SRVCLOUD_GEN", new Object[]
+                        { fieldName, statusCode }, Locale.ENGLISH);
+                        log.error(msg);
+                        throw new EX_ESMAPI(msg);
+
+                    }
+
+                }
+
+                // Try and Get Entity from Response
+                HttpEntity entity = response.getEntity();
+                String apiOutput = EntityUtils.toString(entity);
+                // Lets see what we got from API
+                // System.out.println(apiOutput);
+
+                // Conerting to JSON
+                ObjectMapper mapper = new ObjectMapper();
+                jsonNode = mapper.readTree(apiOutput);
+
+                if (jsonNode != null)
+                {
+
+                    JsonNode rootNode = jsonNode.path("value");
+                    if (rootNode != null)
+                    {
+                        log.info("Values Bound for Value Help for Field -  " + fieldName);
+                        vhlbDDLB = new ArrayList<TY_KeyValue>();
+
+                        Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
+                        while (payloadItr.hasNext())
+                        {
+                            // System.out.println("Payload Iterator Bound");
+                            Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                            String payloadFieldName = payloadEnt.getKey();
+                            // System.out.println("Payload Field Scanned: " + payloadFieldName);
+
+                            if (payloadFieldName.equals("value"))
+                            {
+                                Iterator<JsonNode> cusItr = payloadEnt.getValue().elements();
+                                // System.out.println("Cases Iterator Bound");
+                                while (cusItr.hasNext())
+                                {
+                                    JsonNode cusEnt = cusItr.next();
+                                    if (cusEnt != null)
+                                    {
+
+                                        Iterator<String> fieldNames = cusEnt.fieldNames();
+                                        while (fieldNames.hasNext())
+                                        {
+                                            String conFieldName = fieldNames.next();
+                                            // System.out.println("Case Entity Field Scanned: " + caseFieldName);
+                                            if (conFieldName.equals("content"))
+                                            {
+                                                Iterator<JsonNode> conItr = cusEnt.path(conFieldName).iterator();
+
+                                                while (conItr.hasNext())
+                                                {
+                                                    String code = null;
+                                                    String value = null;
+                                                    JsonNode conEnt = conItr.next();
+                                                    if (conEnt != null)
+                                                    {
+                                                        Iterator<String> fieldNamesCon = conEnt.fieldNames();
+                                                        while (fieldNames.hasNext())
+                                                        {
+
+                                                            String contentFieldName = fieldNamesCon.next();
+                                                            if (contentFieldName.equals("id"))
+                                                            {
+
+                                                                code = conEnt.get(contentFieldName).asText();
+                                                            }
+
+                                                            if (contentFieldName.equals("description"))
+                                                            {
+
+                                                                value = conEnt.get(contentFieldName).asText();
+                                                            }
+
+                                                        }
+                                                    }
+
+                                                    vhlbDDLB.add(new TY_KeyValue(code, value));
+                                                }
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            }
+        }
+
+        catch (Exception e)
+        {
+            throw new EX_ESMAPI(msgSrc.getMessage("ERR_VHLP_FLD_SRVCLOUD_NOTFOUND", new Object[]
+            { fieldName, e.getMessage() }, Locale.ENGLISH));
+
+        }
+        finally
+        {
+            httpClient.close();
+        }
+
+        return vhlbDDLB;
     }
 
     private String getPOSTURL4BaseUrl(String urlBase)

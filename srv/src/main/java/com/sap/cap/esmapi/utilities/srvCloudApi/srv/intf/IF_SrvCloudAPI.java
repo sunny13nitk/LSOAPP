@@ -16,6 +16,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
+import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
 
 /*
  * Impl with comments
@@ -58,5 +59,7 @@ public interface IF_SrvCloudAPI
             throws EX_ESMAPI, IOException;
 
     public List<TY_CatalogItem> getActiveCaseCategoriesByCatalogId(String catalogID) throws EX_ESMAPI, IOException;
+
+    public List<TY_KeyValue> getVHelpDDLB4Field(String fieldName) throws EX_ESMAPI, IOException;
 
 }

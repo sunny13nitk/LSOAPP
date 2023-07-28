@@ -84,6 +84,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
     private TY_UserSessionInfo userSessInfo;
 
+
     @Override
     public TY_UserDetails getUserDetails(Token token) throws EX_ESMAPI
     {
@@ -141,12 +142,24 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     if (!StringUtils.hasText(usAccConEmpl.getAccountId()))
                     {
                         // Seek Employee and populate
-                        usAccConEmpl.setEmployeeId(srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId()));
-                        usAccConEmpl.setEmployee(true);
+                        /* Enable once ESM Module is live and tested */
+                           // usAccConEmpl.setEmployeeId(srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId()));
+                           // usAccConEmpl.setEmployee(true);
+                          /* Enable once ESM Module is live and tested */ 
+
+                          //For Now Always Create an Account -This PART needs to be commented once ESM module is live
+                          userDetails.setUsAcConEmpl(usAccConEmpl);
+                          userSessInfo.setUserDetails(userDetails); // Set in Session
+                          String accountID = this.createAccount(); 
+                          userSessInfo.getUserDetails().getUsAcConEmpl().setAccountId(accountID);
+                          //For Now Always Create an Account -This PART needs to be commented once ESM module is live 
 
                     }
-                    userDetails.setUsAcConEmpl(usAccConEmpl);
-                    userSessInfo.setUserDetails(userDetails); // Set in Session
+                    else
+                    {
+                        userDetails.setUsAcConEmpl(usAccConEmpl);
+                        userSessInfo.setUserDetails(userDetails); // Set in Session
+                    }  
                     log.info("User Details populated in Session : "
                             + userSessInfo.getUserDetails().getUsAcConEmpl().toString());
 
@@ -158,6 +171,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         return userSessInfo.getUserDetails();
     }
 
+    
     @Override
     public TY_UserSessionInfo getESSDetails(Token token, boolean refresh) throws EX_ESMAPI
     {

@@ -44,13 +44,13 @@ public class PropertyConfig
 			@Value("${notesurl}") final String notesUrl, @Value("${topN}") final String topN,
 			@Value("${caseTemplateUrl}") final String caseTemplateUrl,
 			@Value("${catgTreeUrl}") final String catgTreeUrl, @Value("${docSrvUrl}") final String docSrvUrl,
-			@Value("${emplSrvUrl}") final String emplSrvUrl
+			@Value("${emplSrvUrl}") final String emplSrvUrl, @Value("${vhlpUrl}") final String vhlpUrl
 
 	)
 
 	{
 		TY_SrvCloudUrls srvClUrls = new TY_SrvCloudUrls(userName, password, casesUrl, cpUrl, acUrl, notesUrl, topN,
-				caseTemplateUrl, catgTreeUrl, docSrvUrl, emplSrvUrl);
+				caseTemplateUrl, catgTreeUrl, docSrvUrl, emplSrvUrl, vhlpUrl);
 
 		return srvClUrls;
 	}
@@ -58,9 +58,9 @@ public class PropertyConfig
 	@Bean
 	@Autowired // For PropertySourcesPlaceholderConfigurer
 	public TY_RLConfig RatelimitConfigLoad(@Value("${numFormSubms}") final int numFormSubms,
-			@Value("${intvSecs}") final long intvSecs,@Value("${allowedAttachments}") final String allowedAttachments)
+			@Value("${intvSecs}") final long intvSecs, @Value("${allowedAttachments}") final String allowedAttachments)
 	{
-		TY_RLConfig rlConfig = new TY_RLConfig(numFormSubms, intvSecs,allowedAttachments);
+		TY_RLConfig rlConfig = new TY_RLConfig(numFormSubms, intvSecs, allowedAttachments);
 		return rlConfig;
 	}
 
