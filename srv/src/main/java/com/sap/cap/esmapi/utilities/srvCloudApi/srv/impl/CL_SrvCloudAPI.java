@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -2384,76 +2385,42 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     JsonNode rootNode = jsonNode.path("value");
                     if (rootNode != null)
                     {
-                        log.info("Values Bound for Value Help for Field -  " + fieldName);
-                        vhlbDDLB = new ArrayList<TY_KeyValue>();
-
-                        Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
-                        while (payloadItr.hasNext())
+                        JsonNode contentNode = rootNode.at("/content");
+                        if (contentNode != null && contentNode.isArray() && contentNode.size() > 0)
                         {
-                            // System.out.println("Payload Iterator Bound");
-                            Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
-                            String payloadFieldName = payloadEnt.getKey();
-                            // System.out.println("Payload Field Scanned: " + payloadFieldName);
-
-                            if (payloadFieldName.equals("value"))
+                            log.info("Values Bound for Value Help for Field -  " + fieldName);
+                            vhlbDDLB = new ArrayList<TY_KeyValue>();
+                            for (JsonNode arrayItem : contentNode)
                             {
-                                Iterator<JsonNode> cusItr = payloadEnt.getValue().elements();
-                                // System.out.println("Cases Iterator Bound");
-                                while (cusItr.hasNext())
+                                String code = null, desc = null;
+                                Boolean isActive = true;
+                                Iterator<Entry<String, JsonNode>> fields = arrayItem.fields();
+                                while (fields.hasNext())
                                 {
-                                    JsonNode cusEnt = cusItr.next();
-                                    if (cusEnt != null)
+                                    Entry<String, JsonNode> jsonField = fields.next();
+                                    if (jsonField.getKey().equals("code"))
                                     {
+                                        code = jsonField.getValue().asText();
+                                    }
 
-                                        Iterator<String> fieldNames = cusEnt.fieldNames();
-                                        while (fieldNames.hasNext())
-                                        {
-                                            String conFieldName = fieldNames.next();
-                                            // System.out.println("Case Entity Field Scanned: " + caseFieldName);
-                                            if (conFieldName.equals("content"))
-                                            {
-                                                Iterator<JsonNode> conItr = cusEnt.path(conFieldName).iterator();
+                                    if (jsonField.getKey().equals("description"))
+                                    {
+                                        desc = jsonField.getValue().asText();
+                                    }
 
-                                                while (conItr.hasNext())
-                                                {
-                                                    String code = null;
-                                                    String value = null;
-                                                    JsonNode conEnt = conItr.next();
-                                                    if (conEnt != null)
-                                                    {
-                                                        Iterator<String> fieldNamesCon = conEnt.fieldNames();
-                                                        while (fieldNames.hasNext())
-                                                        {
-
-                                                            String contentFieldName = fieldNamesCon.next();
-                                                            if (contentFieldName.equals("id"))
-                                                            {
-
-                                                                code = conEnt.get(contentFieldName).asText();
-                                                            }
-
-                                                            if (contentFieldName.equals("description"))
-                                                            {
-
-                                                                value = conEnt.get(contentFieldName).asText();
-                                                            }
-
-                                                        }
-                                                    }
-
-                                                    vhlbDDLB.add(new TY_KeyValue(code, value));
-                                                }
-
-                                            }
-
-                                        }
-
+                                    if (jsonField.getKey().equals("active"))
+                                    {
+                                        isActive = jsonField.getValue().asBoolean();
                                     }
 
                                 }
 
+                                if (StringUtils.hasText(code) && StringUtils.hasText(desc) && isActive)
+                                {
+                                    TY_KeyValue keyVal = new TY_KeyValue(code, desc);
+                                    vhlbDDLB.add(keyVal);
+                                }
                             }
-
                         }
 
                     }
