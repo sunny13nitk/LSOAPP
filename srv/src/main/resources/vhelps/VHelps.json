@@ -2,9 +2,17 @@
     "VHelpFields": [
         {
             "LOB": "Learning",
-            "fieldNames": [
-                "LSO_Country",
-                "LSO_Language"
+            "fields": [
+                {
+                    "fieldName": "LSO_Country",
+                    "catgSpecific": "true",
+                    "catgListBean": "Catgs_LSO_Country"
+                },
+                {
+                    "fieldName": "LSO_Language",
+                    "catgSpecific": "true",
+                    "catgListBean": "Catgs_LSO_Language"
+                }
             ]
         }
     ]

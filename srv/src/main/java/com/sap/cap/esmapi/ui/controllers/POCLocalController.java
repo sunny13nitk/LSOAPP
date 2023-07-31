@@ -158,6 +158,7 @@ public class POCLocalController
                     if (vhlpSrv != null)
                     {
                         List<TY_KeyValue> vHlpDDLB = vhlpSrv.getVHelpDDLB4Field(EnumCaseTypes.Learning, "LSO_Country");
+            
                     }
                     caseForm.setCaseTxnType(cusItemO.get().getCaseType()); // hidden
                     model.addAttribute("caseForm", caseForm);

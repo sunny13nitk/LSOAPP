@@ -17,6 +17,7 @@ import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cap.esmapi.vhelps.cus.TY_Cus_VHelpsLOB;
+import com.sap.cap.esmapi.vhelps.cus.TY_FieldProperties;
 import com.sap.cap.esmapi.vhelps.cus.TY_VHelpsRoot;
 import com.sap.cap.esmapi.vhelps.pojos.TY_FldVals;
 import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
@@ -53,7 +54,7 @@ public class CL_VHelpSrv implements IF_VHelpSrv
 
             // 1. Validate field for LOB
             // 1.a. Validate LOB
-            Optional<String> fldValsO;
+            Optional<TY_FieldProperties> fldValsO;
             Optional<TY_Cus_VHelpsLOB> lobVhlpO;
 
             // Customization Not maintained and Not Bound :LOB and Vhelp Fields
@@ -71,7 +72,8 @@ public class CL_VHelpSrv implements IF_VHelpSrv
                 if (lobVhlpO.isPresent())
                 {
                     // LOB Customizing Bound - Now check for Field REquested
-                    fldValsO = lobVhlpO.get().getFieldNames().stream().filter(d -> d.equals(fieldName)).findFirst();
+                    fldValsO = lobVhlpO.get().getFields().stream().filter(d -> d.getFieldName().equals(fieldName))
+                            .findFirst();
                     if (fldValsO.isPresent())
                     {
                         // Field Also Configured for Value help Determination
@@ -133,7 +135,7 @@ public class CL_VHelpSrv implements IF_VHelpSrv
             {
                 // SCan for LOB
                 Optional<TY_LOBVHlpPool> lobVhlpsO;
-                lobVhlpsO = vhlpPool.stream().filter(c -> c.getLob().equals(lob.toString())).findFirst();
+                lobVhlpsO = vhlpPool.stream().filter(c -> c.getLob().name().equals(lob.name())).findFirst();
                 if (lobVhlpsO.isPresent())
                 {
                     // Scan for field

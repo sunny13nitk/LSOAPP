@@ -20,6 +20,10 @@ public class TY_Case_Form
     private String description;
     private String template;
     private MultipartFile attachment;
+    private String country;
+    private String language;
+    private boolean countryMandatory;
+    private boolean langMandatory;
     private boolean employee;
 
     @Override

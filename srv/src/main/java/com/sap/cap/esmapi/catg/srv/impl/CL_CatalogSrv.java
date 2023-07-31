@@ -17,6 +17,7 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatalogTree;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgDetails;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplates;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplatesCus;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
@@ -202,6 +203,67 @@ public class CL_CatalogSrv implements IF_CatalogSrv
         }
 
         return catgTmpl;
+    }
+
+    @Override
+    public TY_CatgDetails getCategoryDetails4Catg(String catId, EnumCaseTypes caseType, boolean inUpperCase)
+            throws EX_ESMAPI
+    {
+        TY_CatgDetails catgDetails = null;
+
+        if (StringUtils.hasText(catId) && CollectionUtils.isNotEmpty(catgTmplCus.getCatgTemplates())
+                && caseType != null)
+        {
+            TY_CatalogTree catgTree = this.getCaseCatgTree4LoB(caseType);
+            boolean isLvl1 = false;
+            if (CollectionUtils.isNotEmpty(catgTree.getCategories()))
+            {
+                // Remove blank Categories from Catalog Tree Used for UI Presentation
+                catgTree.getCategories().removeIf(x -> x.getId() == null);
+
+                Optional<TY_CatalogItem> currCatgDetailsO = catgTree.getCategories().stream()
+                        .filter(f -> f.getId().equals(catId)).findFirst();
+                if (currCatgDetailsO.isPresent())
+                {
+                    catgDetails = new TY_CatgDetails();
+                    // 1. Get Text from Catg Guid selected in form and Convert to Upper Case
+                    String catgTxt = null;
+                    if (StringUtils.hasText(currCatgDetailsO.get().getParentName()))
+                    {
+                        catgTxt = currCatgDetailsO.get().getParentName() + ">" + currCatgDetailsO.get().getName();
+                        if (inUpperCase)
+                        {
+                            catgTxt = catgTxt.toUpperCase();
+                        }
+
+                    }
+                    else
+                    {
+                        // No Level 1 Catg. is valid . Hence do not seek for level 1 catg.
+                        if (inUpperCase)
+                        {
+                            catgTxt = currCatgDetailsO.get().getName().toUpperCase();
+                        }
+                        else
+                        {
+                            catgTxt = currCatgDetailsO.get().getName();
+                        }
+
+                        isLvl1 = true;
+
+                    }
+                    catgDetails.setCatDesc(catgTxt);
+                    catgDetails.setCatgId(catId);
+                    catgDetails.setInUpperCase(inUpperCase);
+                    catgDetails.setRoot(isLvl1);
+
+                }
+                // Refurbish Blank Category at Top for New Form - Session maintained
+                catgTree.getCategories().add(0, new TY_CatalogItem());
+            }
+        }
+
+        return catgDetails;
     }
 
     private TY_CatalogTree loadCatgTree4CaseType(EnumCaseTypes caseType)

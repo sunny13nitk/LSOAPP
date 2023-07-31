@@ -1,8 +1,8 @@
 package com.sap.cap.esmapi.config;
 
-import java.io.File;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -20,7 +20,9 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplates;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplatesCus;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.vhelps.cus.TY_Catg_MandatoryFlds;
 import com.sap.cap.esmapi.vhelps.cus.TY_VHelpsRoot;
+import com.sap.cap.esmapi.vhelps.pojos.TY_MandatoryFlds_CatgsList;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +33,8 @@ public class AppInitializrConfig
     private final String configPath = "/configCatg/config.csv";
     private final String configCatgTemplates = "/configCatg/templates.csv";
     private final String configPathVHelpsJSON = "/vhelps/VHelps.json";
+    private final String configCatgCountryMandatory = "/configCatg/Mandatory_Country_Catg.csv";
+    private final String configCatgLanguageMandatory = "/configCatg/Mandatory_Language_Catg.csv";
 
     @Autowired
     private MessageSource msgSrc;
@@ -135,6 +139,81 @@ public class AppInitializrConfig
             log.error("LOB Custom Fields Customization Could not be Loaded!");
         }
         return vHelpCus;
+    }
+
+    @Bean("Catgs_LSO_Country")
+    public TY_MandatoryFlds_CatgsList loadCountryMandatoryCatgs()
+    {
+        TY_MandatoryFlds_CatgsList catgCountryMandList = null;
+
+        try
+        {
+
+            ClassPathResource classPathResource = new ClassPathResource(configCatgCountryMandatory);
+            if (classPathResource != null)
+            {
+                Reader reader = new InputStreamReader(classPathResource.getInputStream());
+                if (reader != null)
+                {
+                    log.info("Resource Bound... ");
+                    List<TY_Catg_MandatoryFlds> configs = new CsvToBeanBuilder(reader).withSkipLines(1)
+                            .withType(TY_Catg_MandatoryFlds.class).build().parse();
+
+                    if (!CollectionUtils.isEmpty(configs))
+                    {
+                        log.info("Entries in Config. Found for Case Categories that have a Mandatory Country Field: "
+                                + configs.size());
+                        catgCountryMandList = new TY_MandatoryFlds_CatgsList(configs);
+                    }
+                }
+            }
+
+        }
+        catch (Exception e)
+        {
+            throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASETYPE_CFG", new Object[]
+            { configPath, e.getLocalizedMessage() }, Locale.ENGLISH));
+        }
+
+        return catgCountryMandList;
+    }
+
+    @Bean("Catgs_LSO_Language")
+    public TY_MandatoryFlds_CatgsList loadLanguageMandatoryCatgs()
+    {
+        TY_MandatoryFlds_CatgsList catgLangMandList = null;
+
+        try
+        {
+
+            ClassPathResource classPathResource = new ClassPathResource(configCatgLanguageMandatory);
+            if (classPathResource != null)
+            {
+                Reader reader = new InputStreamReader(classPathResource.getInputStream());
+                if (reader != null)
+                {
+                    log.info("Resource Bound... ");
+                    List<TY_Catg_MandatoryFlds> configs = new CsvToBeanBuilder(reader).withSkipLines(1)
+                            .withType(TY_Catg_MandatoryFlds.class).build().parse();
+
+                    if (!CollectionUtils.isEmpty(configs))
+                    {
+                        log.info("Entries in Config. Found for Case Categories that have a Mandatory Language Field: "
+                                + configs.size());
+                        catgLangMandList = new TY_MandatoryFlds_CatgsList(configs);
+
+                    }
+                }
+            }
+
+        }
+        catch (Exception e)
+        {
+            throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASETYPE_CFG", new Object[]
+            { configPath, e.getLocalizedMessage() }, Locale.ENGLISH));
+        }
+
+        return catgLangMandList;
     }
 
 }
