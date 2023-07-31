@@ -212,6 +212,7 @@ public class CL_CatalogSrv implements IF_CatalogSrv
         TY_CatgDetails catgDetails = null;
 
         if (StringUtils.hasText(catId) && CollectionUtils.isNotEmpty(catgTmplCus.getCatgTemplates())
+        
                 && caseType != null)
         {
             TY_CatalogTree catgTree = this.getCaseCatgTree4LoB(caseType);
