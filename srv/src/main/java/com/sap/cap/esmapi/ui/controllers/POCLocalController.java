@@ -1,6 +1,5 @@
 package com.sap.cap.esmapi.ui.controllers;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -29,7 +28,7 @@ import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
-import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
+import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpLOBUIModelSrv;
 import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpSrv;
 
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +55,9 @@ public class POCLocalController
 
     @Autowired
     private IF_VHelpSrv vhlpSrv;
+
+    @Autowired
+    private IF_VHelpLOBUIModelSrv vhlpUISrv;
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -155,11 +157,6 @@ public class POCLocalController
                         caseForm.setAccId(userSessSrv.getUserDetails4mSession().getAccountId()); // hidden
                     }
 
-                    if (vhlpSrv != null)
-                    {
-                        List<TY_KeyValue> vHlpDDLB = vhlpSrv.getVHelpDDLB4Field(EnumCaseTypes.Learning, "LSO_Country");
-            
-                    }
                     caseForm.setCaseTxnType(cusItemO.get().getCaseType()); // hidden
                     model.addAttribute("caseForm", caseForm);
 
@@ -347,6 +344,12 @@ public class POCLocalController
                         // Set Questionnaire for Category
                         caseForm.setTemplate(catgTemplate.getQuestionnaire());
 
+                    }
+
+                    if (vhlpUISrv != null)
+                    {
+                        model.addAllAttributes(
+                                vhlpUISrv.getVHelpUIModelMap4LobCatg(EnumCaseTypes.Learning, caseForm.getCatgDesc()));
                     }
 
                     // Case Form Model Set at last

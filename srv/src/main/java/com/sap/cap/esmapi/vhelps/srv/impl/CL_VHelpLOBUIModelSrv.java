@@ -1,6 +1,7 @@
 package com.sap.cap.esmapi.vhelps.srv.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -12,13 +13,17 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgDetails;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
+import com.sap.cap.esmapi.vhelps.cus.TY_Catg_MandatoryFlds;
 import com.sap.cap.esmapi.vhelps.cus.TY_Cus_VHelpsLOB;
 import com.sap.cap.esmapi.vhelps.cus.TY_FieldProperties;
 import com.sap.cap.esmapi.vhelps.cus.TY_VHelpsRoot;
+import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
+import com.sap.cap.esmapi.vhelps.pojos.TY_MandatoryFlds_CatgsList;
 import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpLOBUIModelSrv;
 import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpSrv;
 
@@ -40,12 +45,12 @@ public class CL_VHelpLOBUIModelSrv implements IF_VHelpLOBUIModelSrv
     private ApplicationContext appCtxt;
 
     @Override
-    public Map<String, ?> getVHelpUIModelMap4LobCatg(EnumCaseTypes lob, String catgId) throws EX_ESMAPI
+    public Map<String, List<TY_KeyValue>> getVHelpUIModelMap4LobCatg(EnumCaseTypes lob, String catgId) throws EX_ESMAPI
     {
-        Map<String, ?> modelAttrs = new HashMap<String, Object>();
+        Map<String, List<TY_KeyValue>> modelAttrs = new HashMap<String, List<TY_KeyValue>>();
 
         if (StringUtils.hasText(lob.name()) && StringUtils.hasText(catgId) && catalogSrv != null && vHelpSrv != null
-                && vHelpCusSrv != null)
+                && vHelpCusSrv != null && appCtxt != null)
         {
 
             // Get all RElevant Value help Fields for LoB
@@ -71,6 +76,37 @@ public class CL_VHelpLOBUIModelSrv implements IF_VHelpLOBUIModelSrv
                             {
                                 if (StringUtils.hasText(catgDetails.getCatDesc()))
                                 {
+                                    // Scan for the Current Category Text in Field Category Text bean
+
+                                    // Get Bean Instance for Field Category Texts
+                                    TY_MandatoryFlds_CatgsList catgsList = (TY_MandatoryFlds_CatgsList) appCtxt
+                                            .getBean(fldLob.getCatgListBean());
+                                    if (catgsList != null)
+                                    {
+                                        if (CollectionUtils.isNotEmpty(catgsList.getCatgsList()))
+                                        {
+                                            // check if Current Category is in List of Enabling Categories for current
+                                            // iteration field
+                                            Optional<TY_Catg_MandatoryFlds> catgMandFldsO = catgsList.getCatgsList()
+                                                    .stream()
+                                                    .filter(e -> e.getCatgString().equals(catgDetails.getCatDesc()))
+                                                    .findFirst();
+                                            if (catgMandFldsO.isPresent())
+                                            {
+                                                // Get DDLB for field --should be enabled
+                                                List<TY_KeyValue> vHlpDDLB = vHelpSrv.getVHelpDDLB4Field(lob,
+                                                        fldLob.getFieldName());
+                                                // Refurbish Blank Row at Top for Form
+                                                vHlpDDLB.add(0, new TY_KeyValue());
+
+                                                // Append to Model Map
+                                                if (CollectionUtils.isNotEmpty(vHlpDDLB))
+                                                {
+                                                    modelAttrs.put(fldLob.getFieldName(), vHlpDDLB);
+                                                }
+                                            }
+                                        }
+                                    }
 
                                 }
                             }
@@ -78,7 +114,14 @@ public class CL_VHelpLOBUIModelSrv implements IF_VHelpLOBUIModelSrv
                             // Not Category specific - Get Vhelp and Populate in Attributes Map
                             else
                             {
+                                // Get DDLB for field --should be enabled
+                                List<TY_KeyValue> vHlpDDLB = vHelpSrv.getVHelpDDLB4Field(lob, fldLob.getFieldName());
 
+                                // Append to Model Map
+                                if (CollectionUtils.isNotEmpty(vHlpDDLB))
+                                {
+                                    modelAttrs.put(fldLob.getFieldName(), vHlpDDLB);
+                                }
                             }
                         }
                     }

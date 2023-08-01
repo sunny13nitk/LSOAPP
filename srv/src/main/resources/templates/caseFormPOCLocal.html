@@ -136,7 +136,8 @@
 
                      <div th:if="${caseForm.template != null}" style="padding-top: 15px; padding-bottom: 20px;">
                         <!-- Panel for Template(s) -->
-                        <div data-role="panel" data-title-caption="Please provide Issue Description with these details. You can copy the text from this section to below field to use it as a template."
+                        <div data-role="panel"
+                           data-title-caption="Please provide Issue Description with these details. You can copy the text from this section to below field to use it as a template."
                            data-collapsed="false" data-collapsible="true" data-cls-panel="shadow-3"
                            data-cls-title="bg-lightGray fg-black" data-cls-content="bg-transparent fg-black">
                            <div th:utext="*{template}"></div>
@@ -152,6 +153,38 @@
                      </textarea>
 
                      <small class="text-muted">Enter Issue Description in detail. </small>
+                  </div>
+
+                  <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px"
+                     th:if="${LSO_Country != null}">
+                     <label>Country </label>
+                     <select name="country" id="dropDown1" data-role="select" th:field="*{country}"
+                        data-cls-option="fg-grayMouse" data-cls-selected-item="bg-teal fg-white"
+                        data-random-color="true" addEmptyValue="true">
+
+                        <option th:each="countryI: ${LSO_Country}" th:value="${countryI.value}"
+                           th:selected="${countryI.key}" th:text="${countryI.value}">
+
+                        </option>
+
+
+                     </select>
+                  </div>
+
+                  <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px"
+                     th:if="${LSO_Language != null}">
+                     <label>Language </label>
+                     <select name="language" id="dropDown2" data-role="select" th:field="*{language}"
+                        data-cls-option="fg-grayMouse" data-cls-selected-item="bg-teal fg-white"
+                        data-random-color="true" addEmptyValue="true">
+
+                        <option th:each="languageI: ${LSO_Language}" th:value="${languageI.value}"
+                           th:selected="${languageI.key}" th:text="${languageI.value}">
+
+                        </option>
+
+
+                     </select>
                   </div>
 
                   <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px">
