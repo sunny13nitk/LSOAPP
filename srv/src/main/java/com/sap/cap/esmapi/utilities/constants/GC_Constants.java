@@ -1,6 +1,6 @@
 package com.sap.cap.esmapi.utilities.constants;
 
-public class GC_Constants 
+public class GC_Constants
 {
     public static final String equalsString = "=";
 
@@ -16,6 +16,8 @@ public class GC_Constants
 
     public static final String gc_Attachment_Category = "DOCUMENT";
 
-        
+    public static final String gc_LSO_COUNTRY = "LSO_Country";
+
+    public static final String gc_LSO_LANGUAGE = "LSO_Language";
 
 }

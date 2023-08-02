@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +36,7 @@ import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
+import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.enums.EnumStatus;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
@@ -45,6 +47,8 @@ import com.sap.cap.esmapi.utilities.pojos.TY_UserSessionInfo;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
+import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
+import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpLOBUIModelSrv;
 import com.sap.cds.services.request.UserInfo;
 import com.sap.cloud.security.xsuaa.token.Token;
 
@@ -80,10 +84,12 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
+    @Autowired
+    private IF_VHelpLOBUIModelSrv vHlpModelSrv;
+
     // Properties
 
     private TY_UserSessionInfo userSessInfo;
-
 
     @Override
     public TY_UserDetails getUserDetails(Token token) throws EX_ESMAPI
@@ -143,23 +149,25 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     {
                         // Seek Employee and populate
                         /* Enable once ESM Module is live and tested */
-                           // usAccConEmpl.setEmployeeId(srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId()));
-                           // usAccConEmpl.setEmployee(true);
-                          /* Enable once ESM Module is live and tested */ 
+                        // usAccConEmpl.setEmployeeId(srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId()));
+                        // usAccConEmpl.setEmployee(true);
+                        /* Enable once ESM Module is live and tested */
 
-                          //For Now Always Create an Account -This PART needs to be commented once ESM module is live
-                          userDetails.setUsAcConEmpl(usAccConEmpl);
-                          userSessInfo.setUserDetails(userDetails); // Set in Session
-                          String accountID = this.createAccount(); 
-                          userSessInfo.getUserDetails().getUsAcConEmpl().setAccountId(accountID);
-                          //For Now Always Create an Account -This PART needs to be commented once ESM module is live 
+                        // For Now Always Create an Account -This PART needs to be commented once ESM
+                        // module is live
+                        userDetails.setUsAcConEmpl(usAccConEmpl);
+                        userSessInfo.setUserDetails(userDetails); // Set in Session
+                        String accountID = this.createAccount();
+                        userSessInfo.getUserDetails().getUsAcConEmpl().setAccountId(accountID);
+                        // For Now Always Create an Account -This PART needs to be commented once ESM
+                        // module is live
 
                     }
                     else
                     {
                         userDetails.setUsAcConEmpl(usAccConEmpl);
                         userSessInfo.setUserDetails(userDetails); // Set in Session
-                    }  
+                    }
                     log.info("User Details populated in Session : "
                             + userSessInfo.getUserDetails().getUsAcConEmpl().toString());
 
@@ -171,7 +179,6 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         return userSessInfo.getUserDetails();
     }
 
-    
     @Override
     public TY_UserSessionInfo getESSDetails(Token token, boolean refresh) throws EX_ESMAPI
     {
@@ -233,10 +240,47 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         // Clear Buffer for Previous Form Submission
         clearPreviousSubmission4mSessionBuffer();
 
-        if (caseForm != null && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+        if (caseForm != null && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()) && vHlpModelSrv != null)
         {
             // Push Form data to Session
             TY_CaseFormAsync caseFormAsync = new TY_CaseFormAsync();
+
+            // Check if Country/Language are Mandatory for chosen Category in Form at time
+            // of Submission
+
+            // Make the Case Enum Scan Generic
+            Optional<EnumCaseTypes> caseEnumO = Arrays.stream(EnumCaseTypes.values())
+                    .filter(x -> x.name().equals(caseForm.getCaseTxnType())).findFirst();
+            if (caseEnumO.isPresent())
+            {
+                Map<String, List<TY_KeyValue>> vHlpsMap = vHlpModelSrv.getVHelpUIModelMap4LobCatg(caseEnumO.get(),
+                        caseForm.getCatgDesc());
+                // Some Attributes Relevant for Current Category
+                if (vHlpsMap.size() > 0)
+                {
+                    // Country Field Relevant
+                    if (CollectionUtils.isNotEmpty(vHlpsMap.get(GC_Constants.gc_LSO_COUNTRY)))
+                    {
+                        caseForm.setCountryMandatory(true);
+                    }
+                    else // Remove if Country field is not relevant for Current Category and passed on
+                         // from Form Buffer
+                    {
+                        caseForm.setCountry(null);
+                    }
+
+                    // Language Field Relevant
+                    if (CollectionUtils.isNotEmpty(vHlpsMap.get(GC_Constants.gc_LSO_LANGUAGE)))
+                    {
+                        caseForm.setLangMandatory(true);
+                    }
+                    else // Remove if Country field is not relevant for Current Category and passed on
+                         // from Form Buffer
+                    {
+                        caseForm.setLanguage(null);
+                    }
+                }
+            }
 
             caseFormAsync.setCaseForm(caseForm);
             caseFormAsync.setSubmGuid(UUID.randomUUID().toString());
@@ -535,6 +579,28 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         && StringUtils.hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc()))
                 {
 
+                    // Include Country and Language mandatory check for certain category as
+                    // requested by business.
+                    if (userSessInfo.getCurrentForm4Submission().getCaseForm().isCountryMandatory())
+                    {
+                        if (!StringUtils.hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getCountry()))
+                        {
+                            // Payload Error as Category level shuld be atleast 2
+                            handleMandatoryFieldMissingError(GC_Constants.gc_LSO_COUNTRY);
+                            return false;
+                        }
+                    }
+
+                    if (userSessInfo.getCurrentForm4Submission().getCaseForm().isLangMandatory())
+                    {
+                        if (!StringUtils.hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getLanguage()))
+                        {
+                            // Payload Error as Category level shuld be atleast 2
+                            handleMandatoryFieldMissingError(GC_Constants.gc_LSO_LANGUAGE);
+                            return false;
+                        }
+                    }
+
                     Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
                             .filter(g -> g.getCaseType()
                                     .equals(userSessInfo.getCurrentForm4Submission().getCaseForm().getCaseTxnType()))
@@ -667,14 +733,30 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                 }
 
-                // Also to Include Country mandatory check for certain category as requested by
-                // business.
-
             }
         }
 
         return isValid;
 
+    }
+
+    private void handleMandatoryFieldMissingError(String fldName)
+    {
+        String msg = msgSrc.getMessage("ERR_MAND_FLDS", new Object[]
+        { fldName }, Locale.ENGLISH);
+        log.error(msg); // System Log
+
+        // Logging Framework
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
+                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+        userSessInfo.getMessagesStack().add(logMsg);
+
+        // Instantiate and Fire the Event : Syncronous processing
+        EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+        this.addFormErrors(msg);// For Form Display
     }
 
     @Override
