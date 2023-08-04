@@ -36,7 +36,6 @@ import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
-import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.enums.EnumStatus;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
@@ -249,12 +248,14 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             // of Submission
 
             // Make the Case Enum Scan Generic
-            Optional<EnumCaseTypes> caseEnumO = Arrays.stream(EnumCaseTypes.values())
-                    .filter(x -> x.name().equals(caseForm.getCaseTxnType())).findFirst();
-            if (caseEnumO.isPresent())
+            // Get Case Type Enum from Case Transaction Type
+            Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+                    .filter(f -> f.getCaseType().equals(caseForm.getCaseTxnType())).findFirst();
+            if (cusItemO.isPresent())
             {
-                Map<String, List<TY_KeyValue>> vHlpsMap = vHlpModelSrv.getVHelpUIModelMap4LobCatg(caseEnumO.get(),
-                        caseForm.getCatgDesc());
+
+                Map<String, List<TY_KeyValue>> vHlpsMap = vHlpModelSrv
+                        .getVHelpUIModelMap4LobCatg(cusItemO.get().getCaseTypeEnum(), caseForm.getCatgDesc());
                 // Some Attributes Relevant for Current Category
                 if (vHlpsMap.size() > 0)
                 {
@@ -279,6 +280,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     {
                         caseForm.setLanguage(null);
                     }
+
                 }
             }
 
@@ -290,8 +292,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
             if (!CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
             {
-                Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
-                        .filter(g -> g.getCaseType().equals(caseForm.getCaseTxnType())).findFirst();
+
                 if (cusItemO.isPresent() && catalogSrv != null)
                 {
                     String[] catTreeSelCatg = catalogSrv.getCatgHierarchyforCatId(caseForm.getCatgDesc(),
@@ -586,7 +587,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         if (!StringUtils.hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getCountry()))
                         {
                             // Payload Error as Category level shuld be atleast 2
-                            handleMandatoryFieldMissingError(GC_Constants.gc_LSO_COUNTRY);
+                            handleMandatoryFieldMissingError(GC_Constants.gc_LSO_COUNTRY_DESC);
                             return false;
                         }
                     }
@@ -596,7 +597,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         if (!StringUtils.hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getLanguage()))
                         {
                             // Payload Error as Category level shuld be atleast 2
-                            handleMandatoryFieldMissingError(GC_Constants.gc_LSO_LANGUAGE);
+                            handleMandatoryFieldMissingError(GC_Constants.gc_LSO_LANGUAGE_DESC);
                             return false;
                         }
                     }

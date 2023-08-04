@@ -96,8 +96,15 @@ public class CL_VHelpLOBUIModelSrv implements IF_VHelpLOBUIModelSrv
                                                 // Get DDLB for field --should be enabled
                                                 List<TY_KeyValue> vHlpDDLB = vHelpSrv.getVHelpDDLB4Field(lob,
                                                         fldLob.getFieldName());
-                                                // Refurbish Blank Row at Top for Form
-                                                vHlpDDLB.add(0, new TY_KeyValue());
+
+                                                /*
+                                                 * Only Add Blank Row if not present at top
+                                                 */
+
+                                                if (StringUtils.hasText(vHlpDDLB.get(0).getKey()))
+                                                {
+                                                    vHlpDDLB.add(0, new TY_KeyValue());
+                                                }
 
                                                 // Append to Model Map
                                                 if (CollectionUtils.isNotEmpty(vHlpDDLB))

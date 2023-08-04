@@ -160,7 +160,7 @@ public class CL_VHelpSrv implements IF_VHelpSrv
                             // Get the LOB Vhelp
 
                             Optional<TY_LOBVHlpPool> vHlpLobO = vhlpPool.stream()
-                                    .filter(f -> f.getLob().equals(lob.toString())).findFirst();
+                                    .filter(f -> f.getLob().name().equals(lob.name())).findFirst();
                             if (vHlpLobO.isPresent())
                             {
                                 vHlpLobO.get().getFldVals().add(new TY_FldVals(fieldName, vhlpDDLB));

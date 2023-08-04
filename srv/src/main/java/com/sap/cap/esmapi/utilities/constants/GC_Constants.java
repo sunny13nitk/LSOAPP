@@ -17,7 +17,9 @@ public class GC_Constants
     public static final String gc_Attachment_Category = "DOCUMENT";
 
     public static final String gc_LSO_COUNTRY = "LSO_Country";
+    public static final String gc_LSO_COUNTRY_DESC = "Country";
 
     public static final String gc_LSO_LANGUAGE = "LSO_Language";
+    public static final String gc_LSO_LANGUAGE_DESC = "Language";
 
 }
