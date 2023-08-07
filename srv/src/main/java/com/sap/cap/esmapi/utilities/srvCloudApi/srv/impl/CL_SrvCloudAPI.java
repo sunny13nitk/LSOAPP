@@ -2331,12 +2331,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 String encoding = Base64.getEncoder()
                         .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
 
-                // Query URL Encoding to avoid Illegal character error in Query
-                // URL url = new URL(urlLink);
-                // URI uri = new URI(url.getProtocol(), url.getUserInfo(),
-                // IDN.toASCII(url.getHost()), url.getPort(),
-                // url.getPath(), url.getQuery(), url.getRef());
-                // String correctEncodedURL = uri.toASCIIString();
+            
 
                 HttpGet httpGet = new HttpGet(urlLink);
 

@@ -1,6 +1,5 @@
 package com.sap.cap.esmapi.events.handlers;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
@@ -20,12 +18,9 @@ import org.springframework.util.StringUtils;
 
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
-import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
 import com.sap.cap.esmapi.events.event.EV_LogMessage;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
-import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
-import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.enums.EnumStatus;
 import com.sap.cap.esmapi.utilities.pojos.TY_Account_CaseCreate;
@@ -34,9 +29,9 @@ import com.sap.cap.esmapi.utilities.pojos.TY_Attachment_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_CatgLvl1_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Description_CaseCreate;
+import com.sap.cap.esmapi.utilities.pojos.TY_Extensions_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
-import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
 import lombok.extern.slf4j.Slf4j;
@@ -176,6 +171,25 @@ public class EV_HDLR_CaseFormSubmit
                                     }
 
                                 }
+
+                            }
+
+                            // For Extensions
+                            if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getCountry())
+                                    || StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getLanguage()))
+                            {
+                                TY_Extensions_CaseCreate extn = new TY_Extensions_CaseCreate();
+                                if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getCountry()))
+                                {
+                                    extn.setLSO_Country(evCaseFormSubmit.getPayload().getCaseForm().getCountry());
+                                }
+
+                                if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getLanguage()))
+                                {
+                                    extn.setLSO_Language(evCaseFormSubmit.getPayload().getCaseForm().getLanguage());
+                                }
+
+                                newCaseEntity.setExtensions(extn);
 
                             }
 

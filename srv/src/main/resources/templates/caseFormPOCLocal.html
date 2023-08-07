@@ -162,7 +162,7 @@
                         data-cls-option="fg-grayMouse" data-cls-selected-item="bg-teal fg-white"
                         data-random-color="true" addEmptyValue="true" data-cls-select="bd-red bg-transparent">
 
-                        <option th:each="countryI: ${LSO_Country}" th:value="${countryI.value}"
+                        <option th:each="countryI: ${LSO_Country}" th:value="${countryI.key}"
                            th:selected="${countryI.key}" th:text="${countryI.value}">
 
                         </option>
@@ -178,7 +178,7 @@
                         data-cls-option="fg-grayMouse" data-cls-selected-item="bg-teal fg-white"
                         data-random-color="true" data-cls-select="bd-red bg-transparent" addEmptyValue="true">
 
-                        <option th:each="languageI: ${LSO_Language}" th:value="${languageI.value}"
+                        <option th:each="languageI: ${LSO_Language}" th:value="${languageI.key}"
                            th:selected="${languageI.key}" th:text="${languageI.value}">
 
                         </option>

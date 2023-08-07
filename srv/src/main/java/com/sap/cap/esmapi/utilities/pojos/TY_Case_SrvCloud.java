@@ -22,6 +22,7 @@ public class TY_Case_SrvCloud
     private TY_CatgLvl1_CaseCreate categoryLevel3;
     private TY_CatgLvl1_CaseCreate categoryLevel4;
     private TY_Description_CaseCreate description;
+    private TY_Extensions_CaseCreate extensions;
     private List<TY_Attachment_CaseCreate> attachments = new ArrayList<TY_Attachment_CaseCreate>();
 
     @Override
