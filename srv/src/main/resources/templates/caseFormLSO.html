@@ -91,13 +91,14 @@
                <h6 style="color: #54627B; margin-left: 10px">Create new Case.
                   <span style="color: #B1365B" th:text="${caseTypeStr}"></span> !
                </h6>
-               <form th:object="${caseForm}" enctype="multipart/form-data" th:action="@{/lso/saveCase}" method="post">
+               <form th:object="${caseForm}" enctype="multipart/form-data" th:action="@{/lso/saveCase}"
+                  method="post">
 
 
                   <input type="hidden" th:field="*{accId}" />
                   <input type="hidden" th:field="*{caseTxnType}" />
                   <div class="colspan-9 offset-1" style="margin-top: 15px; margin-bottom: 10px;">
-                     <label>Subject </label> <input class="metro-input input-large" type="text" data-role="input"
+                     <label>Subject </label> <input class="alert metro-input input-large" type="text" data-role="input"
                         data-prepend="<span style = 'padding-top:7px' class='mif-event-available mif-3x'></span>"
                         title="" th:field="*{subject}" />
                      <small class="text-muted">Enter
@@ -107,8 +108,9 @@
                   <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px"
                      th:if="${catgsList != null}">
                      <label>Service Category </label>
-                     <select name="catgDesc" data-role="select" th:field="*{catgDesc}" data-cls-option="fg-grayMouse"
-                        data-cls-selected-item="bg-teal fg-white" data-random-color="true">
+                     <select name="catgDesc" id="dropDown" data-role="select" th:field="*{catgDesc}"
+                        data-cls-option="fg-grayMouse" data-cls-selected-item="bg-teal fg-white" addEmptyValue="true"
+                        data-cls-select="bd-red bg-transparent">
 
                         <option th:each="catg : ${catgsList}" th:value="${catg.id}" th:selected="${catg.id}"
                            th:text="${catg.parentName != null} ? ${catg.parentName} + '>' +${catg.name}: ${catg.name}">
@@ -117,20 +119,72 @@
 
 
                      </select>
-                     <small class="text-muted">Select Service Category from dropdown. </small>
+                     <small class="text-muted">Select Service Category from dropdown and Hit Reload to Refresh Form for
+                        Chosen Category. </small>
+                     <span>
+                        <button id="refresh" style="margin: 3px;" class="button secondary cycle outline" type="submit"
+                           name="action" value="catgChange">
+                           <span class="mif-replay"></span>
+                        </button>
+                     </span>
 
                   </div>
 
 
                   <div class="colspan-9 offset-1" style="margin-top: 35px; margin-bottom: 10px">
                      <label>Description</label>
+
+                     <div th:if="${caseForm.template != null}" style="padding-top: 15px; padding-bottom: 20px;">
+                        <!-- Panel for Template(s) -->
+                        <div data-role="panel"
+                           data-title-caption="Please provide Issue Description with these details. You can copy the text from this section to below field to use it as a template."
+                           data-collapsed="false" data-collapsible="true" data-cls-panel="shadow-3"
+                           data-cls-title="bg-lightGray fg-black" data-cls-content="bg-transparent fg-black">
+                           <div th:utext="*{template}"></div>
+
+                        </div>
+                     </div>
+
                      <p id="chars-counter" style="margin-top: -1px">You enter 0 char(s)</p>
                      <textarea data-role="textarea" data-prepend="<span class='mif-leanpub mif-3x'></span>"
                         data-cls-prepend="bg-light" th:field="*{description}" data-chars-counter="#chars-counter"
                         data-chars-counter-template="You enter $1 char(s)"
                         data-clear-button-icon="<span class='mif-cross fg-black'></span>">
-                           </textarea>
+                     </textarea>
+
                      <small class="text-muted">Enter Issue Description in detail. </small>
+                  </div>
+
+                  <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px"
+                     th:if="${LSO_Country != null}">
+                     <label>Country </label>
+                     <select name="country" id="dropDown1" data-role="select" th:field="*{country}"
+                        data-cls-option="fg-grayMouse" data-cls-selected-item="bg-teal fg-white"
+                        data-random-color="true" addEmptyValue="true" data-cls-select="bd-red bg-transparent">
+
+                        <option th:each="countryI: ${LSO_Country}" th:value="${countryI.key}"
+                           th:selected="${countryI.key}" th:text="${countryI.value}">
+
+                        </option>
+
+
+                     </select>
+                  </div>
+
+                  <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px"
+                     th:if="${LSO_Language != null}">
+                     <label>Language </label>
+                     <select name="language" id="dropDown2" data-role="select" th:field="*{language}"
+                        data-cls-option="fg-grayMouse" data-cls-selected-item="bg-teal fg-white"
+                        data-random-color="true" data-cls-select="bd-red bg-transparent" addEmptyValue="true">
+
+                        <option th:each="languageI: ${LSO_Language}" th:value="${languageI.key}"
+                           th:selected="${languageI.key}" th:text="${languageI.value}">
+
+                        </option>
+
+
+                     </select>
                   </div>
 
                   <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px">
@@ -142,16 +196,18 @@
 
 
                   <div class="d-flex flex-row-r" style="margin-top: 30px; margin-bottom: 10px; margin-right: 20px;">
-                     <button class="button primary rounded outline " data-role="hint" data-hint-position="top"
-                        data-cls-hint="fg-black" data-hint-text="Submit the Case">
+                     <button class="button rounded " style="color: #004466; background: #00ffb3" data-role="hint"
+                        data-hint-position="top" data-cls-hint="fg-black" data-hint-text="Submit the Case" name="action"
+                        value="saveCase">
                         <span class="mif-beenhere" style="margin-left: 0px"> </span> <span
                            style="margin-left: 3px">Submit</span>
                      </button>
 
 
-                     <a class="button primary rounded outline " style=" margin-left: 10px; margin-right: 20px;" data-role="hint"
-                        th:href="@{/lso/}" role="button" data-hint-position="top" data-cls-hint="fg-black"
-                        data-hint-text="Cancel Case Submission.">
+                     <a href="#" class="button rounded "
+                        style="color: #004466; background: #FF004C; margin-left: 10px; margin-right: 20px;"
+                        data-role="hint" th:href="@{/lso/}" role="button" data-hint-position="top"
+                        data-cls-hint="fg-black" data-hint-text="Cancel Case Submission.">
                         <span class="mif-cancel" style="margin-left: 0px">
                         </span>
                         <span style="margin-left: 3px">Cancel
@@ -185,7 +241,15 @@
 
 
 
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+   <script th:inline="javascript">
 
+      $('#dropDown').change(function ()
+      {
+         $('#refresh').prop('disabled', $(this).val() === "")
+      });
+
+   </script>
 
    <!-- Metro 4 -->
    <script src="https://cdn.metroui.org.ua/v4.3.2/js/metro.min.js"></script>

@@ -29,7 +29,6 @@ import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpLOBUIModelSrv;
-import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpSrv;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,9 +51,6 @@ public class POCLocalController
 
     @Autowired
     private MessageSource msgSrc;
-
-    @Autowired
-    private IF_VHelpSrv vhlpSrv;
 
     @Autowired
     private IF_VHelpLOBUIModelSrv vhlpUISrv;

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplates;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
@@ -28,6 +29,7 @@ import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
+import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpLOBUIModelSrv;
 import com.sap.cds.services.request.UserInfo;
 import com.sap.cloud.security.xsuaa.token.Token;
 
@@ -55,6 +57,9 @@ public class LSOController
 
     @Autowired
     private MessageSource msgSrc;
+
+    @Autowired
+    private IF_VHelpLOBUIModelSrv vhlpUISrv;
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -200,7 +205,7 @@ public class LSOController
         return viewCaseForm;
     }
 
-    @PostMapping("/saveCase")
+    @PostMapping(value = "/saveCase", params = "action=saveCase")
     public String saveCase(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
     {
 
@@ -292,6 +297,27 @@ public class LSOController
                     }
                 }
 
+                // Not Feasible to have a Validation Error in Form and Attachment Persisted -
+                // But just to handle theoratically in case there is an Error in Attachment
+                // Persistence only- Remove the attachment otherwise let it persist
+                if (CollectionUtils.isNotEmpty(userSessSrv.getMessageStack()))
+                {
+                    Optional<TY_Message> attErrO = userSessSrv.getMessageStack().stream()
+                            .filter(e -> e.getMsgType().equals(EnumMessageType.ERR_ATTACHMENT)).findFirst();
+                    if (!attErrO.isPresent())
+                    {
+                        // Attachment able to presist do not remove it from Current Payload
+                        caseForm.setAttachment(userSessSrv.getCurrentForm4Submission().getCaseForm().getAttachment());
+
+                    }
+                }
+
+                if (vhlpUISrv != null)
+                {
+                    model.addAllAttributes(
+                            vhlpUISrv.getVHelpUIModelMap4LobCatg(EnumCaseTypes.Learning, caseForm.getCatgDesc()));
+                }
+
                 model.addAttribute("caseForm", caseForm);
 
                 // also Upload the Catg. Tree as per Case Type
@@ -309,6 +335,79 @@ public class LSOController
         }
 
         return caseFormView;
+    }
+
+    @PostMapping(value = "/saveCase", params = "action=catgChange")
+    public String refreshCaseForm4Catg(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
+    {
+
+        String viewCaseForm = caseFormView;
+        if (caseForm != null && userSessSrv != null)
+        {
+
+            // Normal Scenario - Catg. chosen Not relevant for Notes Template and/or
+            // additional fields
+
+            if ((StringUtils.hasText(userSessSrv.getUserDetails4mSession().getAccountId())
+                    || StringUtils.hasText(userSessSrv.getUserDetails4mSession().getEmployeeId()))
+                    && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+            {
+
+                Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+                        .filter(g -> g.getCaseTypeEnum().toString().equals(EnumCaseTypes.Learning.toString()))
+                        .findFirst();
+                if (cusItemO.isPresent() && catgTreeSrv != null)
+                {
+
+                    model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
+
+                    // Populate User Details
+                    TY_UserESS userDetails = new TY_UserESS();
+                    userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                    model.addAttribute("userInfo", userDetails);
+
+                    // Account Or Employee already set on the Form
+                    model.addAttribute("formErrors", userSessSrv.getFormErrors());
+
+                    // also Upload the Catg. Tree as per Case Type
+                    model.addAttribute("catgsList",
+                            catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
+
+                    // Scan Current Catg for Templ. Load and or Additional Fields
+
+                    // Scan for Template Load
+                    TY_CatgTemplates catgTemplate = catalogTreeSrv.getTemplates4Catg(caseForm.getCatgDesc(),
+                            EnumCaseTypes.Learning);
+                    if (catgTemplate != null)
+                    {
+
+                        // Set Questionnaire for Category
+                        caseForm.setTemplate(catgTemplate.getQuestionnaire());
+
+                    }
+
+                    if (vhlpUISrv != null)
+                    {
+                        model.addAllAttributes(
+                                vhlpUISrv.getVHelpUIModelMap4LobCatg(EnumCaseTypes.Learning, caseForm.getCatgDesc()));
+                    }
+
+                    // Case Form Model Set at last
+                    model.addAttribute("caseForm", caseForm);
+                }
+                else
+                {
+
+                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_TYPE_NOCFG", new Object[]
+                    { EnumCaseTypes.Learning.toString() }, Locale.ENGLISH));
+                }
+
+            }
+
+        }
+
+        return viewCaseForm;
+
     }
 
 }
