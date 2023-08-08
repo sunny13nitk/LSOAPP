@@ -1,6 +1,6 @@
 using {cuid} from '@sap/cds/common';
 
-namespace db.model;
+namespace db.esmlogs;
 
 
 /*

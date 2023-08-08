@@ -22,4 +22,6 @@ public class GC_Constants
     public static final String gc_LSO_LANGUAGE = "LSO_Language";
     public static final String gc_LSO_LANGUAGE_DESC = "Language";
 
+    public static final String gc_SelfServiceChannel = "SELF_SERVICE";
+
 }

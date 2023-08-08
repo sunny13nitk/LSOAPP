@@ -17,6 +17,7 @@ public class TY_Case_SrvCloud
     private String subject;
     private String caseType;
     private TY_Account_CaseCreate account;
+    private String origin;
     private TY_CatgLvl1_CaseCreate categoryLevel1;
     private TY_CatgLvl1_CaseCreate categoryLevel2;
     private TY_CatgLvl1_CaseCreate categoryLevel3;

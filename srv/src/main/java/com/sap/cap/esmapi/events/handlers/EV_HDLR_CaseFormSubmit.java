@@ -21,6 +21,7 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
 import com.sap.cap.esmapi.events.event.EV_LogMessage;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.enums.EnumStatus;
 import com.sap.cap.esmapi.utilities.pojos.TY_Account_CaseCreate;
@@ -192,6 +193,9 @@ public class EV_HDLR_CaseFormSubmit
                                 newCaseEntity.setExtensions(extn);
 
                             }
+
+                            // Set the Channel
+                            newCaseEntity.setOrigin(GC_Constants.gc_SelfServiceChannel);
 
                             // Case Payload is now Ready: Post and get the Case ID back
                             try
