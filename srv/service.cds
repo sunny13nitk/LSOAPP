@@ -1,6 +1,6 @@
-using {db.esmlogs as logs } from '../db/model/esmlogs';
+using {db.esmlogs as logs } from '../db/model/esmlogs'; 
 
-service LogsReadService 
+service LogsReadService  
 {
     @readonly entity Logs as projection on logs.esmappmsglog;
 }
