@@ -1,7 +1,9 @@
 package com.sap.cap.esmapi.hana.logging.srv.impl;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -45,6 +47,7 @@ public class CL_HANALoggingSrv implements IF_HANALoggingSrv
             {
                 log.info(msg);
             }
+            List<Map<String, Object>> data = new ArrayList<>();
 
             Map<String, Object> logEntity = new HashMap<String, Object>();
             logEntity.put("ID", UUID.randomUUID()); // ID
@@ -55,14 +58,18 @@ public class CL_HANALoggingSrv implements IF_HANALoggingSrv
             logEntity.put("objectid", logMsg.getObjectId()); // Object ID
             logEntity.put("message", logMsg.getMessage()); // Message Text
 
-            CqnInsert qLogInsert = Insert.into(this.msgLogsTablePath).entry(logEntity);
-            if (qLogInsert != null)
+            data.add(logEntity);
+            if (data.size() > 0)
             {
-                log.info("LOG Insert Query Bound!");
-                Result result = ps.run(qLogInsert);
-                if (result.list().size() > 0)
+                CqnInsert qLogInsert = Insert.into(this.msgLogsTablePath).entries(data);
+                if (qLogInsert != null)
                 {
-                    log.info("Log Successfully Inserted! " + result.rowCount());
+                    log.info("LOG Insert Query Bound!");
+                    Result result = ps.run(qLogInsert);
+                    if (result.list().size() > 0)
+                    {
+                        log.info("# Log Successfully Inserted - " + result.rowCount());
+                    }
                 }
             }
         }
