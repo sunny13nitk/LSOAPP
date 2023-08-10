@@ -1,15 +1,14 @@
 package com.sap.cap.esmapi.hana.logging.srv.impl;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -24,6 +23,7 @@ import com.sap.cds.services.persistence.PersistenceService;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Scope("prototype")
 @Slf4j
 public class CL_HANALoggingSrv implements IF_HANALoggingSrv
 {
@@ -37,8 +37,9 @@ public class CL_HANALoggingSrv implements IF_HANALoggingSrv
     private final String msgLogsTablePath = "db.esmlogs.esmappmsglog"; // Table Path - HANA
 
     @Override
-    public void createLog(TY_Message logMsg) throws EX_ESMAPI
+    public Result createLog(TY_Message logMsg) throws EX_ESMAPI
     {
+        Result response = null;
         if (logMsg != null && msgSrc != null && ps != null)
         {
             String msg = msgSrc.getMessage("PERS_LOG", new Object[]
@@ -67,10 +68,14 @@ public class CL_HANALoggingSrv implements IF_HANALoggingSrv
                     if (result.list().size() > 0)
                     {
                         log.info("# Log Successfully Inserted - " + result.rowCount());
+                        response = result;
+                        
                     }
                 }
             }
         }
+
+        return response;
     }
 
 }
