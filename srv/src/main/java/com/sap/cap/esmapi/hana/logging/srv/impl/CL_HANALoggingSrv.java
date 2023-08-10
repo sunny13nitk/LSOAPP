@@ -47,21 +47,19 @@ public class CL_HANALoggingSrv implements IF_HANALoggingSrv
             {
                 log.info(msg);
             }
-            List<Map<String, Object>> data = new ArrayList<>();
 
-            Map<String, Object> logEntity = new HashMap<String, Object>();
+            Map<String, Object> logEntity = new HashMap<>();
             logEntity.put("ID", UUID.randomUUID()); // ID
-            logEntity.put("username", logMsg.getUserName()); // User Name
-            logEntity.put("timestamp", new Timestamp(System.currentTimeMillis())); // TimeStamp
-            logEntity.put("status", logMsg.getStatus().toString()); // Status
-            logEntity.put("msgtype", logMsg.getMsgType().toString()); // Message Type
-            logEntity.put("objectid", logMsg.getObjectId()); // Object ID
-            logEntity.put("message", logMsg.getMessage()); // Message Text
+            logEntity.put("USERNAME", logMsg.getUserName()); // User Name
+            logEntity.put("TIMESTAMP", new Timestamp(System.currentTimeMillis())); // TimeStamp
+            logEntity.put("STATUS", logMsg.getStatus().toString()); // Status
+            logEntity.put("MSGTYPE", logMsg.getMsgType().toString()); // Message Type
+            logEntity.put("OBJECTID", logMsg.getObjectId()); // Object ID
+            logEntity.put("MESSAGE", logMsg.getMessage()); // Message Text
 
-            data.add(logEntity);
-            if (data.size() > 0)
+            if (logEntity != null)
             {
-                CqnInsert qLogInsert = Insert.into(this.msgLogsTablePath).entries(data);
+                CqnInsert qLogInsert = Insert.into(this.msgLogsTablePath).entry(logEntity);
                 if (qLogInsert != null)
                 {
                     log.info("LOG Insert Query Bound!");

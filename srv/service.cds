@@ -6,4 +6,4 @@ service LogsReadService
 }
 
 
-annotate LogsReadService @(requires :'ESMAPI Administrators') ;
+//annotate LogsReadService @(requires :'ESMAPI Administrators') ;
