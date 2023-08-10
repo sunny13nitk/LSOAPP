@@ -55,7 +55,7 @@ public class CL_HANALoggingSrv implements IF_HANALoggingSrv
             logEntity.put("STATUS", logMsg.getStatus().toString()); // Status
             logEntity.put("MSGTYPE", logMsg.getMsgType().toString()); // Message Type
             logEntity.put("OBJECTID", logMsg.getObjectId()); // Object ID
-            logEntity.put("MESSAGE", logMsg.getMessage()); // Message Text
+            logEntity.put("message", logMsg.getMessage()); // Message Text
 
             if (logEntity != null)
             {
