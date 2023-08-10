@@ -258,13 +258,12 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         .getVHelpUIModelMap4LobCatg(cusItemO.get().getCaseTypeEnum(), caseForm.getCatgDesc());
                 // Some Attributes Relevant for Current Category
                 if (vHlpsMap.size() > 0)
-                {
-                    // Country Field Relevant
+                { // Country Field Relevant
                     if (CollectionUtils.isNotEmpty(vHlpsMap.get(GC_Constants.gc_LSO_COUNTRY)))
                     {
                         caseForm.setCountryMandatory(true);
                     }
-                    else // Remove if Country field is not relevant for Current Category and passed on
+                    else // Remove if Country field is not relevant for Current Category and passed on //
                          // from Form Buffer
                     {
                         caseForm.setCountry(null);
@@ -282,6 +281,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     }
 
                 }
+
             }
 
             caseFormAsync.setCaseForm(caseForm);
@@ -291,6 +291,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             caseFormAsync.setUserId(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId());
 
             if (!CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+
             {
 
                 if (cusItemO.isPresent() && catalogSrv != null)
