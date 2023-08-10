@@ -1,4 +1,4 @@
-package hana.logging.srv.intf;
+package com.sap.cap.esmapi.hana.logging.srv.intf;
 
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;

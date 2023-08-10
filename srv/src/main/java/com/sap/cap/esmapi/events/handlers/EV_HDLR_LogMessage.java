@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
 import com.sap.cap.esmapi.events.event.EV_LogMessage;
+import com.sap.cap.esmapi.hana.logging.srv.intf.IF_HANALoggingSrv;
 
-import hana.logging.srv.intf.IF_HANALoggingSrv;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
