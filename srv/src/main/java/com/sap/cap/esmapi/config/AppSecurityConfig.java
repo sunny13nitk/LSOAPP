@@ -36,7 +36,7 @@ public class AppSecurityConfig
   @Bean
   public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception
   {
-
+ 
     /*
      * ----------- Local Testing --------------------
      */
