@@ -7,6 +7,7 @@ applications:
   path: srv/target/esmapi-exec.jar
   services:
     - esmapi-xsuaa
+    - esmapi-hana
   env:
     IAS_XSUAA_XCHANGE_ENABLED: true
     SEND_XFRAMEOPTIONS: false
