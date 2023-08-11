@@ -24,4 +24,5 @@ public class TY_UserSessionInfo
     private List<String> formErrorMsgs;
     private boolean rateLimitBreached;
     private List<String> allowedAttachmentTypes;
+    private List<String> submissionIDs = new ArrayList<String>();
 }

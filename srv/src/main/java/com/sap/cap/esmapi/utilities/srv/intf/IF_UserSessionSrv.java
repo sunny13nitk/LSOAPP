@@ -90,9 +90,8 @@ public interface IF_UserSessionSrv
     public void clearPreviousSubmission4mSessionBuffer();
 
     /*
-     * Update Session Messages and Log(s) for a submission event result with Case Id
-     * to notify user and update DB
+     * Update Session Messages and Log(s) for a submission event result
      */
-    public boolean updateCase4SubmissionId(String submGuid, String caseId, String msg) throws EX_ESMAPI;
+    public void updateCases4SubmissionIds() throws EX_ESMAPI;
 
 }

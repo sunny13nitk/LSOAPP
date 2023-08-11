@@ -31,6 +31,7 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.events.event.EV_LogMessage;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.hana.logging.srv.intf.IF_HANALoggingSrv;
 import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
@@ -51,6 +52,7 @@ import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpLOBUIModelSrv;
 import com.sap.cds.services.request.UserInfo;
 import com.sap.cloud.security.xsuaa.token.Token;
 
+import cds.gen.db.esmlogs.Esmappmsglog;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -85,6 +87,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
     @Autowired
     private IF_VHelpLOBUIModelSrv vHlpModelSrv;
+
+    @Autowired
+    private IF_HANALoggingSrv hanaLogSrv;
 
     // Properties
 
@@ -196,6 +201,12 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     {
                         // Get the cases for User
                         userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl()));
+
+                        if (CollectionUtils.isNotEmpty(userSessInfo.getSubmissionIDs()))
+                        {
+                            // Seek Case IDs for Submissions
+                            updateCases4SubmissionIds();
+                        }
 
                     }
                     catch (Exception e)
@@ -369,6 +380,10 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                     // Add to Display Messages : to be shown to User or Successful Submission
                     this.addSessionMessage(msg);
+
+                    // Add Submission Guids to Session Context for REconcillation after Case
+                    // Creation Process
+                    this.userSessInfo.getSubmissionIDs().add(caseFormAsync.getSubmGuid());
 
                     isSubmitted = true;
 
@@ -742,32 +757,6 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
     }
 
-    private void handleMandatoryFieldMissingError(String fldName)
-    {
-        String msg = msgSrc.getMessage("ERR_MAND_FLDS", new Object[]
-        { fldName }, Locale.ENGLISH);
-        log.error(msg); // System Log
-
-        // Logging Framework
-        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
-                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
-        userSessInfo.getMessagesStack().add(logMsg);
-
-        // Instantiate and Fire the Event : Syncronous processing
-        EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
-        applicationEventPublisher.publishEvent(logMsgEvent);
-
-        this.addFormErrors(msg);// For Form Display
-    }
-
-    @Override
-    public boolean updateCase4SubmissionId(String submGuid, String caseId, String msg) throws EX_ESMAPI
-    {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateCase4SubmissionId'");
-    }
-
     @Override
     public void addMessagetoStack(TY_Message msg)
     {
@@ -830,6 +819,11 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                 // Fetch Afresh and Reset
                 userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl()));
+                if (CollectionUtils.isNotEmpty(userSessInfo.getSubmissionIDs()))
+                {
+                    // Seek Case IDs for Submissions
+                    updateCases4SubmissionIds();
+                }
 
             }
             catch (Exception e)
@@ -919,6 +913,68 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         }
     }
 
+    @Override
+    public List<TY_CaseESS> getCases4User4mSession()
+    {
+
+        if (CollectionUtils.isNotEmpty(userSessInfo.getCases()))
+        {
+            log.info("# Cases returned for User From Session : " + userSessInfo.getCases().size());
+            return userSessInfo.getCases();
+        }
+
+        return null;
+    }
+
+    @Override
+    public void updateCases4SubmissionIds() throws EX_ESMAPI
+    {
+        if (hanaLogSrv != null && CollectionUtils.isNotEmpty(userSessInfo.getSubmissionIDs()))
+        {
+            // Get the Logs for the Object IDS - Sumbission GUIDS
+            List<Esmappmsglog> logs = hanaLogSrv.getLogsByObjectIDs(userSessInfo.getSubmissionIDs());
+            if (CollectionUtils.isNotEmpty(logs))
+            {
+                // Get Logs Excluding Successful Submission
+                List<Esmappmsglog> logsExclSubm = logs.stream()
+                        .filter(l -> l.getMsgtype() != EnumMessageType.SUCC_CASE_SUBM.name())
+                        .collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(logsExclSubm))
+                {
+                    for (Esmappmsglog esmappmsglog : logsExclSubm)
+                    {
+                        // Append Messages to Session
+                        this.addSessionMessage(esmappmsglog.getMessage());
+                        // # Performance - REmove the Submission Guids that are reconcilled for
+                        // respective Case IDs
+                        userSessInfo.getSubmissionIDs().remove(esmappmsglog.getObjectid());
+                    }
+                }
+
+            }
+
+        }
+    }
+
+    private void handleMandatoryFieldMissingError(String fldName)
+    {
+        String msg = msgSrc.getMessage("ERR_MAND_FLDS", new Object[]
+        { fldName }, Locale.ENGLISH);
+        log.error(msg); // System Log
+
+        // Logging Framework
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
+                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+        userSessInfo.getMessagesStack().add(logMsg);
+
+        // Instantiate and Fire the Event : Syncronous processing
+        EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+        this.addFormErrors(msg);// For Form Display
+    }
+
     private void handleInvalidAttachment(String filename, String extnType)
     {
         String msg;
@@ -980,19 +1036,6 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
         // Should be handled Centrally via Aspect
         throw new EX_ESMAPI(msg);
-    }
-
-    @Override
-    public List<TY_CaseESS> getCases4User4mSession()
-    {
-
-        if (CollectionUtils.isNotEmpty(userSessInfo.getCases()))
-        {
-            log.info("# Cases returned for User From Session : " + userSessInfo.getCases().size());
-            return userSessInfo.getCases();
-        }
-
-        return null;
     }
 
 }

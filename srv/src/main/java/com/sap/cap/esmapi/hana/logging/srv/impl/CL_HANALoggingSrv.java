@@ -2,10 +2,12 @@ package com.sap.cap.esmapi.hana.logging.srv.impl;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Scope;
@@ -17,9 +19,13 @@ import com.sap.cap.esmapi.hana.logging.srv.intf.IF_HANALoggingSrv;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cds.Result;
 import com.sap.cds.ql.Insert;
+import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnInsert;
+import com.sap.cds.ql.cqn.CqnSelect;
 import com.sap.cds.services.persistence.PersistenceService;
 
+import cds.gen.db.esmlogs.Esmappmsglog;
+import cds.gen.db.esmlogs.Esmappmsglog_;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -35,6 +41,7 @@ public class CL_HANALoggingSrv implements IF_HANALoggingSrv
     private MessageSource msgSrc;
 
     private final String msgLogsTablePath = "db.esmlogs.esmappmsglog"; // Table Path - HANA
+    private final String objectID = "objectid";
 
     @Override
     public Result createLog(TY_Message logMsg) throws EX_ESMAPI
@@ -69,13 +76,31 @@ public class CL_HANALoggingSrv implements IF_HANALoggingSrv
                     {
                         log.info("# Log Successfully Inserted - " + result.rowCount());
                         response = result;
-                        
+
                     }
                 }
             }
         }
 
         return response;
+    }
+
+    @Override
+    public List<Esmappmsglog> getLogsByObjectIDs(List<String> objIDs) throws EX_ESMAPI
+    {
+        List<Esmappmsglog> logs = null;
+
+        if (CollectionUtils.isNotEmpty(objIDs) && ps != null)
+        {
+            CqnSelect qLogsByObjectId = Select.from(Esmappmsglog_.class).where(l -> l.get(objectID).in(objIDs));
+            if (qLogsByObjectId != null)
+            {
+                logs = ps.run(qLogsByObjectId).listOf(Esmappmsglog.class);
+            }
+
+        }
+
+        return logs;
     }
 
 }
