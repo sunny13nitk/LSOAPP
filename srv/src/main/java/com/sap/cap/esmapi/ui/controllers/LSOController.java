@@ -280,6 +280,16 @@ public class LSOController
                                                                                                                  // Notes
                 caseForm.setSubject(userSessSrv.getCurrentForm4Submission().getCaseForm().getSubject()); // Curr Subject
 
+                if (StringUtils.hasText(userSessSrv.getCurrentForm4Submission().getCaseForm().getCountry()))
+                {
+                    caseForm.setCountry(userSessSrv.getCurrentForm4Submission().getCaseForm().getCountry());
+                }
+
+                if (StringUtils.hasText(userSessSrv.getCurrentForm4Submission().getCaseForm().getLanguage()))
+                {
+                    caseForm.setLanguage(userSessSrv.getCurrentForm4Submission().getCaseForm().getLanguage());
+                }
+
                 model.addAttribute("formErrors", userSessSrv.getFormErrors());
 
                 // Not Feasible to have a Validation Error in Form and Attachment Persisted -

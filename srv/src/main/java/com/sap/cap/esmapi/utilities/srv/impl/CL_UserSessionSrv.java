@@ -937,7 +937,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             {
                 // Get Logs Excluding Successful Submission
                 List<Esmappmsglog> logsExclSubm = logs.stream()
-                        .filter(l -> l.getMsgtype() != EnumMessageType.SUCC_CASE_SUBM.name())
+                        .filter(l -> l.getMsgtype() != EnumMessageType.SUCC_CASE_SUBM.toString())
                         .collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(logsExclSubm))
                 {
