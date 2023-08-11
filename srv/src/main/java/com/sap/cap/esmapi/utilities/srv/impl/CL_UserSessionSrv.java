@@ -935,6 +935,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             List<Esmappmsglog> logs = hanaLogSrv.getLogsByObjectIDs(userSessInfo.getSubmissionIDs());
             if (CollectionUtils.isNotEmpty(logs))
             {
+                log.info("# Of Log entries for Submission(s) in Current Session - " + logs.size());
                 // Get Logs Excluding Successful Submission
                 List<Esmappmsglog> logsExclSubm = logs.stream()
                         .filter(l -> l.getMsgtype() != EnumMessageType.SUCC_CASE_SUBM.toString())
@@ -943,11 +944,18 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                 {
                     for (Esmappmsglog esmappmsglog : logsExclSubm)
                     {
-                        // Append Messages to Session
-                        this.addSessionMessage(esmappmsglog.getMessage());
-                        // # Performance - REmove the Submission Guids that are reconcilled for
-                        // respective Case IDs
-                        userSessInfo.getSubmissionIDs().remove(esmappmsglog.getObjectid());
+                        log.info("# Of Log Entries after Filtering Case Submissions  - " + logsExclSubm.size());
+                        // further Check due to HANA String Comparison Issue - Not picked up in Filter
+                        if (esmappmsglog.getMsgtype() != EnumMessageType.SUCC_CASE_SUBM.toString())
+                        {
+                            // Append Messages to Session
+
+                            this.addSessionMessage(esmappmsglog.getMessage());
+                            // # Performance - REmove the Submission Guids that are reconcilled for
+                            // respective Case IDs
+                            userSessInfo.getSubmissionIDs().remove(esmappmsglog.getObjectid());
+                        }
+
                     }
                 }
 
