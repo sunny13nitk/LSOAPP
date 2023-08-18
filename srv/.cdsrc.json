@@ -1,16 +1,10 @@
-{ 
-  "build": {
-    "target": "."
-  },
+{
   "requires": {
     "auth": {
       "kind": "xsuaa"
     },
     "approuter": {
       "kind": "cloudfoundry"
-    },
-    "hana": {
-      "deploy-format": "hdbtable"
     }
   }
 }
