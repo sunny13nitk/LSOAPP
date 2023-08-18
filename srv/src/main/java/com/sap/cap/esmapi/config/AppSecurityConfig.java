@@ -58,7 +58,7 @@ public class AppSecurityConfig
         .anyRequest().denyAll() // Deny any other endpoint access then listed above
         .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
         .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
-    // @formatter:on
+    // @formatter:on 
 
     return http.build();
 
