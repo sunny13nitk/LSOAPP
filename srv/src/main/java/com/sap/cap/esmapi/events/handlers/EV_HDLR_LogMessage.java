@@ -25,10 +25,10 @@ public class EV_HDLR_LogMessage
             log.info("Inside Message Logging Event Handler...");
             if (evLogMessage.getMessageToLog() != null)
             {
-                // if (dbLogSrv.createLog(evLogMessage.getMessageToLog()) != null)
-                // {
-                //     log.info("Message Logged in DB!");
-                // }
+                if (dbLogSrv.createLog(evLogMessage.getMessageToLog()) != null)
+                {
+                    log.info("Message Logged in DB!");
+                }
             }
         }
 
