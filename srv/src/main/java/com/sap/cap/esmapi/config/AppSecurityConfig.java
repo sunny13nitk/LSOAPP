@@ -19,7 +19,7 @@ import com.sap.cloud.security.xsuaa.token.TokenAuthenticationConverter;
 import com.sap.cloud.security.xsuaa.tokenflows.XsuaaTokenFlows;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity  
 
 // @Order(1) // needs to have higher priority than CAP security config
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
