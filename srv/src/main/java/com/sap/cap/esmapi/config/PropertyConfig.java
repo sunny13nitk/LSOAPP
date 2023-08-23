@@ -1,8 +1,5 @@
 package com.sap.cap.esmapi.config;
 
-import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
-import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,12 +9,17 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
+import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
+import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
+
 @Configuration
 @PropertySources(
 { @PropertySource("classpath:messages.properties"), @PropertySource("classpath:srvcloudurls.properties"),
 		@PropertySource("classpath:appconfig.properties") })
+
 public class PropertyConfig
 {
+
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
 	{
@@ -44,13 +46,14 @@ public class PropertyConfig
 			@Value("${notesurl}") final String notesUrl, @Value("${topN}") final String topN,
 			@Value("${caseTemplateUrl}") final String caseTemplateUrl,
 			@Value("${catgTreeUrl}") final String catgTreeUrl, @Value("${docSrvUrl}") final String docSrvUrl,
-			@Value("${emplSrvUrl}") final String emplSrvUrl, @Value("${vhlpUrl}") final String vhlpUrl
+			@Value("${emplSrvUrl}") final String emplSrvUrl, @Value("${vhlpUrl}") final String vhlpUrl,
+			@Value("${caseDetailsUrl}") final String caseDetailsUrl
 
 	)
 
 	{
 		TY_SrvCloudUrls srvClUrls = new TY_SrvCloudUrls(userName, password, casesUrl, cpUrl, acUrl, notesUrl, topN,
-				caseTemplateUrl, catgTreeUrl, docSrvUrl, emplSrvUrl, vhlpUrl);
+				caseTemplateUrl, catgTreeUrl, docSrvUrl, emplSrvUrl, vhlpUrl, caseDetailsUrl);
 
 		return srvClUrls;
 	}

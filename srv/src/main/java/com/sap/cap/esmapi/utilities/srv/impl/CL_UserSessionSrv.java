@@ -37,6 +37,7 @@ import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
+import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.enums.EnumStatus;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
@@ -200,7 +201,11 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     try
                     {
                         // Get the cases for User
-                        userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl()));
+                        // userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl()));
+
+                        // Get ONLY Learning Cases for User
+                        userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl(),
+                                EnumCaseTypes.Learning));
 
                         if (CollectionUtils.isNotEmpty(userSessInfo.getSubmissionIDs()))
                         {
@@ -708,7 +713,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                                     {
                                         String extnType = extensionAttachment;
                                         Optional<String> extnfoundO = userSessInfo.getAllowedAttachmentTypes().stream()
-                                                .filter(a -> a.equals(extnType)).findFirst();
+                                                .filter(a -> a.equalsIgnoreCase(extnType)).findFirst();
                                         if (!extnfoundO.isPresent())
                                         {
                                             // Invalid Attachment TYpe Error
@@ -818,7 +823,8 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                 }
 
                 // Fetch Afresh and Reset
-                userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl()));
+                userSessInfo.setCases(
+                        essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl(), EnumCaseTypes.Learning));
                 if (CollectionUtils.isNotEmpty(userSessInfo.getSubmissionIDs()))
                 {
                     // Seek Case IDs for Submissions

@@ -24,5 +24,6 @@ public class TY_SrvCloudUrls
     private String docSrvUrl;
     private String emplUrl;
     private String vhlpUrl;
+    private String caseDetailsUrl;
 
 }

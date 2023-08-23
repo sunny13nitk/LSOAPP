@@ -9,8 +9,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
+import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
@@ -28,6 +30,9 @@ public interface IF_SrvCloudAPI
     public List<TY_CaseESS> getCases4User(String accountIdUser, String contactIdUser) throws IOException;
 
     public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails) throws IOException;
+
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails, EnumCaseTypes caseType)
+            throws IOException;
 
     public List<TY_CaseGuidId> getCaseGuidIdList();
 
@@ -61,5 +66,7 @@ public interface IF_SrvCloudAPI
     public List<TY_CatalogItem> getActiveCaseCategoriesByCatalogId(String catalogID) throws EX_ESMAPI, IOException;
 
     public List<TY_KeyValue> getVHelpDDLB4Field(String fieldName) throws EX_ESMAPI, IOException;
+
+    public TY_CaseDetails getCaseDetails4Case(String caseId) throws EX_ESMAPI, IOException;
 
 }

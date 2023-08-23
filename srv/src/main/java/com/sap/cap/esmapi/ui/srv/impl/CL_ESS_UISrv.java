@@ -10,6 +10,7 @@ import com.sap.cap.esmapi.ui.pojos.TY_ESS_Stats;
 import com.sap.cap.esmapi.ui.pojos.TY_NameValueLPair;
 import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
+import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
@@ -105,6 +106,13 @@ public class CL_ESS_UISrv implements IF_ESS_UISrv
     public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails) throws IOException
     {
         return srvCloudApiSrv.getCases4User(userDetails);
+    }
+
+    @Override
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails, EnumCaseTypes caseType)
+            throws IOException
+    {
+        return srvCloudApiSrv.getCases4User(userDetails, caseType);
     }
 
 }

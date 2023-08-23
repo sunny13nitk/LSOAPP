@@ -24,4 +24,5 @@ public class TY_CaseESS
     private String createdOn;
     private Date creationDate;    
     private String formattedDate;
+    private String origin;
 }

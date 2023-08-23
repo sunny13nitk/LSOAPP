@@ -19,7 +19,7 @@ import com.sap.cloud.security.xsuaa.token.TokenAuthenticationConverter;
 import com.sap.cloud.security.xsuaa.tokenflows.XsuaaTokenFlows;
 
 @Configuration
-@EnableWebSecurity  
+@EnableWebSecurity
 
 // @Order(1) // needs to have higher priority than CAP security config
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
@@ -58,7 +58,7 @@ public class AppSecurityConfig
         .anyRequest().denyAll() // Deny any other endpoint access then listed above
         .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
         .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
-    // @formatter:on 
+    // @formatter:on
 
     return http.build();
 

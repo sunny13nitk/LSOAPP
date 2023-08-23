@@ -45,13 +45,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
 import com.sap.cap.esmapi.utilities.StringsUtility;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
+import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.TY_AccountCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
@@ -75,6 +79,9 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
     @Autowired
     private IF_APISrv apiSrv;
+
+    @Autowired
+    private TY_CatgCus caseTypeCus;
 
     @Autowired
     private MessageSource msgSrc;
@@ -195,7 +202,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                     {
                                         String caseid = null, caseguid = null, caseType = null,
                                                 caseTypeDescription = null, subject = null, status = null,
-                                                createdOn = null, accountId = null, contactId = null;
+                                                createdOn = null, accountId = null, contactId = null, origin = null;
                                         // System.out.println("Cases Entity Bound - Reading Case...");
                                         Iterator<String> fieldNames = caseEnt.fieldNames();
                                         while (fieldNames.hasNext())
@@ -259,6 +266,16 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
                                                     status = caseEnt.get(caseFieldName).asText();
+                                                }
+                                            }
+
+                                            if (caseFieldName.equals("origin"))
+                                            {
+                                                // System.out.println("Case Status Added : " +
+                                                // caseEnt.get(caseFieldName).asText());
+                                                if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
+                                                {
+                                                    origin = caseEnt.get(caseFieldName).asText();
                                                 }
                                             }
 
@@ -387,14 +404,14 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                                 casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType,
                                                         caseTypeDescription, subject, status, accountId, contactId,
-                                                        createdOn, date, dateFormatted));
+                                                        createdOn, date, dateFormatted, origin));
 
                                             }
                                             else
                                             {
                                                 casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType,
                                                         caseTypeDescription, subject, status, accountId, contactId,
-                                                        createdOn, null, null));
+                                                        createdOn, null, null, origin));
                                             }
 
                                         }
@@ -2035,7 +2052,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                     {
                                         String caseid = null, caseguid = null, caseType = null,
                                                 caseTypeDescription = null, subject = null, status = null,
-                                                createdOn = null, accountId = null, contactId = null;
+                                                createdOn = null, accountId = null, contactId = null, origin = null;
                                         // System.out.println("Cases Entity Bound - Reading Case...");
                                         Iterator<String> fieldNames = caseEnt.fieldNames();
                                         while (fieldNames.hasNext())
@@ -2089,6 +2106,16 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
                                                     subject = caseEnt.get(caseFieldName).asText();
+                                                }
+                                            }
+
+                                            if (caseFieldName.equals("origin"))
+                                            {
+                                                // System.out.println("Case Subject Added : " +
+                                                // caseEnt.get(caseFieldName).asText());
+                                                if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
+                                                {
+                                                    origin = caseEnt.get(caseFieldName).asText();
                                                 }
                                             }
 
@@ -2227,14 +2254,14 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                                 casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType,
                                                         caseTypeDescription, subject, status, accountId, contactId,
-                                                        createdOn, date, dateFormatted));
+                                                        createdOn, date, dateFormatted, origin));
 
                                             }
                                             else
                                             {
                                                 casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType,
                                                         caseTypeDescription, subject, status, accountId, contactId,
-                                                        createdOn, null, null));
+                                                        createdOn, null, null, origin));
                                             }
 
                                         }
@@ -2330,8 +2357,6 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                 String encoding = Base64.getEncoder()
                         .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
-
-            
 
                 HttpGet httpGet = new HttpGet(urlLink);
 
@@ -2436,6 +2461,109 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         }
 
         return vhlbDDLB;
+    }
+
+    @Override
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails, EnumCaseTypes caseType)
+            throws IOException
+    {
+
+        List<TY_CaseESS> casesByCaseType = null;
+        List<TY_CaseESS> allCases = this.getCases4User(userDetails);
+        if (caseTypeCus != null)
+        {
+            Optional<TY_CatgCusItem> cusO = caseTypeCus.getCustomizations().stream()
+                    .filter(c -> c.getCaseTypeEnum().equals(caseType)).findFirst();
+            if (cusO.isPresent() && CollectionUtils.isNotEmpty(allCases))
+            {
+                casesByCaseType = allCases.stream().filter(t -> t.getCaseType().equals(cusO.get().getCaseType()))
+                        .collect(Collectors.toList());
+            }
+        }
+        log.info("# Cases for Case Type - " + caseType.name() + "for Current User : " + casesByCaseType.size());
+        return casesByCaseType;
+    }
+
+    @Override
+    public TY_CaseDetails getCaseDetails4Case(String caseId) throws EX_ESMAPI, IOException
+    {
+        TY_CaseDetails caseDetails = null;
+        if (StringUtils.hasText(caseId))
+        {
+            JsonNode jsonNode = null;
+            HttpResponse response = null;
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            String urlLink = null;
+            try
+            {
+                if (StringUtils.hasText(caseId) && StringUtils.hasText(srvCloudUrls.getCaseDetailsUrl()))
+
+                {
+                    log.info("Fetching Details for Case ID : " + caseId);
+
+                    urlLink = srvCloudUrls.getCaseDetailsUrl() + caseId;
+
+                    String encoding = Base64.getEncoder()
+                            .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                    HttpGet httpGet = new HttpGet(urlLink);
+
+                    httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                    httpGet.addHeader("accept", "application/json");
+
+                    // Fire the Url
+                    response = httpClient.execute(httpGet);
+
+                    // verify the valid error code first
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    if (statusCode != HttpStatus.SC_OK)
+                    {
+                        String msg = msgSrc.getMessage("ERR_CASE_DET_FETCH", new Object[]
+                        { caseId }, Locale.ENGLISH);
+                        log.error(msg);
+                        throw new EX_ESMAPI(msg);
+                    }
+
+                    // Try and Get Entity from Response
+                    HttpEntity entity = response.getEntity();
+                    String apiOutput = EntityUtils.toString(entity);
+                    // Lets see what we got from API
+                    // System.out.println(apiOutput);
+
+                    // Conerting to JSON
+                    ObjectMapper mapper = new ObjectMapper();
+                    jsonNode = mapper.readTree(apiOutput);
+
+                    if (jsonNode != null)
+                    {
+
+                        JsonNode rootNode = jsonNode.path("value");
+                        if (rootNode != null)
+                        {
+                            JsonNode contentNode = rootNode.at("/notes");
+                            if (contentNode != null)
+                            {
+
+                            }
+
+                        }
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_DET_FETCH", new Object[]
+                { caseId, e.getMessage() }, Locale.ENGLISH));
+
+            }
+            finally
+            {
+                httpClient.close();
+            }
+
+        }
+        return caseDetails;
     }
 
     private String getPOSTURL4BaseUrl(String urlBase)
