@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.ui.controllers;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -25,9 +27,11 @@ import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
+import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpLOBUIModelSrv;
 
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +61,12 @@ public class POCLocalController
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
+
+    // #TEST - Begin
+    @Autowired
+    private IF_SrvCloudAPI apiSrv;
+
+    // #TEST - End
 
     private final String caseListVWRedirect = "redirect:/poclocal/";
     private final String caseFormErrorRedirect = "redirect:/poclocal/errForm/";
@@ -381,4 +391,32 @@ public class POCLocalController
         return viewCaseForm;
 
     }
+
+    // #TEST
+    @GetMapping("/caseDetails/{caseID}")
+    public String getCaseDetails(@PathVariable String caseID, Model model)
+    {
+        if (StringUtils.hasText(caseID) && apiSrv != null)
+        {
+            try
+            {
+                TY_CaseDetails caseDetails = apiSrv.getCaseDetails4Case(caseID);
+                if (caseDetails != null)
+                {
+                    if (CollectionUtils.isNotEmpty(caseDetails.getNotes()))
+                    {
+                        log.info("# Notes Bound for Case ID - " + caseDetails.getNotes().size());
+                    }
+                }
+            }
+            catch (EX_ESMAPI | IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+        return "success";
+    }
+
 }

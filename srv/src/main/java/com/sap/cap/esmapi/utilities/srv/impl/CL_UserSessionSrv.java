@@ -33,6 +33,7 @@ import com.sap.cap.esmapi.events.event.EV_LogMessage;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.hana.logging.srv.intf.IF_HANALoggingSrv;
 import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
+import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.ui.srv.intf.IF_ESS_UISrv;
@@ -966,6 +967,58 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             }
 
         }
+    }
+
+    @Override
+    public TY_CaseEdit_Form getCaseDetails4Edit(String caseID) throws EX_ESMAPI
+    {
+        TY_CaseEdit_Form caseEditForm = null;
+        if (StringUtils.hasText(caseID))
+        {
+            // Check if REquested Case belongs to the User
+            if (CollectionUtils.isNotEmpty(getCases4User4mSession()))
+            {
+                Optional<TY_CaseESS> caseESSO = getCases4User4mSession().stream().filter(c -> c.getId().equals(caseID))
+                        .findFirst();
+                if (caseESSO.isPresent())
+                {
+                    TY_CaseESS caseESS = caseESSO.get();
+
+                    // If The Channel is SELF_SERVICE, then only seek Notes and Use Other Case
+                    // details from Session Var
+
+                    // --- Filter by External Note Type(s) only
+
+                    // Else Only Use Case Details from Sess Var and prepare the Case Edit Form Model
+                }
+                else // Unauthorized Access - Case Is not in User's List
+                {
+                    handleUnauthorizedCaseAccess(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), caseID);
+                }
+            }
+
+        }
+
+        return caseEditForm;
+    }
+
+    private void handleUnauthorizedCaseAccess(String userId, String caseID)
+    {
+        String msg;
+        msg = msgSrc.getMessage("ERR_UNAUTH_CASE_ACCESS", new Object[]
+        { userId, caseID }, Locale.ENGLISH);
+
+        log.error(msg);
+        TY_Message logMsg = new TY_Message(userId, Timestamp.from(Instant.now()), EnumStatus.Error,
+                EnumMessageType.ERR_UNAUTH_CASE_ACCESS, caseID, msg);
+        this.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) caseID, logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+        // Should be handled Centrally via Aspect
+        throw new EX_ESMAPI(msg);
     }
 
     private void handleMandatoryFieldMissingError(String fldName)

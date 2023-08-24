@@ -61,6 +61,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_DefaultComm;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
+import com.sap.cap.esmapi.utilities.pojos.TY_NotesDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
@@ -2540,9 +2541,72 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         JsonNode rootNode = jsonNode.path("value");
                         if (rootNode != null)
                         {
+                            caseDetails = new TY_CaseDetails();
+                            caseDetails.setCaseGuid(caseId);
+                            caseDetails.setNotes(new ArrayList<TY_NotesDetails>());
                             JsonNode contentNode = rootNode.at("/notes");
-                            if (contentNode != null)
+                            if (contentNode != null && contentNode.isArray() && contentNode.size() > 0)
                             {
+                                log.info("Notes for Case ID : " + caseId + " bound..");
+                                for (JsonNode arrayItem : contentNode)
+                                {
+                                    String content = null, noteType = null, userCreate = null, timestamp = null;
+                                    OffsetDateTime odt = null;
+
+                                    Iterator<Entry<String, JsonNode>> fields = arrayItem.fields();
+                                    while (fields.hasNext())
+                                    {
+                                        Entry<String, JsonNode> jsonField = fields.next();
+                                        if (jsonField.getKey().equals("content"))
+                                        {
+                                            content = jsonField.getValue().asText();
+                                        }
+
+                                        if (jsonField.getKey().equals("noteType"))
+                                        {
+                                            noteType = jsonField.getValue().asText();
+                                        }
+
+                                        if (jsonField.getKey().equals("adminData"))
+                                        {
+                                            JsonNode adminNode = jsonField.getValue();
+                                            if (adminNode != null)
+                                            {
+                                                Iterator<String> fieldNames = adminNode.fieldNames();
+                                                while (fieldNames.hasNext())
+                                                {
+                                                    String caseFieldName = fieldNames.next();
+
+                                                    if (caseFieldName.equals("createdOn"))
+                                                    {
+
+                                                        if (StringUtils.hasText(adminNode.get(caseFieldName).asText()))
+                                                        {
+
+                                                            timestamp = adminNode.get(caseFieldName).asText();
+                                                            // Parse the date-time string into OffsetDateTime
+                                                            odt = OffsetDateTime.parse(timestamp);
+                                                        }
+                                                    }
+
+                                                    if (caseFieldName.equals("createdByName"))
+                                                    {
+
+                                                        if (StringUtils.hasText(adminNode.get(caseFieldName).asText()))
+                                                        {
+                                                            userCreate = adminNode.get(caseFieldName).asText();
+                                                        }
+                                                    }
+
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                    TY_NotesDetails newNote = new TY_NotesDetails(noteType, odt, userCreate, content);
+                                    caseDetails.getNotes().add(newNote);
+
+                                }
 
                             }
 

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
@@ -93,5 +94,11 @@ public interface IF_UserSessionSrv
      * Update Session Messages and Log(s) for a submission event result
      */
     public void updateCases4SubmissionIds() throws EX_ESMAPI;
+
+    /*
+     * Get Model for Case Edit for a particular Case ID -- Includes Case Navigation
+     * Authority Check if the Case really belongs to User in Current Session
+     */
+    public TY_CaseEdit_Form getCaseDetails4Edit(String caseID) throws EX_ESMAPI;
 
 }

@@ -19,5 +19,7 @@ public class TY_CatgCusItem
     @CsvBindByPosition(position = 1)
     private String caseType;
     @CsvBindByPosition(position = 2)
-    private String catgCsvPath;    
+    private String catgCsvPath;
+    @CsvBindByPosition(position = 3)
+    private String appNoteTypes;
 }
