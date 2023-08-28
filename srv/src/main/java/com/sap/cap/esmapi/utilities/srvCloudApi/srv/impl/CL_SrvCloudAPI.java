@@ -48,6 +48,7 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.status.pojos.TY_StatusCfgItem;
 import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
 import com.sap.cap.esmapi.utilities.StringsUtility;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
@@ -2628,6 +2629,112 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
         }
         return caseDetails;
+    }
+
+    @Override
+    public List<TY_StatusCfgItem> getStatusCfg4StatusSchema(String StatusSchema) throws EX_ESMAPI, IOException
+    {
+        List<TY_StatusCfgItem> userStatusAssignments = null;
+        if (StringUtils.hasText(StatusSchema) && StringUtils.hasText(srvCloudUrls.getStatusSchemaUrl()))
+        {
+
+            JsonNode jsonNode = null;
+            HttpResponse response = null;
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            String urlLink = null;
+            try
+            {
+
+                log.info("Fetching Details for Status Schema: " + StatusSchema);
+
+                urlLink = srvCloudUrls.getStatusSchemaUrl() + StatusSchema;
+
+                String encoding = Base64.getEncoder()
+                        .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                HttpGet httpGet = new HttpGet(urlLink);
+
+                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                httpGet.addHeader("accept", "application/json");
+
+                // Fire the Url
+                response = httpClient.execute(httpGet);
+
+                // verify the valid error code first
+                int statusCode = response.getStatusLine().getStatusCode();
+                if (statusCode != HttpStatus.SC_OK)
+                {
+                    String msg = msgSrc.getMessage("ERR_INVALID_SCHEMA", new Object[]
+                    { StatusSchema }, Locale.ENGLISH);
+                    log.error(msg);
+                    throw new EX_ESMAPI(msg);
+                }
+
+                // Try and Get Entity from Response
+                HttpEntity entity = response.getEntity();
+                String apiOutput = EntityUtils.toString(entity);
+                // Lets see what we got from API
+                // System.out.println(apiOutput);
+
+                // Conerting to JSON
+                ObjectMapper mapper = new ObjectMapper();
+                jsonNode = mapper.readTree(apiOutput);
+
+                if (jsonNode != null)
+                {
+
+                    JsonNode rootNode = jsonNode.path("value");
+                    if (rootNode != null)
+                    {
+                        userStatusAssignments = new ArrayList<TY_StatusCfgItem>();
+
+                        JsonNode contentNode = rootNode.at("/userStatusAssignments");
+                        if (contentNode != null && contentNode.isArray() && contentNode.size() > 0)
+                        {
+                            log.info("Status for Schema : " + StatusSchema + " bound..");
+                            for (JsonNode arrayItem : contentNode)
+                            {
+                                String userStatus = null, userStatusDescription = null;
+
+                                Iterator<Entry<String, JsonNode>> fields = arrayItem.fields();
+                                while (fields.hasNext())
+                                {
+                                    Entry<String, JsonNode> jsonField = fields.next();
+                                    if (jsonField.getKey().equals("userStatus"))
+                                    {
+                                        userStatus = jsonField.getValue().asText();
+                                    }
+
+                                    if (jsonField.getKey().equals("userStatusDescription"))
+                                    {
+                                        userStatusDescription = jsonField.getValue().asText();
+                                    }
+
+                                }
+                                userStatusAssignments.add(new TY_StatusCfgItem(userStatus, userStatusDescription));
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                throw new EX_ESMAPI(msgSrc.getMessage("ERR_INVALID_SCHEMA", new Object[]
+                { StatusSchema, e.getMessage() }, Locale.ENGLISH));
+
+            }
+            finally
+            {
+                httpClient.close();
+            }
+
+        }
+
+        return userStatusAssignments;
     }
 
     private String getPOSTURL4BaseUrl(String urlBase)

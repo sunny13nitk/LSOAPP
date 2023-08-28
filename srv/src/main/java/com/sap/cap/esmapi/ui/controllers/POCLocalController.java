@@ -1,6 +1,6 @@
 package com.sap.cap.esmapi.ui.controllers;
 
-import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -24,10 +24,11 @@ import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.status.pojos.TY_StatusCfgItem;
+import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
-import com.sap.cap.esmapi.utilities.pojos.TY_CaseDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
@@ -398,18 +399,56 @@ public class POCLocalController
     {
         if (StringUtils.hasText(caseID) && apiSrv != null)
         {
-            try
+            if (userSessSrv != null)
             {
-                TY_CaseDetails caseDetails = apiSrv.getCaseDetails4Case(caseID);
-                if (caseDetails != null)
+                userSessSrv.loadUser4Test();
+
+                try
                 {
-                    if (CollectionUtils.isNotEmpty(caseDetails.getNotes()))
+
+                    TY_CaseEdit_Form caseEditForm = userSessSrv.getCaseDetails4Edit(caseID);
+                    if (caseEditForm != null)
                     {
-                        log.info("# Notes Bound for Case ID - " + caseDetails.getNotes().size());
+                        if (CollectionUtils.isNotEmpty(caseEditForm.getCaseDetails().getNotes()))
+                        {
+                            log.info("# External Notes Bound for Case ID - "
+                                    + caseEditForm.getCaseDetails().getNotes().size());
+                        }
                     }
                 }
+                catch (Exception e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
-            catch (EX_ESMAPI | IOException e)
+        }
+
+        return "success";
+    }
+
+    // #TEST
+    @GetMapping("/schDetails/{schID}")
+    public String getStatusSchemaDetails(@PathVariable String schID)
+    {
+        if (StringUtils.hasText(schID) && apiSrv != null)
+        {
+
+            try
+            {
+
+                List<TY_StatusCfgItem> cfgs = apiSrv.getStatusCfg4StatusSchema(schID);
+
+                if (CollectionUtils.isNotEmpty(cfgs))
+                {
+                    for (TY_StatusCfgItem cfg : cfgs)
+                    {
+                        log.info(cfg.toString());
+                    }
+                }
+
+            }
+            catch (Exception e)
             {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

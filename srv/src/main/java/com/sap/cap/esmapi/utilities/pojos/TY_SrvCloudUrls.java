@@ -25,5 +25,6 @@ public class TY_SrvCloudUrls
     private String emplUrl;
     private String vhlpUrl;
     private String caseDetailsUrl;
+    private String statusSchemaUrl;
 
 }

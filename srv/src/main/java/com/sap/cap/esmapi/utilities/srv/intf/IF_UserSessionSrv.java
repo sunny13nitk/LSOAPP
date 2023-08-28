@@ -96,7 +96,7 @@ public interface IF_UserSessionSrv
     public void updateCases4SubmissionIds() throws EX_ESMAPI;
 
     /*
-     * Get Model for Case Edit for a particular Case ID -- Includes Case Navigation
+     * Get Model for Case Edit for a particular Case GUID -- Includes Case Navigation
      * Authority Check if the Case really belongs to User in Current Session
      */
     public TY_CaseEdit_Form getCaseDetails4Edit(String caseID) throws EX_ESMAPI;

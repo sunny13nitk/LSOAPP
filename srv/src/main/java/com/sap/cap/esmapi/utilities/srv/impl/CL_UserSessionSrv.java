@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,8 +42,10 @@ import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.enums.EnumStatus;
+import com.sap.cap.esmapi.utilities.pojos.TY_CaseDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
+import com.sap.cap.esmapi.utilities.pojos.TY_NotesDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserSessionInfo;
@@ -978,16 +981,76 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             // Check if REquested Case belongs to the User
             if (CollectionUtils.isNotEmpty(getCases4User4mSession()))
             {
-                Optional<TY_CaseESS> caseESSO = getCases4User4mSession().stream().filter(c -> c.getId().equals(caseID))
-                        .findFirst();
+                Optional<TY_CaseESS> caseESSO = getCases4User4mSession().stream()
+                        .filter(c -> c.getGuid().equals(caseID)).findFirst();
                 if (caseESSO.isPresent())
                 {
                     TY_CaseESS caseESS = caseESSO.get();
 
                     // If The Channel is SELF_SERVICE, then only seek Notes and Use Other Case
                     // details from Session Var
+                    if (caseESS.getOrigin().equals(GC_Constants.gc_SelfServiceChannel))
+                    {
+                        try
+                        {
+                            TY_CaseDetails caseDetails = srvCloudApiSrv.getCaseDetails4Case(caseESS.getGuid());
+                            // --- Filter by External Note Type(s) only
+                            if (caseDetails != null)
+                            {
+                                caseEditForm = new TY_CaseEdit_Form();
+                                caseDetails.setCaseType(caseESS.getCaseType());
+                                caseDetails.setCaseId(caseESS.getId());
+                                caseDetails.setStatus(caseESS.getStatusDesc());
+                                caseDetails.setDescription(caseESS.getSubject());
+                                if (CollectionUtils.isNotEmpty(caseDetails.getNotes()))
+                                {
+                                    // Get External Note Type(s) for Current Case Type
+                                    if (CollectionUtils.isNotEmpty(catgCusSrv.getCustomizations()))
+                                    {
+                                        // Get Customization for Current Case Type
+                                        Optional<TY_CatgCusItem> cusIO = catgCusSrv.getCustomizations().stream()
+                                                .filter(c -> c.getCaseType().equals(caseDetails.getCaseType()))
+                                                .findFirst();
+                                        if (cusIO.isPresent())
+                                        {
+                                            // Check if Note Type configured for External Note(s)
+                                            if (StringUtils.hasText(cusIO.get().getAppNoteTypes()))
+                                            {
+                                                List<String> appNoteTypes = Arrays
+                                                        .asList(cusIO.get().getAppNoteTypes().split("\\|"));
+                                                if (CollectionUtils.isNotEmpty(appNoteTypes))
+                                                {
+                                                    // Filter by External Note Type(s) only
+                                                    List<TY_NotesDetails> notesExternal = caseDetails.getNotes()
+                                                            .stream()
+                                                            .filter(n -> appNoteTypes.contains(n.getNoteType()))
+                                                            .collect(Collectors.toList());
 
-                    // --- Filter by External Note Type(s) only
+                                                    if (CollectionUtils.isNotEmpty(notesExternal))
+                                                    {
+
+                                                        Collections.sort(notesExternal, Comparator
+                                                                .comparing(TY_NotesDetails::getTimestamp).reversed());
+                                                        caseDetails.setNotes(notesExternal);
+                                                    }
+
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                }
+
+                                caseEditForm.setCaseDetails(caseDetails);
+
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            handleErrorCaseFetch(caseID, e);
+                        }
+
+                    }
 
                     // Else Only Use Case Details from Sess Var and prepare the Case Edit Form Model
                 }
@@ -1000,6 +1063,25 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         }
 
         return caseEditForm;
+    }
+
+    private void handleErrorCaseFetch(String caseID, Exception e)
+    {
+        String msg;
+        msg = msgSrc.getMessage("EXC_CASE_GET", new Object[]
+        { caseID, e.getLocalizedMessage() }, Locale.ENGLISH);
+
+        log.error(msg);
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_CASE_DET_FETCH, caseID, msg);
+        this.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) caseID, logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+        // Should be handled Centrally via Aspect
+        throw new EX_ESMAPI(msg);
     }
 
     private void handleUnauthorizedCaseAccess(String userId, String caseID)

@@ -22,4 +22,6 @@ public class TY_CatgCusItem
     private String catgCsvPath;
     @CsvBindByPosition(position = 3)
     private String appNoteTypes;
+    @CsvBindByPosition(position = 4)
+    private String statusSchema;
 }
