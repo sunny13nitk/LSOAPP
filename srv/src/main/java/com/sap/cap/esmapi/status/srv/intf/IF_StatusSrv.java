@@ -7,4 +7,6 @@ import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 public interface IF_StatusSrv
 {
     public TY_StatusCfg getStatusCfg4CaseType(EnumCaseTypes caseType) throws EX_ESMAPI;
+
+    public boolean isEditAllowed4CaseStatus(String caseStatus) throws EX_ESMAPI;
 }

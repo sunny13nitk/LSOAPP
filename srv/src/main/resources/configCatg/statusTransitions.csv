@@ -1,0 +1,7 @@
+fromStatus,toStatus,caseEditAllowed
+Open,Open,true
+In Process, In Process,true
+Customer Action, In Process,true
+Completed, In Process,true
+Closed, Closed,false
+Awaiting 3rd Party, Awaiting 3rd Party,true

@@ -11,6 +11,7 @@ import org.springframework.web.context.annotation.SessionScope;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.status.pojos.TY_PortalStatusTransitions;
 import com.sap.cap.esmapi.status.pojos.TY_StatusCfg;
 import com.sap.cap.esmapi.status.srv.intf.IF_StatusSrv;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
@@ -24,6 +25,8 @@ public class CL_StatusSrv implements IF_StatusSrv
 {
 
     private final TY_CatgCus catgCus; // Autowired
+
+    private final TY_PortalStatusTransitions statusTransitions; // Autowired
 
     private List<TY_StatusCfg> lobStatusCfgList;
 
@@ -53,6 +56,13 @@ public class CL_StatusSrv implements IF_StatusSrv
         }
 
         return statusCFG;
+    }
+
+    @Override
+    public boolean isEditAllowed4CaseStatus(String caseStatus) throws EX_ESMAPI
+    {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isEditAllowed4CaseStatus'");
     }
 
     private TY_StatusCfg fetchStatusCfg4CaseType(EnumCaseTypes caseType)

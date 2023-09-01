@@ -401,7 +401,6 @@ public class POCLocalController
         {
             if (userSessSrv != null)
             {
-                userSessSrv.loadUser4Test();
 
                 try
                 {
@@ -413,6 +412,7 @@ public class POCLocalController
                         {
                             log.info("# External Notes Bound for Case ID - "
                                     + caseEditForm.getCaseDetails().getNotes().size());
+                            model.addAttribute("caseEditForm", caseEditForm);
                         }
                     }
                 }
