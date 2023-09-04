@@ -33,6 +33,7 @@ import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.events.event.EV_LogMessage;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.hana.logging.srv.intf.IF_HANALoggingSrv;
+import com.sap.cap.esmapi.status.srv.intf.IF_StatusSrv;
 import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
@@ -95,6 +96,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
     @Autowired
     private IF_HANALoggingSrv hanaLogSrv;
+
+    @Autowired
+    private IF_StatusSrv statusSrv;
 
     // Properties
 
@@ -1042,6 +1046,10 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                                 }
 
                                 caseEditForm.setCaseDetails(caseDetails);
+
+                                caseEditForm.getCaseDetails().setStatusTransitionCFG(
+                                        statusSrv.getPortalStatusTransition4CaseTypeandCaseStatus(
+                                                caseDetails.getCaseType(), caseDetails.getStatus()));
 
                             }
                         }

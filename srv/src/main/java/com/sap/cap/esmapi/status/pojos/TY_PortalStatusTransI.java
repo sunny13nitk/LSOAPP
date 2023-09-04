@@ -12,9 +12,11 @@ import lombok.NoArgsConstructor;
 public class TY_PortalStatusTransI
 {
     @CsvBindByPosition(position = 0)
-    private String fromStatus;
+    private String caseType;
     @CsvBindByPosition(position = 1)
-    private String toStatus;
+    private String fromStatus;
     @CsvBindByPosition(position = 2)
+    private String toStatus;
+    @CsvBindByPosition(position = 3)
     private Boolean editAllowed;
 }
