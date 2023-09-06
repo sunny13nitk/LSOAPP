@@ -405,14 +405,21 @@ public class POCLocalController
                 try
                 {
 
+                    // Populate User Details
+                    TY_UserESS userDetails = new TY_UserESS();
+                    userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                    model.addAttribute("userInfo", userDetails);
+
+                    // Get Case Details
                     TY_CaseEdit_Form caseEditForm = userSessSrv.getCaseDetails4Edit(caseID);
                     if (caseEditForm != null)
                     {
+                        model.addAttribute("caseEditForm", caseEditForm);
                         if (CollectionUtils.isNotEmpty(caseEditForm.getCaseDetails().getNotes()))
                         {
                             log.info("# External Notes Bound for Case ID - "
                                     + caseEditForm.getCaseDetails().getNotes().size());
-                            model.addAttribute("caseEditForm", caseEditForm);
+
                         }
                     }
                 }
@@ -424,7 +431,7 @@ public class POCLocalController
             }
         }
 
-        return "success";
+        return "caseFormReplyPOCLocal";
     }
 
     // #TEST
