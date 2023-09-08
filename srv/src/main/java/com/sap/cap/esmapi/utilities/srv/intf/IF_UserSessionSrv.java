@@ -54,6 +54,19 @@ public interface IF_UserSessionSrv
 
     public boolean SubmitCaseForm(TY_Case_Form caseForm);
 
+    // @formatter:off -- Submit Case Reply Form
+    // : Form Data Saved in session :currentCaseReply
+    // --Validate Case Reply Form - Implicit Call
+    // ---- Fail
+    // ------- Message Logging Event
+    //
+    // ------- Message Stack in Session Populated and REturn false
+    // ---- Succ
+    // ------- Create and Publish Case Reply Submit Event
+    // ------- session :currentCaseReply to be picked up by Event Handler
+    // @formatter:on
+    public boolean SubmitCaseReply(TY_CaseEdit_Form caseReplyForm);
+
     public void clearFormErrors();
 
     public List<String> getFormErrors();
@@ -78,6 +91,8 @@ public interface IF_UserSessionSrv
 
     public boolean isCaseFormValid();
 
+    public boolean isCaseReplyValid();
+
     /*
      * Just to get the Flag rateLimitBreached from Session
      */
@@ -96,8 +111,9 @@ public interface IF_UserSessionSrv
     public void updateCases4SubmissionIds() throws EX_ESMAPI;
 
     /*
-     * Get Model for Case Edit for a particular Case GUID -- Includes Case Navigation
-     * Authority Check if the Case really belongs to User in Current Session
+     * Get Model for Case Edit for a particular Case GUID -- Includes Case
+     * Navigation Authority Check if the Case really belongs to User in Current
+     * Session
      */
     public TY_CaseEdit_Form getCaseDetails4Edit(String caseID) throws EX_ESMAPI;
 

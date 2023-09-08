@@ -35,6 +35,7 @@ import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.hana.logging.srv.intf.IF_HANALoggingSrv;
 import com.sap.cap.esmapi.status.srv.intf.IF_StatusSrv;
 import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
+import com.sap.cap.esmapi.ui.pojos.TY_CaseEditFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
@@ -1073,6 +1074,195 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         return caseEditForm;
     }
 
+    @Override
+    public boolean SubmitCaseReply(TY_CaseEdit_Form caseReplyForm)
+    {
+        boolean isSubmitted = false;
+
+        if (caseReplyForm != null)
+        {
+
+            // Clear Buffer for Previous Form Submission
+            clearPreviousSubmission4mSessionBuffer();
+            // Push Form data to Session
+            TY_CaseEditFormAsync caseReplyAsync = new TY_CaseEditFormAsync();
+            caseReplyAsync.setCaseReply(caseReplyForm);
+            caseReplyAsync.setSubmGuid(UUID.randomUUID().toString());
+            // Latest time Stamp from Form Submissions
+            caseReplyAsync.setTimestamp(Timestamp.from(Instant.now()));
+            caseReplyAsync.setUserId(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId());
+            userSessInfo.setCurrentCaseReply(caseReplyAsync);
+
+            if (isCaseReplyValid())
+            {
+                // Attchments to be handled Here in Session service Only once the Form is
+                // Validated Successfully
+                try
+                {
+                    if (caseReplyForm.getAttachment() != null)
+                    {
+                        if (caseReplyForm.getAttachment().getBytes() != null)
+                        {
+                            // Create Attachment here to prevent Data loss in ASyncronous Thread
+                            // Create Attachment
+                            TY_Attachment newAttachment = new TY_Attachment(
+                                    FilenameUtils.getName(caseReplyForm.getAttachment().getOriginalFilename()),
+                                    GC_Constants.gc_Attachment_Category, false);
+                            caseReplyAsync.setAttR(srvCloudApiSrv.createAttachment(newAttachment));
+                            if (caseReplyAsync.getAttR() != null)
+                            {
+                                if (srvCloudApiSrv.persistAttachment(caseReplyAsync.getAttR().getUploadUrl(),
+                                        caseReplyForm.getAttachment()))
+                                {
+                                    log.info("Attachment with id : " + caseReplyAsync.getAttR()
+                                            + " Persisted in Document Container.. for Submission ID: "
+                                            + caseReplyAsync.getSubmGuid());
+                                }
+                            }
+
+                        }
+                    }
+
+                }
+                catch (EX_ESMAPI | IOException e)
+                {
+
+                    if (e instanceof IOException)
+                    {
+                        handleNoFileDataAttachment(caseReplyAsync);
+                    }
+                    else if (e instanceof EX_ESMAPI)
+                    {
+                        handleAttachmentPersistError(caseReplyAsync, e);
+                    }
+
+                    isSubmitted = false;
+                }
+
+                userSessInfo.getCurrentCaseReply().setValid(true);
+
+                // SUCC_CASE_REPL_SUBM=Reply for Case with id - {0} of Type - {1} submitted
+                // Successfully with Submission id - {2} for User - {3}!
+                String msg = msgSrc.getMessage("SUCC_CASE_REPL_SUBM", new Object[]
+                { caseReplyAsync.getCaseReply().getCaseDetails().getCaseId(),
+                        caseReplyAsync.getCaseReply().getCaseDetails().getCaseType(), caseReplyAsync.getSubmGuid(),
+                        caseReplyAsync.getUserId() }, Locale.ENGLISH);
+                log.info(msg); // System Log
+
+                // Logging Framework
+                TY_Message logMsg = new TY_Message(caseReplyAsync.getUserId(), caseReplyAsync.getTimestamp(),
+                        EnumStatus.Success, EnumMessageType.SUCC_CASE_REPL_SUBM, caseReplyAsync.getSubmGuid(), msg);
+                userSessInfo.getMessagesStack().add(logMsg);
+                // Instantiate and Fire the Event : Syncronous processing
+                EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
+                applicationEventPublisher.publishEvent(logMsgEvent);
+
+                // Add to Display Messages : to be shown to User or Successful Submission
+                this.addSessionMessage(msg);
+
+                // Add Submission Guids to Session Context for REconcillation after Case
+                // Creation Process
+                this.userSessInfo.getSubmissionIDs().add(caseReplyAsync.getSubmGuid());
+
+                isSubmitted = true;
+            }
+
+        }
+
+        return isSubmitted;
+    }
+
+    @Override
+    public boolean isCaseReplyValid()
+    {
+        boolean isValid = true;
+
+        // Get the Latest Form Submission from Session and Validate
+        if (userSessInfo.getCurrentCaseReply() != null && !CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
+        {
+            if (userSessInfo.getCurrentCaseReply().getCaseReply() != null)
+            {
+                // REply Text is Mandatory
+                if (StringUtils.hasText(userSessInfo.getCurrentCaseReply().getCaseReply().getReply()))
+                {
+
+                    // Also check for Allowed Attachment Type(s) as provided by the business
+                    if (rlConfig != null && userSessInfo.getCurrentCaseReply().getCaseReply().getAttachment() != null)
+                    {
+                        if (CollectionUtils.isEmpty(userSessInfo.getAllowedAttachmentTypes()))
+                        {
+                            // Populate Attachment Types allowed in Session
+                            userSessInfo.setAllowedAttachmentTypes(
+                                    Arrays.asList(rlConfig.getAllowedAttachments().split("\\|")));
+
+                        }
+                        if (StringUtils
+                                .hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getAttachment()
+                                        .getOriginalFilename())
+                                && CollectionUtils.isNotEmpty(userSessInfo.getAllowedAttachmentTypes()))
+                        {
+                            // Get the Extension Type for Attachment
+                            String filename = userSessInfo.getCurrentForm4Submission().getCaseForm().getAttachment()
+                                    .getOriginalFilename();
+                            String[] fNameSplits = filename.split("\\.");
+
+                            if (fNameSplits != null)
+                            {
+                                String extensionAttachment = null;
+                                if (fNameSplits.length >= 1)
+                                {
+                                    extensionAttachment = fNameSplits[fNameSplits.length - 1];
+                                }
+                                if (StringUtils.hasText(extensionAttachment))
+                                {
+                                    String extnType = extensionAttachment;
+                                    Optional<String> extnfoundO = userSessInfo.getAllowedAttachmentTypes().stream()
+                                            .filter(a -> a.equalsIgnoreCase(extnType)).findFirst();
+                                    if (!extnfoundO.isPresent())
+                                    {
+                                        // Invalid Attachment TYpe Error
+                                        handleInvalidAttachment(filename, extnType);
+                                        isValid = false;
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+
+                // Payload error
+
+                String msg = msgSrc.getMessage("ERR_CASE_PAYLOAD", new Object[]
+                { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                        new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(Timestamp.from(Instant.now())) },
+                        Locale.ENGLISH);
+                log.error(msg);
+
+                TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                        Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
+                        userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+
+                // For Logging Framework
+                userSessInfo.getMessagesStack().add(message);
+                // Instantiate and Fire the Event
+                EV_LogMessage logMsgEvent = new EV_LogMessage(this, message);
+                applicationEventPublisher.publishEvent(logMsgEvent);
+
+                this.addFormErrors(msg);// For Form Display
+
+                isValid = false;
+
+            }
+
+        }
+        return isValid;
+    }
+
     private void handleErrorCaseFetch(String caseID, Exception e)
     {
         String msg;
@@ -1178,6 +1368,49 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         String msg;
         msg = msgSrc.getMessage("FILE_NO_DATA", new Object[]
         { caseFormAsync.getCaseForm().getAttachment().getOriginalFilename() }, Locale.ENGLISH);
+
+        log.error(msg);
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
+                caseFormAsync.getSubmGuid(), msg);
+        this.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) caseFormAsync.getSubmGuid(), logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+        // Should be handled Centrally via Aspect
+        throw new EX_ESMAPI(msg);
+    }
+
+    private void handleAttachmentPersistError(TY_CaseEditFormAsync caseFormAsync, Exception e)
+    {
+        String msg;
+        msg = msgSrc.getMessage("ERROR_DOCS_PERSIST", new Object[]
+        { caseFormAsync.getAttR().getUploadUrl(), caseFormAsync.getCaseReply().getAttachment().getOriginalFilename(),
+                e.getLocalizedMessage() }, Locale.ENGLISH);
+
+        log.error(msg);
+
+        this.addFormErrors(msg);// For Form Display
+
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
+                caseFormAsync.getSubmGuid(), msg);
+        this.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) caseFormAsync.getSubmGuid(), logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+        // Should be handled Centrally via Aspect
+        throw new EX_ESMAPI(msg);
+    }
+
+    private void handleNoFileDataAttachment(TY_CaseEditFormAsync caseFormAsync)
+    {
+        String msg;
+        msg = msgSrc.getMessage("FILE_NO_DATA", new Object[]
+        { caseFormAsync.getCaseReply().getAttachment().getOriginalFilename() }, Locale.ENGLISH);
 
         log.error(msg);
         TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),

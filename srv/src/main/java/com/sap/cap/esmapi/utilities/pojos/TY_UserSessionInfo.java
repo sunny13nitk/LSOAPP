@@ -3,8 +3,8 @@ package com.sap.cap.esmapi.utilities.pojos;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.cap.esmapi.ui.pojos.TY_CaseEditFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
-import com.sap.cap.esmapi.ui.pojos.TY_ESS_Stats;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,4 +25,5 @@ public class TY_UserSessionInfo
     private boolean rateLimitBreached;
     private List<String> allowedAttachmentTypes;
     private List<String> submissionIDs = new ArrayList<String>();
+    private TY_CaseEditFormAsync currentCaseReply; // Case Reply in Session
 }
