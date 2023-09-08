@@ -1196,13 +1196,12 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                                     Arrays.asList(rlConfig.getAllowedAttachments().split("\\|")));
 
                         }
-                        if (StringUtils
-                                .hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getAttachment()
-                                        .getOriginalFilename())
+                        if (StringUtils.hasText(
+                                userSessInfo.getCurrentCaseReply().getCaseReply().getAttachment().getOriginalFilename())
                                 && CollectionUtils.isNotEmpty(userSessInfo.getAllowedAttachmentTypes()))
                         {
                             // Get the Extension Type for Attachment
-                            String filename = userSessInfo.getCurrentForm4Submission().getCaseForm().getAttachment()
+                            String filename = userSessInfo.getCurrentCaseReply().getCaseReply().getAttachment()
                                     .getOriginalFilename();
                             String[] fNameSplits = filename.split("\\.");
 
@@ -1261,6 +1260,18 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
         }
         return isValid;
+    }
+
+    @Override
+    public TY_CaseEditFormAsync getCurrentReplyForm4Submission()
+    {
+        TY_CaseEditFormAsync currCaseReplyForm = null;
+        if (userSessInfo != null)
+        {
+            currCaseReplyForm = userSessInfo.getCurrentCaseReply();
+        }
+
+        return currCaseReplyForm;
     }
 
     private void handleErrorCaseFetch(String caseID, Exception e)

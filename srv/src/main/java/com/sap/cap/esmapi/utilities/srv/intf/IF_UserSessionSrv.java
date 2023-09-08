@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.ui.pojos.TY_CaseEditFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
@@ -74,6 +75,8 @@ public interface IF_UserSessionSrv
     public void addFormErrors(String errorMsg);
 
     public TY_CaseFormAsync getCurrentForm4Submission();
+
+    public TY_CaseEditFormAsync getCurrentReplyForm4Submission();
 
     public String createAccount() throws EX_ESMAPI;
 

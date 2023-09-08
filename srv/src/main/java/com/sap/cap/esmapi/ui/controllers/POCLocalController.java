@@ -23,6 +23,7 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplates;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
+import com.sap.cap.esmapi.events.event.EV_CaseReplySubmit;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.status.pojos.TY_StatusCfgItem;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
@@ -72,6 +73,8 @@ public class POCLocalController
     private final String caseListVWRedirect = "redirect:/poclocal/";
     private final String caseFormErrorRedirect = "redirect:/poclocal/errForm/";
     private final String caseFormView = "caseFormPOCLocal";
+    private final String caseFormReply = "caseFormReplyPOCLocal";
+    private final String caseFormReplyErrorRedirect = "redirect:/poclocal/errCaseReply/";
 
     @GetMapping("/")
     public String showCasesList(Model model)
@@ -390,6 +393,85 @@ public class POCLocalController
         }
 
         return viewCaseForm;
+
+    }
+
+    @PostMapping(value = "/saveCaseReply", params = "action=saveCaseEdit")
+    public String saveCaseReply(@ModelAttribute("caseEditForm") TY_CaseEdit_Form caseReplyForm, Model model)
+    {
+
+        String viewName = caseListVWRedirect;
+        if (caseReplyForm != null && userSessSrv != null)
+        {
+
+            log.info("Processing of Case Reply Form - UI layer :Begins....");
+
+            // Any Validation Error(s) on the Form or Submission not possible
+            if (!userSessSrv.SubmitCaseReply(caseReplyForm))
+            {
+                // Redirect to Error Processing of Form
+                viewName = caseFormReplyErrorRedirect;
+            }
+            else
+            {
+                // Fire Case Submission Event - To be processed Asyncronously
+                EV_CaseReplySubmit eventCaseReplySubmit = new EV_CaseReplySubmit(this,
+                        userSessSrv.getCurrentReplyForm4Submission());
+                applicationEventPublisher.publishEvent(eventCaseReplySubmit);
+            }
+
+            log.info("Processing of Case Form - UI layer :Ends....");
+        }
+        return viewName;
+    }
+
+    @GetMapping("/errCaseReply/")
+    public String showErrorCaseReplyForm(Model model)
+    {
+        if (userSessSrv != null)
+        {
+
+            if (userSessSrv.getCurrentReplyForm4Submission() != null && StringUtils.hasText(
+                    userSessSrv.getCurrentReplyForm4Submission().getCaseReply().getCaseDetails().getCaseGuid()))
+            {
+
+                // Populate User Details
+                TY_UserESS userDetails = new TY_UserESS();
+                userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                model.addAttribute("userInfo", userDetails);
+
+                model.addAttribute("formErrors", userSessSrv.getFormErrors());
+
+                // Get Case Details
+                TY_CaseEdit_Form caseEditForm = userSessSrv.getCurrentReplyForm4Submission().getCaseReply();
+                if (caseEditForm != null)
+                {
+                    // Not Feasible to have a Validation Error in Form and Attachment Persisted -
+                    // But just to handle theoratically in case there is an Error in Attachment
+                    // Persistence only- Remove the attachment otherwise let it persist
+                    if (CollectionUtils.isNotEmpty(userSessSrv.getMessageStack()))
+                    {
+                        Optional<TY_Message> attErrO = userSessSrv.getMessageStack().stream()
+                                .filter(e -> e.getMsgType().equals(EnumMessageType.ERR_ATTACHMENT)).findFirst();
+                        if (attErrO.isPresent())
+                        {
+                            // Attachment able to presist do not remove it from Current Payload
+                            caseEditForm.setAttachment(null);
+
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+
+                throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_DET_FETCH", new Object[]
+                { userSessSrv.getCurrentReplyForm4Submission().getCaseReply().getCaseDetails().getCaseGuid() },
+                        Locale.ENGLISH));
+            }
+        }
+        return caseFormReply;
 
     }
 
