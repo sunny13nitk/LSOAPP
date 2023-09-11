@@ -172,6 +172,9 @@ public class POCLocalController
 
                     model.addAttribute("formErrors", null);
 
+                    // clear Form errors on each refresh or a New Case form request
+                    userSessSrv.clearFormErrors();
+
                     // also Upload the Catg. Tree as per Case Type
                     model.addAttribute("catgsList",
                             catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
