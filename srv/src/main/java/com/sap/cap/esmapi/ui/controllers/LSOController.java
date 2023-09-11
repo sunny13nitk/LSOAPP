@@ -180,8 +180,12 @@ public class LSOController
 
                     model.addAttribute("formErrors", null);
 
-                    //clear Form errors on each refresh or a New Case form request
-                    userSessSrv.clearFormErrors();
+                    // clear Form errors on each refresh or a New Case form request
+                    if (CollectionUtils.isNotEmpty(userSessSrv.getFormErrors()))
+                    {
+                        userSessSrv.clearFormErrors();
+
+                    }
 
                     // also Upload the Catg. Tree as per Case Type
                     model.addAttribute("catgsList",
