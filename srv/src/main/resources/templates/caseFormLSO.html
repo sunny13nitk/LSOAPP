@@ -59,8 +59,9 @@
          <div class="col-xs-15">
             <div th:if="${formErrors != null}">
                <!-- Check for Form error -->
-               <div data-role="panel" data-title-caption="Case Form Validation Error(s)" data-collapsed="true"
-                  data-collapsible="true" data-cls-panel="shadow-3" data-cls-title="bg-lightRed fg-white"
+               <div th:if="${formErrors.size() >0}" data-role="panel"
+                  data-title-caption="Case Form Validation Error(s)" data-collapsed="true" data-collapsible="true"
+                  data-cls-panel="shadow-3" data-cls-title="bg-lightRed fg-white"
                   data-cls-content="bg-lightRed fg-white">
 
                   <div class="cell-11">
@@ -91,8 +92,7 @@
                <h6 style="color: #54627B; margin-left: 10px">Create new Case.
                   <span style="color: #B1365B" th:text="${caseTypeStr}"></span> !
                </h6>
-               <form th:object="${caseForm}" enctype="multipart/form-data" th:action="@{/lso/saveCase}"
-                  method="post">
+               <form th:object="${caseForm}" enctype="multipart/form-data" th:action="@{/lso/saveCase}" method="post">
 
 
                   <input type="hidden" th:field="*{accId}" />

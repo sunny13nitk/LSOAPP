@@ -383,8 +383,12 @@ public class LSOController
                     userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
                     model.addAttribute("userInfo", userDetails);
 
-                    // Account Or Employee already set on the Form
-                    model.addAttribute("formErrors", userSessSrv.getFormErrors());
+                    // clear Form errors on each refresh or a New Case form request
+                    if (CollectionUtils.isNotEmpty(userSessSrv.getFormErrors()))
+                    {
+                        userSessSrv.clearFormErrors();
+
+                    }
 
                     // also Upload the Catg. Tree as per Case Type
                     model.addAttribute("catgsList",
