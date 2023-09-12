@@ -127,7 +127,7 @@
                   <input type="hidden" th:field="*{caseDetails.origin}" />
                   <input type="hidden" th:field="*{caseDetails.status}" />
                   <input type="hidden" th:field="*{caseDetails.description}" />
-                  <input type="hidden" th:field="*{caseDetails.statusTransitionCFG}" />
+                  <!-- <input type="hidden" th:field="*{caseDetails.statusTransitionCFG}" /> -->
                   <!-- Hidden Fields - Carried over in Form to Controller -->
 
                   <h6 style="color: #325254; background-color: aliceBlue; padding: 10px; margin: 10px;">Past
@@ -150,13 +150,44 @@
                   </div>
 
                   <!-- Notes Iterations - Begin -->
-                  <div th:each="note: *{caseDetails.notes}">
+                  <div th:each="note,iterStat: *{caseDetails.notes}">
 
                      <div style="margin-top: 10px;"></div>
-                     <div th:if="${note != null}" data-role="panel" data-title-caption="Interaction"
-                        data-cls-panel="shadow-1" data-title-icon="<span class='mif-apps'></span>" data-collapsed="true"
-                        data-collapsible="true" data-cls-title="bg-lightGray fg-black"
-                        data-cls-content="bg-transparent fg-black" class="colspan-9 offset-1">
+                     <div th:if="${note != null && iterStat.index == 0}" data-role="panel"
+                        data-title-caption="Interaction" data-cls-panel="shadow-1"
+                        data-title-icon="<span class='mif-apps'></span>" data-collapsed="false" data-collapsible="true"
+                        data-cls-title="bg-lightGray fg-black" data-cls-content="bg-transparent fg-black"
+                        class="colspan-9 offset-1">
+
+                        <div th:if="${note.content != null}">
+                           <!-- <div class="row colspan-9 offset-1"> -->
+                           <div>
+
+                              <h6 style="color: #325254" th:if="${note.createdByName != null}">
+                                 <span style="margin-left: 10px;" class="mif-user fg-blue"></span>
+                                 <span style="margin-left: 5px;" th:text="${note.createdByName }"></span>
+                                 <span style="margin-left: 20px;" class="mif-alarm-on fg-blue"></span>
+                                 <span style="margin-left: 5px;" th:text="${note.timestamp }"></span>
+                              </h6>
+
+
+                           </div>
+
+                           <div th:utext="${note.content}">
+
+                           </div>
+
+                           <!-- </div> -->
+
+                        </div>
+
+                     </div>
+
+                     <div th:if="${note != null && iterStat.index > 0}" data-role="panel"
+                        data-title-caption="Interaction" data-cls-panel="shadow-1"
+                        data-title-icon="<span class='mif-apps'></span>" data-collapsed="true" data-collapsible="true"
+                        data-cls-title="bg-lightGray fg-black" data-cls-content="bg-transparent fg-black"
+                        class="colspan-9 offset-1">
 
                         <div th:if="${note.content != null}">
                            <!-- <div class="row colspan-9 offset-1"> -->

@@ -1141,6 +1141,11 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                 userSessInfo.getCurrentCaseReply().setValid(true);
 
+                userSessInfo.getCurrentCaseReply().getCaseReply().getCaseDetails()
+                        .setStatusTransitionCFG(statusSrv.getPortalStatusTransition4CaseTypeandCaseStatus(
+                                userSessInfo.getCurrentCaseReply().getCaseReply().getCaseDetails().getCaseType(),
+                                userSessInfo.getCurrentCaseReply().getCaseReply().getCaseDetails().getStatus()));
+
                 // SUCC_CASE_REPL_SUBM=Reply for Case with id - {0} of Type - {1} submitted
                 // Successfully with Submission id - {2} for User - {3}!
                 String msg = msgSrc.getMessage("SUCC_CASE_REPL_SUBM", new Object[]
