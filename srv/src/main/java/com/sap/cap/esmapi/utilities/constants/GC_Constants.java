@@ -24,4 +24,6 @@ public class GC_Constants
 
     public static final String gc_SelfServiceChannel = "SELF_SERVICE";
 
+    public static final String gc_ETag = "ETag";
+
 }

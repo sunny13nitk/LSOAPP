@@ -19,6 +19,7 @@ public class TY_CaseDetails
     private String origin;
     private String status;
     private String description;
+    private String eTag;
 
     private List<TY_NotesDetails> notes;
 

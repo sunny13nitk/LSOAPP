@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -2482,7 +2484,16 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         .collect(Collectors.toList());
             }
         }
-        log.info("# Cases for Case Type - " + caseType.name() + "for Current User : " + casesByCaseType.size());
+        if (CollectionUtils.isNotEmpty(casesByCaseType))
+        {
+            log.info("# Cases for Case Type - " + caseType.name() + "for Current User : " + casesByCaseType.size());
+        }
+        else
+        {
+            log.info("No Cases Found for the User - " + userDetails.getUserId()
+                    + ". Probable Account Creation Directly in Service Cloud!");
+        }
+
         return casesByCaseType;
     }
 
@@ -2532,6 +2543,20 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     // Lets see what we got from API
                     // System.out.println(apiOutput);
 
+                    // Get Response Header(s) from API REsponse
+                    Header[] headers = response.getAllHeaders();
+                    String eTag = null;
+                    if (headers.length > 0)
+                    {
+                        // Get the Etag
+                        Optional<Header> etagO = Arrays.asList(headers).stream()
+                                .filter(e -> e.getName().equals(GC_Constants.gc_ETag)).findFirst();
+                        if (etagO.isPresent())
+                        {
+                            eTag = etagO.get().getValue();
+                        }
+                    }
+
                     // Conerting to JSON
                     ObjectMapper mapper = new ObjectMapper();
                     jsonNode = mapper.readTree(apiOutput);
@@ -2544,6 +2569,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         {
                             caseDetails = new TY_CaseDetails();
                             caseDetails.setCaseGuid(caseId);
+                            caseDetails.setETag(eTag);
                             caseDetails.setNotes(new ArrayList<TY_NotesDetails>());
                             JsonNode contentNode = rootNode.at("/notes");
                             if (contentNode != null && contentNode.isArray() && contentNode.size() > 0)
