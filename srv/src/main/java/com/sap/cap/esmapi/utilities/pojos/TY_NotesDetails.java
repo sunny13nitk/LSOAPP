@@ -13,6 +13,8 @@ public class TY_NotesDetails
 {
 
     private String noteType;
+    private String id;
+    private String noteId;
     private OffsetDateTime timestamp;
     private String createdByName;
     private String content;

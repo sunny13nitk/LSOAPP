@@ -489,7 +489,7 @@ public class POCLocalController
     @GetMapping("/caseDetails/{caseID}")
     public String getCaseDetails(@PathVariable String caseID, Model model)
     {
-        if (StringUtils.hasText(caseID) && apiSrv != null)
+         if (StringUtils.hasText(caseID) && apiSrv != null)
         {
             if (userSessSrv != null)
             {

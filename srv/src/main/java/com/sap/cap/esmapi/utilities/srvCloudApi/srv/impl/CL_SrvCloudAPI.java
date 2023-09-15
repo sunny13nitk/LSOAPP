@@ -2336,7 +2336,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
         if (!CollectionUtils.isEmpty(casesESSList4User))
         {
-            System.out.println("# Cases returned in call : " + casesESSList4User.size());
+            log.info("# Cases returned in call : " + casesESSList4User.size());
         }
         return casesESSList4User;
     }
@@ -2571,19 +2571,32 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                             caseDetails.setCaseGuid(caseId);
                             caseDetails.setETag(eTag);
                             caseDetails.setNotes(new ArrayList<TY_NotesDetails>());
+
+                            // Add Notes
                             JsonNode contentNode = rootNode.at("/notes");
                             if (contentNode != null && contentNode.isArray() && contentNode.size() > 0)
                             {
                                 log.info("Notes for Case ID : " + caseId + " bound..");
                                 for (JsonNode arrayItem : contentNode)
                                 {
-                                    String content = null, noteType = null, userCreate = null, timestamp = null;
+                                    String content = null, noteType = null, userCreate = null, timestamp = null,
+                                            id = null, noteId = null;
                                     OffsetDateTime odt = null;
 
                                     Iterator<Entry<String, JsonNode>> fields = arrayItem.fields();
                                     while (fields.hasNext())
                                     {
                                         Entry<String, JsonNode> jsonField = fields.next();
+                                        if (jsonField.getKey().equals("id"))
+                                        {
+                                            id = jsonField.getValue().asText();
+                                        }
+
+                                        if (jsonField.getKey().equals("noteId"))
+                                        {
+                                            noteId = jsonField.getValue().asText();
+                                        }
+
                                         if (jsonField.getKey().equals("content"))
                                         {
                                             content = jsonField.getValue().asText();
@@ -2630,10 +2643,89 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                         }
 
                                     }
-                                    TY_NotesDetails newNote = new TY_NotesDetails(noteType, odt, userCreate, content);
+                                    TY_NotesDetails newNote = new TY_NotesDetails(noteType, id, noteId, odt, userCreate,
+                                            content);
                                     caseDetails.getNotes().add(newNote);
 
                                 }
+
+                            }
+
+                            // Add Description
+                            JsonNode descNode = rootNode.at("/description");
+                            if (descNode != null && descNode.size() > 0)
+                            {
+                                log.info("Desc for Case ID : " + caseId + " bound..");
+
+                                Iterator<String> fieldNamesDesc = descNode.fieldNames();
+                                String content = null, noteType = null, userCreate = null, timestamp = null, id = null,
+                                        noteId = null;
+                                OffsetDateTime odt = null;
+                                while (fieldNamesDesc.hasNext())
+                                {
+                                    String descFieldName = fieldNamesDesc.next();
+                                    if (descFieldName.equals("id"))
+                                    {
+                                        id = descNode.get(descFieldName).asText();
+                                    }
+
+                                    if (descFieldName.equals("noteId"))
+                                    {
+                                        noteId = descNode.get(descFieldName).asText();
+                                    }
+
+                                    if (descFieldName.equals("content"))
+                                    {
+                                        content = descNode.get(descFieldName).asText();
+                                    }
+
+                                    if (descFieldName.equals("noteType"))
+                                    {
+                                        noteType = descNode.get(descFieldName).asText();
+                                    }
+
+                                    if (descFieldName.equals("adminData"))
+                                    {
+                                        // System.out.println("Inside Reporter: " );
+
+                                        JsonNode admEnt = descNode.path("adminData");
+                                        if (admEnt != null)
+                                        {
+                                            // System.out.println("Reporter Node Bound");
+
+                                            Iterator<String> fieldNamesAdm = admEnt.fieldNames();
+                                            while (fieldNamesAdm.hasNext())
+                                            {
+                                                String admFieldName = fieldNamesAdm.next();
+                                                if (admFieldName.equals("createdOn"))
+                                                {
+                                                    if (StringUtils.hasText(admEnt.get(admFieldName).asText()))
+                                                    {
+
+                                                        timestamp = admEnt.get(admFieldName).asText();
+                                                        // Parse the date-time string into OffsetDateTime
+                                                        odt = OffsetDateTime.parse(timestamp);
+                                                    }
+                                                }
+
+                                                if (admFieldName.equals("createdByName"))
+                                                {
+
+                                                    if (StringUtils.hasText(admEnt.get(admFieldName).asText()))
+                                                    {
+                                                        userCreate = admEnt.get(admFieldName).asText();
+                                                    }
+                                                }
+
+                                            }
+
+                                        }
+                                    }
+
+                                }
+                                TY_NotesDetails newNote = new TY_NotesDetails(noteType, id, noteId, odt, userCreate,
+                                        content);
+                                caseDetails.getNotes().add(newNote);
 
                             }
 

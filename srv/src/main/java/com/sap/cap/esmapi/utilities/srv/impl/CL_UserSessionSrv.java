@@ -811,9 +811,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             TY_UserDetails userDetails = new TY_UserDetails();
             userDetails.setAuthenticated(true);
             // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
-            Ty_UserAccountContactEmployee usAccConEmpl = new Ty_UserAccountContactEmployee("I534439", "Kelly Lin",
-                    "kelly.lin@sap.com", "11ee2d1d-f8d2-83ee-afdb-818259020a00",
-                    null, "11edefe1-bbe4-400e-afdb-817c5e020a00", false, false);
+            Ty_UserAccountContactEmployee usAccConEmpl = new Ty_UserAccountContactEmployee("I057386", "Sunny Bhardwaj",
+            "sunny.bhardwaj@sap.com", "11eda929-5152-18be-afdb-81d9ac010a00",
+            "11eda929-71b5-43ce-afdb-81d9ac010a00", "11ed17c5-47d5-c4de-afdb-818bd8010a00", false, false);
 
             userDetails.setUsAcConEmpl(usAccConEmpl);
             userSessInfo.setUserDetails(userDetails); // Set in Session
