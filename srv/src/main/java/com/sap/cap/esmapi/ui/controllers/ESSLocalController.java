@@ -123,7 +123,8 @@ public class ESSLocalController
     private Ty_UserAccountContactEmployee getUserAccount()
     {
         return new Ty_UserAccountContactEmployee("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
-                "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00","11ed17c5-47d5-c4de-afdb-818bd8010a00",false,false);
+                "11eda929-5152-18be-afdb-81d9ac010a00", "11eda929-71b5-43ce-afdb-81d9ac010a00",
+                "11ed17c5-47d5-c4de-afdb-818bd8010a00", false, false);
 
         // return new Ty_UserAccountContact("Dummy ESS2", "ESS Portal Test1",
         // "testess2@gmail.com",
@@ -331,7 +332,7 @@ public class ESSLocalController
                 if (StringUtils.hasText(caseForm.getDescription()))
                 {
                     // Create Note and Get Guid back
-                    String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(caseForm.getDescription()));
+                    String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(caseForm.getDescription(), null));
                     if (StringUtils.hasText(noteId))
                     {
                         newCaseEntity.setDescription(new TY_Description_CaseCreate(noteId));

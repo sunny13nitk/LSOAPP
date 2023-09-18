@@ -78,7 +78,7 @@ public class CL_StatusSrv implements IF_StatusSrv
     {
         TY_PortalStatusTransICode statTransCus = null;
 
-        if (StringUtils.hasText(caseStatus) && StringUtils.hasText(caseType) && msgSrc != null)
+        if (StringUtils.hasText(caseStatus) && StringUtils.hasText(caseType) && msgSrc != null && catgCus != null)
         {
             if (CollectionUtils.isNotEmpty(statusTransitions.getStatusTransitions()))
             {
@@ -94,20 +94,26 @@ public class CL_StatusSrv implements IF_StatusSrv
                 {
                     statTransCus = new TY_PortalStatusTransICode(transO.get(), null);
 
-                    // Get All Status Definitions for Case Type
-                    TY_StatusCfg statusCFG = this.getStatusCfg4CaseType(EnumCaseTypes.valueOf(caseType));
-                    if (statusCFG != null)
+                    Optional<TY_CatgCusItem> cusItemO = catgCus.getCustomizations().stream()
+                            .filter(f -> f.getCaseType().equals(caseType)).findFirst();
+                    if (cusItemO.isPresent())
                     {
-                        if (CollectionUtils.isNotEmpty(statusCFG.getUserStatusAssignments()))
+                        // Get All Status Definitions for Case Type
+                        TY_StatusCfg statusCFG = this.getStatusCfg4CaseType(cusItemO.get().getCaseTypeEnum());
+                        if (statusCFG != null)
                         {
-                            // Filter for To Status Description
-                            Optional<TY_StatusCfgItem> toStatusO = statusCFG.getUserStatusAssignments().stream().filter(
-                                    s -> s.getUserStatusDescription().equalsIgnoreCase(transO.get().getToStatus()))
-                                    .findFirst();
-
-                            if (toStatusO.isPresent())
+                            if (CollectionUtils.isNotEmpty(statusCFG.getUserStatusAssignments()))
                             {
-                                statTransCus.setToStatusCode(toStatusO.get().getUserStatus());
+                                // Filter for To Status Description
+                                Optional<TY_StatusCfgItem> toStatusO = statusCFG.getUserStatusAssignments().stream()
+                                        .filter(s -> s.getUserStatusDescription()
+                                                .equalsIgnoreCase(transO.get().getToStatus()))
+                                        .findFirst();
+
+                                if (toStatusO.isPresent())
+                                {
+                                    statTransCus.setToStatusCode(toStatusO.get().getUserStatus());
+                                }
                             }
                         }
                     }

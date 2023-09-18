@@ -138,7 +138,9 @@
                      Latest First
                   </h6>
 
-                  <div class="colspan-9 offset-1" style="margin-top: 15px; margin-bottom: 10px">
+
+                  <div th:if="*{caseDetails.statusTransitionCFG.transCfg.editAllowed == true}"
+                     class="colspan-9 offset-1" style="margin-top: 15px; margin-bottom: 10px">
                      <label>Reply</label>
 
                      <p id="chars-counter" style="margin-top: -1px">You enter 0 char(s)</p>
@@ -217,14 +219,16 @@
 
                   </div>
 
-                  <div class="colspan-9 offset-1" style="margin-top: 15px; margin-bottom: 10px">
+                  <div th:if="*{caseDetails.statusTransitionCFG.transCfg.editAllowed == true}"
+                     class="colspan-9 offset-1" style="margin-top: 15px; margin-bottom: 10px">
                      <label>Attachment</label>
                      <input type="file" data-role="file" name="attachment" th:field="*{attachment}" data-mode="drop">
 
                   </div>
 
 
-                  <div class="d-flex flex-row-r" style="margin-top: 30px; margin-bottom: 10px; margin-right: 20px;">
+                  <div th:if="*{caseDetails.statusTransitionCFG.transCfg.editAllowed == true}" class="d-flex flex-row-r"
+                     style="margin-top: 30px; margin-bottom: 10px; margin-right: 20px;">
                      <button class="button rounded " style="color: #004466; background: #00ffb3" data-role="hint"
                         data-hint-position="top" data-cls-hint="fg-black" data-hint-text="Submit Reply" name="action"
                         value="saveCaseEdit">
