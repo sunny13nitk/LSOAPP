@@ -24,4 +24,7 @@ public class TY_CatgCusItem
     private String appNoteTypes;
     @CsvBindByPosition(position = 4)
     private String statusSchema;
+    @CsvBindByPosition(position = 5)
+    private String replyNoteType;
+
 }

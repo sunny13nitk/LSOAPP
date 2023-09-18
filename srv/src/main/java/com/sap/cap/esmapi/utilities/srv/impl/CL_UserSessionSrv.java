@@ -812,8 +812,8 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             userDetails.setAuthenticated(true);
             // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
             Ty_UserAccountContactEmployee usAccConEmpl = new Ty_UserAccountContactEmployee("I057386", "Sunny Bhardwaj",
-            "sunny.bhardwaj@sap.com", "11eda929-5152-18be-afdb-81d9ac010a00",
-            "11eda929-71b5-43ce-afdb-81d9ac010a00", "11ed17c5-47d5-c4de-afdb-818bd8010a00", false, false);
+                    "sunny.bhardwaj@sap.com", "11eda929-5152-18be-afdb-81d9ac010a00",
+                    "11eda929-71b5-43ce-afdb-81d9ac010a00", "11ed17c5-47d5-c4de-afdb-818bd8010a00", false, false);
 
             userDetails.setUsAcConEmpl(usAccConEmpl);
             userSessInfo.setUserDetails(userDetails); // Set in Session
@@ -1078,7 +1078,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     }
 
     @Override
-    public boolean SubmitCaseReply(TY_CaseEdit_Form caseReplyForm)
+    public boolean SubmitCaseReply(TY_CaseEdit_Form caseReplyForm) throws EX_ESMAPI, IOException
     {
         boolean isSubmitted = false;
 
@@ -1098,6 +1098,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
             if (isCaseReplyValid())
             {
+                caseReplyAsync.setValid(true);
                 // Attchments to be handled Here in Session service Only once the Form is
                 // Validated Successfully
                 try

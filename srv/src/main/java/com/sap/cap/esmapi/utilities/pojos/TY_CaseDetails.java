@@ -2,7 +2,7 @@ package com.sap.cap.esmapi.utilities.pojos;
 
 import java.util.List;
 
-import com.sap.cap.esmapi.status.pojos.TY_PortalStatusTransI;
+import com.sap.cap.esmapi.status.pojos.TY_PortalStatusTransICode;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,6 +23,6 @@ public class TY_CaseDetails
 
     private List<TY_NotesDetails> notes;
 
-    private TY_PortalStatusTransI statusTransitionCFG;
+    private TY_PortalStatusTransICode statusTransitionCFG;
 
 }

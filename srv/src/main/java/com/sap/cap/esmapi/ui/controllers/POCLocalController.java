@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.ui.controllers;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -408,6 +409,7 @@ public class POCLocalController
 
     @PostMapping(value = "/saveCaseReply", params = "action=saveCaseEdit")
     public String saveCaseReply(@ModelAttribute("caseEditForm") TY_CaseEdit_Form caseReplyForm, Model model)
+            throws EX_ESMAPI, IOException
     {
 
         String viewName = caseListVWRedirect;
@@ -485,11 +487,10 @@ public class POCLocalController
 
     }
 
-    
     @GetMapping("/caseDetails/{caseID}")
     public String getCaseDetails(@PathVariable String caseID, Model model)
     {
-         if (StringUtils.hasText(caseID) && apiSrv != null)
+        if (StringUtils.hasText(caseID) && apiSrv != null)
         {
             if (userSessSrv != null)
             {

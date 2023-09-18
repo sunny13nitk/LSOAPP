@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.utilities.srv.intf;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -66,7 +67,7 @@ public interface IF_UserSessionSrv
     // ------- Create and Publish Case Reply Submit Event
     // ------- session :currentCaseReply to be picked up by Event Handler
     // @formatter:on
-    public boolean SubmitCaseReply(TY_CaseEdit_Form caseReplyForm);
+    public boolean SubmitCaseReply(TY_CaseEdit_Form caseReplyForm) throws EX_ESMAPI, IOException;
 
     public void clearFormErrors();
 

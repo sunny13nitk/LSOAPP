@@ -1,5 +1,7 @@
 package com.sap.cap.esmapi.status.srv.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -14,10 +16,13 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.status.pojos.TY_PortalStatusTransI;
+import com.sap.cap.esmapi.status.pojos.TY_PortalStatusTransICode;
 import com.sap.cap.esmapi.status.pojos.TY_PortalStatusTransitions;
 import com.sap.cap.esmapi.status.pojos.TY_StatusCfg;
+import com.sap.cap.esmapi.status.pojos.TY_StatusCfgItem;
 import com.sap.cap.esmapi.status.srv.intf.IF_StatusSrv;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
+import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +40,12 @@ public class CL_StatusSrv implements IF_StatusSrv
 
     private final MessageSource msgSrc; // Autowired
 
+    private final IF_SrvCloudAPI srvCloudApi; // Autowired
+
     private List<TY_StatusCfg> lobStatusCfgList;
 
     @Override
-    public TY_StatusCfg getStatusCfg4CaseType(EnumCaseTypes caseType) throws EX_ESMAPI
+    public TY_StatusCfg getStatusCfg4CaseType(EnumCaseTypes caseType) throws EX_ESMAPI, IOException
     {
         TY_StatusCfg statusCFG = null;
         if (caseType != null && catgCus != null)
@@ -66,10 +73,10 @@ public class CL_StatusSrv implements IF_StatusSrv
     }
 
     @Override
-    public TY_PortalStatusTransI getPortalStatusTransition4CaseTypeandCaseStatus(String caseType, String caseStatus)
-            throws EX_ESMAPI
+    public TY_PortalStatusTransICode getPortalStatusTransition4CaseTypeandCaseStatus(String caseType, String caseStatus)
+            throws EX_ESMAPI, IOException
     {
-        TY_PortalStatusTransI statTransCus = null;
+        TY_PortalStatusTransICode statTransCus = null;
 
         if (StringUtils.hasText(caseStatus) && StringUtils.hasText(caseType) && msgSrc != null)
         {
@@ -85,7 +92,26 @@ public class CL_StatusSrv implements IF_StatusSrv
                 }).findFirst();
                 if (transO.isPresent())
                 {
-                    statTransCus = transO.get();
+                    statTransCus = new TY_PortalStatusTransICode(transO.get(), null);
+
+                    // Get All Status Definitions for Case Type
+                    TY_StatusCfg statusCFG = this.getStatusCfg4CaseType(EnumCaseTypes.valueOf(caseType));
+                    if (statusCFG != null)
+                    {
+                        if (CollectionUtils.isNotEmpty(statusCFG.getUserStatusAssignments()))
+                        {
+                            // Filter for To Status Description
+                            Optional<TY_StatusCfgItem> toStatusO = statusCFG.getUserStatusAssignments().stream().filter(
+                                    s -> s.getUserStatusDescription().equalsIgnoreCase(transO.get().getToStatus()))
+                                    .findFirst();
+
+                            if (toStatusO.isPresent())
+                            {
+                                statTransCus.setToStatusCode(toStatusO.get().getUserStatus());
+                            }
+                        }
+                    }
+
                 }
                 else
                 {
@@ -101,9 +127,9 @@ public class CL_StatusSrv implements IF_StatusSrv
         return statTransCus;
     }
 
-    private TY_StatusCfg fetchStatusCfg4CaseType(EnumCaseTypes caseType)
+    private TY_StatusCfg fetchStatusCfg4CaseType(EnumCaseTypes caseType) throws EX_ESMAPI, IOException
     {
-
+        TY_StatusCfg statusCfg = null;
         if (CollectionUtils.isNotEmpty(catgCus.getCustomizations()))
         {
             Optional<TY_CatgCusItem> cusO = catgCus.getCustomizations().stream()
@@ -113,12 +139,26 @@ public class CL_StatusSrv implements IF_StatusSrv
                 TY_CatgCusItem cus = cusO.get();
                 if (StringUtils.hasText(cus.getStatusSchema()))
                 {
+                    // Fetch Status Description snd Codes from Service cloud
+
+                    List<TY_StatusCfgItem> statusCfgs = srvCloudApi.getStatusCfg4StatusSchema(cus.getStatusSchema());
+                    if (CollectionUtils.isNotEmpty(statusCfgs))
+                    {
+                        if (CollectionUtils.isEmpty(lobStatusCfgList))
+                        {
+                            lobStatusCfgList = new ArrayList<TY_StatusCfg>();
+                        }
+
+                        statusCfg = new TY_StatusCfg(caseType, statusCfgs);
+
+                        lobStatusCfgList.add(statusCfg);
+                    }
 
                 }
             }
         }
 
-        return null;
+        return statusCfg;
     }
 
 }
