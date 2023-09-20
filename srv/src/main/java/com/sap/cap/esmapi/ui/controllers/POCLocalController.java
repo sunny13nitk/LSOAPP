@@ -455,9 +455,13 @@ public class POCLocalController
                 model.addAttribute("formErrors", userSessSrv.getFormErrors());
 
                 // Get Case Details
-                TY_CaseEdit_Form caseEditForm = userSessSrv.getCurrentReplyForm4Submission().getCaseReply();
+                TY_CaseEdit_Form caseEditForm = userSessSrv.getCaseDetails4Edit(
+                        userSessSrv.getCurrentReplyForm4Submission().getCaseReply().getCaseDetails().getCaseGuid());
+
                 if (caseEditForm != null)
                 {
+                    // Super Impose Reply from User Form 4m Session
+                    caseEditForm.setReply(userSessSrv.getCurrentReplyForm4Submission().getCaseReply().getReply());
                     // Not Feasible to have a Validation Error in Form and Attachment Persisted -
                     // But just to handle theoratically in case there is an Error in Attachment
                     // Persistence only- Remove the attachment otherwise let it persist
@@ -472,6 +476,8 @@ public class POCLocalController
 
                         }
                     }
+
+                    model.addAttribute("caseEditForm", caseEditForm);
                 }
 
             }

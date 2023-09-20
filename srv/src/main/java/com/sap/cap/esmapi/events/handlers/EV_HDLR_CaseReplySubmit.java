@@ -28,6 +28,7 @@ import com.sap.cap.esmapi.utilities.enums.EnumStatus;
 import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
 import com.sap.cap.esmapi.utilities.pojos.TY_Attachment_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseDetails;
+import com.sap.cap.esmapi.utilities.pojos.TY_CasePatchInfo;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseReplyNote;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud_Reply;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
@@ -181,6 +182,14 @@ public class EV_HDLR_CaseReplySubmit
                             if (caseReplyPayload != null)
                             {
                                 // Invoke Srv cloud API to Patch/Update the Case
+                                if (srvCloudApiSrv.updateCasewithReply(new TY_CasePatchInfo(caseDetails.getCaseGuid(),
+                                        evCaseReply.getPayload().getCaseReply().getCaseDetails().getCaseId(),
+                                        caseDetails.getETag()), caseReplyPayload))
+                                {
+                                    handleCaseSuccUpdated(
+                                            evCaseReply.getPayload().getCaseReply().getCaseDetails().getCaseId(),
+                                            evCaseReply.getPayload().getSubmGuid(), evCaseReply);
+                                }
                             }
                         }
                         catch (EX_ESMAPI | IOException e)
@@ -194,6 +203,22 @@ public class EV_HDLR_CaseReplySubmit
 
             }
         }
+    }
+
+    private void handleCaseSuccUpdated(String caseId, String submId, EV_CaseReplySubmit evCaseReply)
+    {
+        String msg;
+        // Reply for Case with id - {0} updated successfully for Submission id - {1}.
+        msg = msgSrc.getMessage("SUCC_CASE_REPLY_UPDATE", new Object[]
+        { caseId, submId }, Locale.ENGLISH);
+
+        log.info(msg);
+        TY_Message logMsg = new TY_Message(evCaseReply.getPayload().getUserId(), Timestamp.from(Instant.now()),
+                EnumStatus.Success, EnumMessageType.SUCC_CASE_REPL_SAVE, evCaseReply.getPayload().getSubmGuid(), msg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) evCaseReply.getPayload().getSubmGuid(), logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
     }
 
     private void handleCaseDetailsFetchError(EV_CaseReplySubmit evCaseReply, Exception e)

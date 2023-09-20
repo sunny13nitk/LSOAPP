@@ -742,23 +742,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                     // Payload error
 
-                    String msg = msgSrc.getMessage("ERR_CASE_PAYLOAD", new Object[]
-                    { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                            new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(Timestamp.from(Instant.now())) },
-                            Locale.ENGLISH);
-                    log.error(msg);
-
-                    TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                            Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
-                            userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
-
-                    // For Logging Framework
-                    userSessInfo.getMessagesStack().add(message);
-                    // Instantiate and Fire the Event
-                    EV_LogMessage logMsgEvent = new EV_LogMessage(this, message);
-                    applicationEventPublisher.publishEvent(logMsgEvent);
-
-                    this.addFormErrors(msg);// For Form Display
+                    handleCaseReplyError();
 
                     isValid = false;
 
@@ -1229,7 +1213,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                                     if (!extnfoundO.isPresent())
                                     {
                                         // Invalid Attachment TYpe Error
-                                        handleInvalidAttachment(filename, extnType);
+                                        handleInvalidAttachmentCaseReply(filename, extnType);
                                         isValid = false;
                                     }
                                 }
@@ -1238,6 +1222,11 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         }
                     }
                 }
+                else
+                {
+                    isValid = false;
+                    handleCaseReplyBlankError();
+                }
 
             }
             else
@@ -1245,23 +1234,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                 // Payload error
 
-                String msg = msgSrc.getMessage("ERR_CASE_PAYLOAD", new Object[]
-                { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                        new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(Timestamp.from(Instant.now())) },
-                        Locale.ENGLISH);
-                log.error(msg);
-
-                TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                        Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
-                        userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
-
-                // For Logging Framework
-                userSessInfo.getMessagesStack().add(message);
-                // Instantiate and Fire the Event
-                EV_LogMessage logMsgEvent = new EV_LogMessage(this, message);
-                applicationEventPublisher.publishEvent(logMsgEvent);
-
-                this.addFormErrors(msg);// For Form Display
+                handleCaseReplyError();
 
                 isValid = false;
 
@@ -1269,6 +1242,44 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
         }
         return isValid;
+    }
+
+    private void handleCaseReplyError()
+    {
+        String msg = msgSrc.getMessage("ERR_CASE_PAYLOAD", new Object[]
+        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(Timestamp.from(Instant.now())) }, Locale.ENGLISH);
+        log.error(msg);
+
+        TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
+                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+
+        // For Logging Framework
+        userSessInfo.getMessagesStack().add(message);
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage(this, message);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+        this.addFormErrors(msg);// For Form Display
+    }
+
+    private void handleCaseReplyBlankError()
+    {
+        String msg = msgSrc.getMessage("ERR_BLANK_CASE_REPLY", null, Locale.ENGLISH);
+        log.error(msg);
+
+        TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
+                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+
+        // For Logging Framework
+        userSessInfo.getMessagesStack().add(message);
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage(this, message);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+        this.addFormErrors(msg);// For Form Display
     }
 
     @Override
@@ -1355,6 +1366,26 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
         // Instantiate and Fire the Event
         EV_LogMessage logMsgEvent = new EV_LogMessage((Object) userSessInfo.getCurrentForm4Submission().getSubmGuid(),
+                logMsg);
+        applicationEventPublisher.publishEvent(logMsgEvent);
+
+    }
+
+    private void handleInvalidAttachmentCaseReply(String filename, String extnType)
+    {
+        String msg;
+        msg = msgSrc.getMessage("ERR_INVALID_ATT_TYPE", new Object[]
+        { extnType, filename }, Locale.ENGLISH);
+
+        log.error(msg);
+        this.addFormErrors(msg);
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
+                userSessInfo.getCurrentCaseReply().getSubmGuid(), msg);
+        this.addMessagetoStack(logMsg);
+
+        // Instantiate and Fire the Event
+        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) userSessInfo.getCurrentCaseReply().getSubmGuid(),
                 logMsg);
         applicationEventPublisher.publishEvent(logMsgEvent);
 

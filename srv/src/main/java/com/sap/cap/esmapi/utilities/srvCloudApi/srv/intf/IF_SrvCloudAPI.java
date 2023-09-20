@@ -16,7 +16,9 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
+import com.sap.cap.esmapi.utilities.pojos.TY_CasePatchInfo;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
+import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud_Reply;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
 import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
@@ -71,5 +73,8 @@ public interface IF_SrvCloudAPI
         public TY_CaseDetails getCaseDetails4Case(String caseId) throws EX_ESMAPI, IOException;
 
         public List<TY_StatusCfgItem> getStatusCfg4StatusSchema(String StatusSchema) throws EX_ESMAPI, IOException;
+
+        public boolean updateCasewithReply(TY_CasePatchInfo patchInfo, TY_Case_SrvCloud_Reply caseReply)
+                        throws EX_ESMAPI, IOException;
 
 }

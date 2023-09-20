@@ -28,6 +28,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
@@ -61,7 +62,9 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
+import com.sap.cap.esmapi.utilities.pojos.TY_CasePatchInfo;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
+import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud_Reply;
 import com.sap.cap.esmapi.utilities.pojos.TY_DefaultComm;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesDetails;
@@ -1650,7 +1653,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                             HttpEntity entityResp = response.getEntity();
                             String apiOutput = EntityUtils.toString(entityResp);
                             System.out.println(apiOutput);
-                            throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                            throw new RuntimeException(
+                                    "Failed with HTTP error code : " + statusCode + " Details: " + apiOutput);
 
                         }
 
@@ -1903,9 +1907,9 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     {
                         HttpEntity entityResp = response.getEntity();
                         String apiOutput = EntityUtils.toString(entityResp);
-                        System.out.println(apiOutput);
+                        log.error(apiOutput);
                         throw new EX_ESMAPI("Error peristing Attachment for filename : " + file.getOriginalFilename()
-                                + "HTTPSTATUS Code" + statusCode);
+                                + "HTTPSTATUS Code" + statusCode + "Details :" + apiOutput);
                     }
 
                 }
@@ -2853,6 +2857,81 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         }
 
         return userStatusAssignments;
+    }
+
+    @Override
+    public boolean updateCasewithReply(TY_CasePatchInfo patchInfo, TY_Case_SrvCloud_Reply caseReply)
+            throws EX_ESMAPI, IOException
+    {
+        boolean caseUpdated = false;
+        if (caseReply != null && patchInfo != null)
+        {
+            if (StringUtils.hasText(patchInfo.getCaseGuid()) && StringUtils.hasText(patchInfo.getETag()))
+            {
+                HttpClient httpclient = HttpClients.createDefault();
+                String casePOSTURL = getPOSTURL4BaseUrl(srvCloudUrls.getCaseDetailsUrl());
+                if (StringUtils.hasText(casePOSTURL))
+                {
+                    casePOSTURL = casePOSTURL + patchInfo.getCaseGuid();
+
+                    String encoding = Base64.getEncoder()
+                            .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                    HttpPatch httpPatch = new HttpPatch(casePOSTURL);
+                    httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                    httpPatch.addHeader("Content-Type", "application/json");
+                    httpPatch.addHeader(GC_Constants.gc_IFMatch, patchInfo.getETag());
+
+                    // Remove Description Note Type from Payload before Persisting
+                    // Important as the Description or Default text Type Should not be persisted
+                    // alongwith Note(s)
+                    if (CollectionUtils.isNotEmpty(caseReply.getNotes()))
+                    {
+                        caseReply.getNotes()
+                                .removeIf(n -> n.getNoteType().equalsIgnoreCase(GC_Constants.gc_DescNoteType));
+                    }
+
+                    ObjectMapper objMapper = new ObjectMapper();
+
+                    String requestBody = objMapper.writeValueAsString(caseReply);
+                    log.info(requestBody);
+
+                    StringEntity entity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
+                    httpPatch.setEntity(entity);
+
+                    // PATCH Case in Service Cloud
+                    try
+                    {
+                        // Fire the Url
+                        HttpResponse response = httpclient.execute(httpPatch);
+                        // verify the valid error code first
+                        int statusCode = response.getStatusLine().getStatusCode();
+                        if (statusCode != HttpStatus.SC_OK)
+                        {
+                            HttpEntity entityResp = response.getEntity();
+                            String apiOutput = EntityUtils.toString(entityResp);
+                            log.error(apiOutput);
+                            // Error Updating Case id - {0}. HTTP Status - {1}. Details : {2}.
+                            throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_REPLY_UPDATE", new Object[]
+                            { patchInfo.getCaseId(), statusCode, apiOutput }, Locale.ENGLISH));
+
+                        }
+                        else
+                        {
+                            caseUpdated = true;
+                        }
+
+                    }
+                    catch (IOException e)
+                    {
+                        throw new EX_ESMAPI(msgSrc.getMessage("ERR_NOTES_POST", new Object[]
+                        { e.getLocalizedMessage() }, Locale.ENGLISH));
+                    }
+                }
+
+            }
+
+        }
+        return caseUpdated;
     }
 
     private String getPOSTURL4BaseUrl(String urlBase)

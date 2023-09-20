@@ -26,4 +26,8 @@ public class GC_Constants
 
     public static final String gc_ETag = "ETag";
 
+    public static final String gc_IFMatch = "If-Match";
+
+    public static final String gc_DescNoteType = "S000";
+
 }
