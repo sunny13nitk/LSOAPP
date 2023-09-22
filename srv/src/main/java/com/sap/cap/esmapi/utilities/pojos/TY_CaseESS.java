@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TY_CaseESS 
+public class TY_CaseESS
 {
     private String guid;
     private String id;
@@ -22,7 +22,7 @@ public class TY_CaseESS
     private String accountId;
     private String contactId;
     private String createdOn;
-    private Date creationDate;    
+    private Date creationDate;
     private String formattedDate;
     private String origin;
 }

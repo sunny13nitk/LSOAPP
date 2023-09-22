@@ -205,12 +205,12 @@ public class EV_HDLR_CaseReplySubmit
         }
     }
 
-    private void handleCaseSuccUpdated(String caseId, String submId, EV_CaseReplySubmit evCaseReply)
+    private void handleCaseSuccUpdated(String string, String submId, EV_CaseReplySubmit evCaseReply)
     {
         String msg;
         // Reply for Case with id - {0} updated successfully for Submission id - {1}.
         msg = msgSrc.getMessage("SUCC_CASE_REPLY_UPDATE", new Object[]
-        { caseId, submId }, Locale.ENGLISH);
+        { string, submId }, Locale.ENGLISH);
 
         log.info(msg);
         TY_Message logMsg = new TY_Message(evCaseReply.getPayload().getUserId(), Timestamp.from(Instant.now()),

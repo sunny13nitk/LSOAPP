@@ -106,7 +106,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword())
                     && StringUtils.hasLength(srvCloudUrls.getCasesUrl()))
             {
-                System.out.println("Url and Credentials Found!!");
+                log.info("Url and Credentials Found!!");
 
                 long numCases = apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getCasesUrl());
                 if (numCases > 0)
@@ -137,7 +137,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         HttpEntity entity = response.getEntity();
                         String apiOutput = EntityUtils.toString(entity);
                         // Lets see what we got from API
-                        // System.out.println(apiOutput);
+                        // Log.info(apiOutput);
 
                         // Conerting to JSON
                         ObjectMapper mapper = new ObjectMapper();
@@ -186,21 +186,21 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     JsonNode rootNode = jsonNode.path("value");
                     if (rootNode != null)
                     {
-                        System.out.println("Cases Bound!!");
+                        log.info("Cases Bound!!");
                         casesESSList = new ArrayList<TY_CaseESS>();
 
                         Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
                         while (payloadItr.hasNext())
                         {
-                            // System.out.println("Payload Iterator Bound");
+                            // log.info("Payload Iterator Bound");
                             Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
                             String payloadFieldName = payloadEnt.getKey();
-                            // System.out.println("Payload Field Scanned: " + payloadFieldName);
+                            // log.info("Payload Field Scanned: " + payloadFieldName);
 
                             if (payloadFieldName.equals("value"))
                             {
                                 Iterator<JsonNode> casesItr = payloadEnt.getValue().elements();
-                                // System.out.println("Cases Iterator Bound");
+                                // log.info("Cases Iterator Bound");
                                 while (casesItr.hasNext())
                                 {
 
@@ -210,15 +210,16 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                         String caseid = null, caseguid = null, caseType = null,
                                                 caseTypeDescription = null, subject = null, status = null,
                                                 createdOn = null, accountId = null, contactId = null, origin = null;
-                                        // System.out.println("Cases Entity Bound - Reading Case...");
+
+                                        // log.info("Cases Entity Bound - Reading Case...");
                                         Iterator<String> fieldNames = caseEnt.fieldNames();
                                         while (fieldNames.hasNext())
                                         {
                                             String caseFieldName = fieldNames.next();
-                                            // System.out.println("Case Entity Field Scanned: " + caseFieldName);
+                                            // log.info("Case Entity Field Scanned: " + caseFieldName);
                                             if (caseFieldName.equals("id"))
                                             {
-                                                // System.out.println("Case GUID Added : " +
+                                                // log.info("Case GUID Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -228,7 +229,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("displayId"))
                                             {
-                                                // System.out.println("Case Id Added : " +
+                                                // log.info("Case Id Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -238,7 +239,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("caseType"))
                                             {
-                                                // System.out.println("Case Type Added : " +
+                                                // log.info("Case Type Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -248,7 +249,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("caseTypeDescription"))
                                             {
-                                                // System.out.println("Case Type Description Added : " +
+                                                // log.info("Case Type Description Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -258,7 +259,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("subject"))
                                             {
-                                                // System.out.println("Case Subject Added : " +
+                                                // log.info("Case Subject Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -268,7 +269,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("statusDescription"))
                                             {
-                                                // System.out.println("Case Status Added : " +
+                                                // log.info("Case Status Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -278,7 +279,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("origin"))
                                             {
-                                                // System.out.println("Case Status Added : " +
+                                                // log.info("Case Status Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -288,7 +289,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("statusDescription"))
                                             {
-                                                // System.out.println("Case Status Added : " +
+                                                // log.info("Case Status Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -298,12 +299,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("adminData"))
                                             {
-                                                // System.out.println("Inside Admin Data: " );
+                                                // log.info("Inside Admin Data: " );
 
                                                 JsonNode admEnt = caseEnt.path("adminData");
                                                 if (admEnt != null)
                                                 {
-                                                    // System.out.println("AdminData Node Bound");
+                                                    // log.info("AdminData Node Bound");
 
                                                     Iterator<String> fieldNamesAdm = admEnt.fieldNames();
                                                     while (fieldNamesAdm.hasNext())
@@ -311,7 +312,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         String admFieldName = fieldNamesAdm.next();
                                                         if (admFieldName.equals("createdOn"))
                                                         {
-                                                            // System.out.println( "Created On : " +
+                                                            // log.info( "Created On : " +
                                                             // admEnt.get(admFieldName).asText());
                                                             createdOn = admEnt.get(admFieldName).asText();
                                                         }
@@ -322,12 +323,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("account"))
                                             {
-                                                // System.out.println("Inside Account: " );
+                                                // log.info("Inside Account: " );
 
                                                 JsonNode accEnt = caseEnt.path("account");
                                                 if (accEnt != null)
                                                 {
-                                                    // System.out.println("Account Node Bound");
+                                                    // log.info("Account Node Bound");
 
                                                     Iterator<String> fieldNamesAcc = accEnt.fieldNames();
                                                     while (fieldNamesAcc.hasNext())
@@ -335,7 +336,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         String accFieldName = fieldNamesAcc.next();
                                                         if (accFieldName.equals("id"))
                                                         {
-                                                            // System.out.println(
+                                                            // log.info(
                                                             // "Account ID : " + accEnt.get(accFieldName).asText());
                                                             accountId = accEnt.get(accFieldName).asText();
                                                         }
@@ -347,12 +348,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                             if (caseFieldName.equals("individualCustomer")
                                                     && (!StringUtils.hasText(accountId)))
                                             {
-                                                // System.out.println("Inside Account: " );
+                                                // log.info("Inside Account: " );
 
                                                 JsonNode accEnt = caseEnt.path("individualCustomer");
                                                 if (accEnt != null)
                                                 {
-                                                    // System.out.println("Account Node Bound");
+                                                    // log.info("Account Node Bound");
 
                                                     Iterator<String> fieldNamesAcc = accEnt.fieldNames();
                                                     while (fieldNamesAcc.hasNext())
@@ -360,7 +361,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         String accFieldName = fieldNamesAcc.next();
                                                         if (accFieldName.equals("id"))
                                                         {
-                                                            // System.out.println(
+                                                            // log.info(
                                                             // "Account ID : " + accEnt.get(accFieldName).asText());
                                                             accountId = accEnt.get(accFieldName).asText();
                                                         }
@@ -371,12 +372,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("reporter"))
                                             {
-                                                // System.out.println("Inside Reporter: " );
+                                                // log.info("Inside Reporter: " );
 
                                                 JsonNode repEnt = caseEnt.path("reporter");
                                                 if (repEnt != null)
                                                 {
-                                                    // System.out.println("Reporter Node Bound");
+                                                    // log.info("Reporter Node Bound");
 
                                                     Iterator<String> fieldNamesRep = repEnt.fieldNames();
                                                     while (fieldNamesRep.hasNext())
@@ -384,7 +385,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         String repFieldName = fieldNamesRep.next();
                                                         if (repFieldName.equals("id"))
                                                         {
-                                                            // System.out.println(
+                                                            // log.info(
                                                             // "Reporter ID : " + repEnt.get(repFieldName).asText());
                                                             contactId = repEnt.get(repFieldName).asText();
                                                         }
@@ -484,7 +485,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
         if (!CollectionUtils.isEmpty(casesESSList4User))
         {
-            System.out.println("# Cases returned in call : " + casesESSList4User.size());
+            log.info("# Cases returned in call : " + casesESSList4User.size());
         }
         return casesESSList4User;
     }
@@ -505,21 +506,21 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 JsonNode rootNode = jsonNode.path("value");
                 if (rootNode != null)
                 {
-                    System.out.println("Cases Bound!!");
+                    log.info("Cases Bound!!");
                     casesGuidIdsList = new ArrayList<TY_CaseGuidId>();
 
                     Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
                     while (payloadItr.hasNext())
                     {
-                        System.out.println("Payload Iterator Bound");
+                        log.info("Payload Iterator Bound");
                         Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
                         String payloadFieldName = payloadEnt.getKey();
-                        System.out.println("Payload Field Scanned:  " + payloadFieldName);
+                        log.info("Payload Field Scanned:  " + payloadFieldName);
 
                         if (payloadFieldName.equals("value"))
                         {
                             Iterator<JsonNode> casesItr = payloadEnt.getValue().elements();
-                            System.out.println("Cases Iterator Bound");
+                            log.info("Cases Iterator Bound");
                             while (casesItr.hasNext())
                             {
 
@@ -527,16 +528,15 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                 if (caseEnt != null)
                                 {
                                     String caseid = null, caseguid = null;
-                                    System.out.println("Cases Entity Bound - Reading Case...");
+                                    log.info("Cases Entity Bound - Reading Case...");
                                     Iterator<String> fieldNames = caseEnt.fieldNames();
                                     while (fieldNames.hasNext())
                                     {
                                         String caseFieldName = fieldNames.next();
-                                        System.out.println("Case Entity Field Scanned:  " + caseFieldName);
+                                        log.info("Case Entity Field Scanned:  " + caseFieldName);
                                         if (caseFieldName.equals("id"))
                                         {
-                                            System.out.println(
-                                                    "Case GUID Added : " + caseEnt.get(caseFieldName).asText());
+                                            log.info("Case GUID Added : " + caseEnt.get(caseFieldName).asText());
                                             if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                             {
                                                 caseguid = caseEnt.get(caseFieldName).asText();
@@ -604,20 +604,20 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         JsonNode rootNode = accountsResp.path("value");
                         if (rootNode != null)
                         {
-                            System.out.println("Accounts Bound!!");
+                            log.info("Accounts Bound!!");
 
                             Iterator<Map.Entry<String, JsonNode>> payloadItr = accountsResp.fields();
                             while (payloadItr.hasNext())
                             {
-                                System.out.println("Payload Iterator Bound");
+                                log.info("Payload Iterator Bound");
                                 Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
                                 String payloadFieldName = payloadEnt.getKey();
-                                System.out.println("Payload Field Scanned:  " + payloadFieldName);
+                                log.info("Payload Field Scanned:  " + payloadFieldName);
 
                                 if (payloadFieldName.equals("value"))
                                 {
                                     Iterator<JsonNode> accItr = payloadEnt.getValue().elements();
-                                    System.out.println("Accounts Iterator Bound");
+                                    log.info("Accounts Iterator Bound");
                                     while (accItr.hasNext())
                                     {
 
@@ -625,27 +625,26 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                         if (accEnt != null)
                                         {
                                             String accid = null, accEmail = null;
-                                            System.out.println("Account Entity Bound - Reading Account...");
+                                            log.info("Account Entity Bound - Reading Account...");
                                             Iterator<String> fieldNames = accEnt.fieldNames();
                                             while (fieldNames.hasNext())
                                             {
                                                 String accFieldName = fieldNames.next();
-                                                System.out.println("Account Entity Field Scanned:  " + accFieldName);
+                                                log.info("Account Entity Field Scanned:  " + accFieldName);
                                                 if (accFieldName.equals("id"))
                                                 {
-                                                    System.out.println(
-                                                            "Account Id Added : " + accEnt.get(accFieldName).asText());
+                                                    log.info("Account Id Added : " + accEnt.get(accFieldName).asText());
                                                     accid = accEnt.get(accFieldName).asText();
                                                 }
 
                                                 if (accFieldName.equals("defaultCommunication"))
                                                 {
-                                                    System.out.println("Inside Default Communication:  ");
+                                                    log.info("Inside Default Communication:  ");
 
                                                     JsonNode commEnt = accEnt.path("defaultCommunication");
                                                     if (commEnt != null)
                                                     {
-                                                        System.out.println("Comm's Node Bound");
+                                                        log.info("Comm's Node Bound");
 
                                                         Iterator<String> fieldNamesComm = commEnt.fieldNames();
                                                         while (fieldNamesComm.hasNext())
@@ -653,7 +652,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                             String commFieldName = fieldNamesComm.next();
                                                             if (commFieldName.equals("eMail"))
                                                             {
-                                                                System.out.println("Account Email Added : "
+                                                                log.info("Account Email Added : "
                                                                         + commEnt.get(commFieldName).asText());
                                                                 accEmail = commEnt.get(commFieldName).asText();
                                                             }
@@ -713,7 +712,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword())
                     && StringUtils.hasLength(srvCloudUrls.getAccountsUrl()))
             {
-                System.out.println("Url and Credentials Found!!");
+                log.info("Url and Credentials Found!!");
 
                 long numAccounts = apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getAccountsUrl());
                 if (numAccounts > 0)
@@ -743,7 +742,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         org.apache.http.HttpEntity entity = response.getEntity();
                         String apiOutput = EntityUtils.toString(entity);
                         // Lets see what we got from API
-                        System.out.println(apiOutput);
+                        log.info(apiOutput);
 
                         // Conerting to JSON
                         ObjectMapper mapper = new ObjectMapper();
@@ -780,7 +779,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword())
                     && StringUtils.hasLength(srvCloudUrls.getEmplUrl()))
             {
-                System.out.println("Url and Credentials Found!!");
+                log.info("Url and Credentials Found!!");
 
                 long numEmpl = apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getEmplUrl());
                 if (numEmpl > 0)
@@ -810,7 +809,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         org.apache.http.HttpEntity entity = response.getEntity();
                         String apiOutput = EntityUtils.toString(entity);
                         // Lets see what we got from API
-                        System.out.println(apiOutput);
+                        log.info(apiOutput);
 
                         // Conerting to JSON
                         ObjectMapper mapper = new ObjectMapper();
@@ -847,7 +846,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword())
                     && StringUtils.hasLength(srvCloudUrls.getCpUrl()))
             {
-                System.out.println("Url and Credentials Found!!");
+                log.info("Url and Credentials Found!!");
 
                 long numAccounts = apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getCpUrl());
                 if (numAccounts > 0)
@@ -877,7 +876,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         org.apache.http.HttpEntity entity = response.getEntity();
                         String apiOutput = EntityUtils.toString(entity);
                         // Lets see what we got from API
-                        System.out.println(apiOutput);
+                        log.info(apiOutput);
 
                         // Conerting to JSON
                         ObjectMapper mapper = new ObjectMapper();
@@ -918,20 +917,20 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         JsonNode rootNode = accountsResp.path("value");
                         if (rootNode != null)
                         {
-                            System.out.println("Contacts Bound!!");
+                            log.info("Contacts Bound!!");
 
                             Iterator<Map.Entry<String, JsonNode>> payloadItr = accountsResp.fields();
                             while (payloadItr.hasNext())
                             {
-                                System.out.println("Payload Iterator Bound");
+                                log.info("Payload Iterator Bound");
                                 Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
                                 String payloadFieldName = payloadEnt.getKey();
-                                System.out.println("Payload Field Scanned:  " + payloadFieldName);
+                                log.info("Payload Field Scanned:  " + payloadFieldName);
 
                                 if (payloadFieldName.equals("value"))
                                 {
                                     Iterator<JsonNode> accItr = payloadEnt.getValue().elements();
-                                    System.out.println("Contacts Iterator Bound");
+                                    log.info("Contacts Iterator Bound");
                                     while (accItr.hasNext())
                                     {
 
@@ -939,22 +938,21 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                         if (accEnt != null)
                                         {
                                             String accid = null, accEmail = null;
-                                            System.out.println("Contact Entity Bound - Reading Contact...");
+                                            log.info("Contact Entity Bound - Reading Contact...");
                                             Iterator<String> fieldNames = accEnt.fieldNames();
                                             while (fieldNames.hasNext())
                                             {
                                                 String accFieldName = fieldNames.next();
-                                                System.out.println("Contact Entity Field Scanned:  " + accFieldName);
+                                                log.info("Contact Entity Field Scanned:  " + accFieldName);
                                                 if (accFieldName.equals("id"))
                                                 {
-                                                    System.out.println(
-                                                            "Account Id Added : " + accEnt.get(accFieldName).asText());
+                                                    log.info("Account Id Added : " + accEnt.get(accFieldName).asText());
                                                     accid = accEnt.get(accFieldName).asText();
                                                 }
 
                                                 if (accFieldName.equals("eMail"))
                                                 {
-                                                    System.out.println("Account Email Added : "
+                                                    log.info("Account Email Added : "
                                                             + accEnt.get(accFieldName).asText());
                                                     accEmail = accEnt.get(accFieldName).asText();
                                                 }
@@ -1023,7 +1021,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     try
                     {
                         String requestBody = objMapper.writeValueAsString(newAccount);
-                        System.out.println(requestBody);
+                        log.info(requestBody);
 
                         StringEntity entity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
                         httpPost.setEntity(entity);
@@ -1055,24 +1053,24 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                 if (rootNode != null)
                                 {
 
-                                    System.out.println("Account Bound!!");
+                                    log.info("Account Bound!!");
 
                                     Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
                                     while (payloadItr.hasNext())
                                     {
-                                        System.out.println("Payload Iterator Bound");
+                                        log.info("Payload Iterator Bound");
                                         Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
                                         String payloadFieldName = payloadEnt.getKey();
-                                        System.out.println("Payload Field Scanned:  " + payloadFieldName);
+                                        log.info("Payload Field Scanned:  " + payloadFieldName);
 
                                         if (payloadFieldName.equals("value"))
                                         {
                                             JsonNode accEnt = payloadEnt.getValue();
-                                            System.out.println("New Account Entity Bound");
+                                            log.info("New Account Entity Bound");
                                             if (accEnt != null)
                                             {
 
-                                                System.out.println("Accounts Entity Bound - Reading Account...");
+                                                log.info("Accounts Entity Bound - Reading Account...");
                                                 Iterator<String> fieldNames = accEnt.fieldNames();
                                                 while (fieldNames.hasNext())
                                                 {
@@ -1081,7 +1079,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                             .println("Account Entity Field Scanned:  " + accFieldName);
                                                     if (accFieldName.equals("id"))
                                                     {
-                                                        System.out.println("Account GUID Added : "
+                                                        log.info("Account GUID Added : "
                                                                 + accEnt.get(accFieldName).asText());
                                                         if (StringUtils.hasText(accEnt.get(accFieldName).asText()))
                                                         {
@@ -1135,7 +1133,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword())
                     && StringUtils.hasLength(srvCloudUrls.getCaseTemplateUrl()))
             {
-                System.out.println("Url and Credentials Found!!");
+                log.info("Url and Credentials Found!!");
 
                 url = srvCloudUrls.getCaseTemplateUrl() + caseType;
 
@@ -1170,7 +1168,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 HttpEntity entity = response.getEntity();
                 String apiOutput = EntityUtils.toString(entity);
                 // Lets see what we got from API
-                // System.out.println(apiOutput);
+                // log.info(apiOutput);
 
                 // Conerting to JSON
                 ObjectMapper mapper = new ObjectMapper();
@@ -1181,21 +1179,21 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     JsonNode rootNode = jsonNode.path("value");
                     if (rootNode != null)
                     {
-                        System.out.println("Customizing Bound!!");
+                        log.info("Customizing Bound!!");
                         List<TY_CaseCatalogCustomizing> caseCusList = new ArrayList<TY_CaseCatalogCustomizing>();
 
                         Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
                         while (payloadItr.hasNext())
                         {
-                            // System.out.println("Payload Iterator Bound");
+                            // log.info("Payload Iterator Bound");
                             Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
                             String payloadFieldName = payloadEnt.getKey();
-                            // System.out.println("Payload Field Scanned: " + payloadFieldName);
+                            // log.info("Payload Field Scanned: " + payloadFieldName);
 
                             if (payloadFieldName.equals("value"))
                             {
                                 Iterator<JsonNode> cusItr = payloadEnt.getValue().elements();
-                                // System.out.println("Cases Iterator Bound");
+                                // log.info("Cases Iterator Bound");
                                 while (cusItr.hasNext())
                                 {
 
@@ -1209,10 +1207,10 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                         while (fieldNames.hasNext())
                                         {
                                             String cusFieldName = fieldNames.next();
-                                            // System.out.println("Case Entity Field Scanned: " + caseFieldName);
+                                            // log.info("Case Entity Field Scanned: " + caseFieldName);
                                             if (cusFieldName.equals("caseType"))
                                             {
-                                                // System.out.println("Case GUID Added : " +
+                                                // log.info("Case GUID Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
                                                 {
@@ -1222,7 +1220,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (cusFieldName.equals("statusSchema"))
                                             {
-                                                // System.out.println("Case Id Added : " +
+                                                // log.info("Case Id Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
                                                 {
@@ -1232,7 +1230,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (cusFieldName.equals("status"))
                                             {
-                                                // System.out.println("Case Id Added : " +
+                                                // log.info("Case Id Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
                                                 {
@@ -1242,7 +1240,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (cusFieldName.equals("partyScheme"))
                                             {
-                                                // System.out.println("Case Id Added : " +
+                                                // log.info("Case Id Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
                                                 {
@@ -1252,12 +1250,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (cusFieldName.equals("catalog"))
                                             {
-                                                // System.out.println("Inside Admin Data: " );
+                                                // log.info("Inside Admin Data: " );
 
                                                 JsonNode catEnt = cusEnt.path("catalog");
                                                 if (catEnt != null)
                                                 {
-                                                    // System.out.println("AdminData Node Bound");
+                                                    // log.info("AdminData Node Bound");
 
                                                     Iterator<String> fieldNamesCat = catEnt.fieldNames();
                                                     while (fieldNamesCat.hasNext())
@@ -1265,7 +1263,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         String catFieldName = fieldNamesCat.next();
                                                         if (catFieldName.equals("id"))
                                                         {
-                                                            // System.out.println( "Created On : " +
+                                                            // log.info( "Created On : " +
                                                             // admEnt.get(admFieldName).asText());
                                                             cataglogId = catEnt.get(catFieldName).asText();
                                                         }
@@ -1337,7 +1335,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword())
                     && StringUtils.hasLength(srvCloudUrls.getCatgTreeUrl()))
             {
-                System.out.println("Url and Credentials Found!!");
+                log.info("Url and Credentials Found!!");
 
                 urlLink = StringsUtility.replaceURLwithParams(srvCloudUrls.getCatgTreeUrl(), new String[]
                 { catalogID }, GC_Constants.gc_UrlReplParam);
@@ -1380,7 +1378,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 HttpEntity entity = response.getEntity();
                 String apiOutput = EntityUtils.toString(entity);
                 // Lets see what we got from API
-                // System.out.println(apiOutput);
+                // log.info(apiOutput);
 
                 // Conerting to JSON
                 ObjectMapper mapper = new ObjectMapper();
@@ -1392,21 +1390,21 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     JsonNode rootNode = jsonNode.path("value");
                     if (rootNode != null)
                     {
-                        System.out.println("Customizing Bound!!");
+                        log.info("Customizing Bound!!");
                         catgTree = new ArrayList<TY_CatalogItem>();
 
                         Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
                         while (payloadItr.hasNext())
                         {
-                            // System.out.println("Payload Iterator Bound");
+                            // log.info("Payload Iterator Bound");
                             Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
                             String payloadFieldName = payloadEnt.getKey();
-                            // System.out.println("Payload Field Scanned: " + payloadFieldName);
+                            // log.info("Payload Field Scanned: " + payloadFieldName);
 
                             if (payloadFieldName.equals("value"))
                             {
                                 Iterator<JsonNode> cusItr = payloadEnt.getValue().elements();
-                                // System.out.println("Cases Iterator Bound");
+                                // log.info("Cases Iterator Bound");
                                 while (cusItr.hasNext())
                                 {
 
@@ -1419,10 +1417,10 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                         while (fieldNames.hasNext())
                                         {
                                             String cusFieldName = fieldNames.next();
-                                            // System.out.println("Case Entity Field Scanned: " + caseFieldName);
+                                            // log.info("Case Entity Field Scanned: " + caseFieldName);
                                             if (cusFieldName.equals("id"))
                                             {
-                                                // System.out.println("Case GUID Added : " +
+                                                // log.info("Case GUID Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
                                                 {
@@ -1432,7 +1430,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (cusFieldName.equals("parentId"))
                                             {
-                                                // System.out.println("Case Id Added : " +
+                                                // log.info("Case Id Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
                                                 {
@@ -1442,7 +1440,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (cusFieldName.equals("name"))
                                             {
-                                                // System.out.println("Case Id Added : " +
+                                                // log.info("Case Id Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
                                                 {
@@ -1452,7 +1450,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (cusFieldName.equals("parentName"))
                                             {
-                                                // System.out.println("Case Id Added : " +
+                                                // log.info("Case Id Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(cusEnt.get(cusFieldName).asText()))
                                                 {
@@ -1519,7 +1517,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 try
                 {
                     String requestBody = objMapper.writeValueAsString(notes);
-                    System.out.println(requestBody);
+                    log.info(requestBody);
 
                     StringEntity entity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
                     httpPost.setEntity(entity);
@@ -1551,32 +1549,32 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                             if (rootNode != null)
                             {
 
-                                System.out.println("Notes Bound!!");
+                                log.info("Notes Bound!!");
 
                                 Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
                                 while (payloadItr.hasNext())
                                 {
-                                    System.out.println("Payload Iterator Bound");
+                                    log.info("Payload Iterator Bound");
                                     Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
                                     String payloadFieldName = payloadEnt.getKey();
-                                    System.out.println("Payload Field Scanned:  " + payloadFieldName);
+                                    log.info("Payload Field Scanned:  " + payloadFieldName);
 
                                     if (payloadFieldName.equals("value"))
                                     {
                                         JsonNode notesEnt = payloadEnt.getValue();
-                                        System.out.println("New Notes Entity Bound");
+                                        log.info("New Notes Entity Bound");
                                         if (notesEnt != null)
                                         {
 
-                                            System.out.println("Notes Entity Bound - Reading Notes...");
+                                            log.info("Notes Entity Bound - Reading Notes...");
                                             Iterator<String> fieldNames = notesEnt.fieldNames();
                                             while (fieldNames.hasNext())
                                             {
                                                 String notesFieldName = fieldNames.next();
-                                                System.out.println("Notes Entity Field Scanned:  " + notesFieldName);
+                                                log.info("Notes Entity Field Scanned:  " + notesFieldName);
                                                 if (notesFieldName.equals("id"))
                                                 {
-                                                    System.out.println("Notes GUID Added : "
+                                                    log.info("Notes GUID Added : "
                                                             + notesEnt.get(notesFieldName).asText());
                                                     if (StringUtils.hasText(notesEnt.get(notesFieldName).asText()))
                                                     {
@@ -1652,7 +1650,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         {
                             HttpEntity entityResp = response.getEntity();
                             String apiOutput = EntityUtils.toString(entityResp);
-                            System.out.println(apiOutput);
+                            log.info(apiOutput);
                             throw new RuntimeException(
                                     "Failed with HTTP error code : " + statusCode + " Details: " + apiOutput);
 
@@ -1673,33 +1671,32 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                             if (rootNode != null)
                             {
 
-                                System.out.println("Notes Bound!!");
+                                log.info("Notes Bound!!");
 
                                 Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
                                 while (payloadItr.hasNext())
                                 {
-                                    System.out.println("Payload Iterator Bound");
+                                    log.info("Payload Iterator Bound");
                                     Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
                                     String payloadFieldName = payloadEnt.getKey();
-                                    System.out.println("Payload Field Scanned:  " + payloadFieldName);
+                                    log.info("Payload Field Scanned:  " + payloadFieldName);
 
                                     if (payloadFieldName.equals("value"))
                                     {
                                         JsonNode caseEnt = payloadEnt.getValue();
-                                        System.out.println("New Case Entity Bound");
+                                        log.info("New Case Entity Bound");
                                         if (caseEnt != null)
                                         {
 
-                                            System.out.println("Case Entity Bound - Reading Case...");
+                                            log.info("Case Entity Bound - Reading Case...");
                                             Iterator<String> fieldNames = caseEnt.fieldNames();
                                             while (fieldNames.hasNext())
                                             {
                                                 String caseFieldName = fieldNames.next();
-                                                System.out.println("Case Entity Field Scanned:  " + caseFieldName);
+                                                log.info("Case Entity Field Scanned:  " + caseFieldName);
                                                 if (caseFieldName.equals("displayId"))
                                                 {
-                                                    System.out.println(
-                                                            "Case ID Added : " + caseEnt.get(caseFieldName).asText());
+                                                    log.info("Case ID Added : " + caseEnt.get(caseFieldName).asText());
                                                     if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                     {
                                                         caseId = caseEnt.get(caseFieldName).asText();
@@ -1938,20 +1935,20 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                         JsonNode rootNode = empResp.path("value");
                         if (rootNode != null)
                         {
-                            System.out.println("Employees Bound!!");
+                            log.info("Employees Bound!!");
 
                             Iterator<Map.Entry<String, JsonNode>> payloadItr = empResp.fields();
                             while (payloadItr.hasNext())
                             {
-                                System.out.println("Payload Iterator Bound");
+                                log.info("Payload Iterator Bound");
                                 Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
                                 String payloadFieldName = payloadEnt.getKey();
-                                System.out.println("Payload Field Scanned:  " + payloadFieldName);
+                                log.info("Payload Field Scanned:  " + payloadFieldName);
 
                                 if (payloadFieldName.equals("value"))
                                 {
                                     Iterator<JsonNode> empItr = payloadEnt.getValue().elements();
-                                    System.out.println("Employee Iterator Bound");
+                                    log.info("Employee Iterator Bound");
                                     while (empItr.hasNext())
                                     {
 
@@ -1959,22 +1956,22 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                         if (empEnt != null)
                                         {
                                             String empid = null, empUserId = null;
-                                            System.out.println("Employee Entity Bound - Reading Employee...");
+                                            log.info("Employee Entity Bound - Reading Employee...");
                                             Iterator<String> fieldNames = empEnt.fieldNames();
                                             while (fieldNames.hasNext())
                                             {
                                                 String empFieldName = fieldNames.next();
-                                                System.out.println("Employee Entity Field Scanned:  " + empFieldName);
+                                                log.info("Employee Entity Field Scanned:  " + empFieldName);
                                                 if (empFieldName.equals("id"))
                                                 {
-                                                    System.out.println(
+                                                    log.info(
                                                             "Employee Id Added : " + empEnt.get(empFieldName).asText());
                                                     empid = empEnt.get(empFieldName).asText();
                                                 }
 
                                                 if (empFieldName.equals("employeeDisplayId"))
                                                 {
-                                                    System.out.println("Employee User Id Added : "
+                                                    log.info("Employee User Id Added : "
                                                             + empEnt.get(empFieldName).asText());
                                                     empUserId = empEnt.get(empFieldName).asText();
                                                 }
@@ -2037,21 +2034,21 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     JsonNode rootNode = jsonNode.path("value");
                     if (rootNode != null)
                     {
-                        System.out.println("Cases Bound!!");
+                        log.info("Cases Bound!!");
                         casesESSList = new ArrayList<TY_CaseESS>();
 
                         Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
                         while (payloadItr.hasNext())
                         {
-                            // System.out.println("Payload Iterator Bound");
+                            // log.info("Payload Iterator Bound");
                             Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
                             String payloadFieldName = payloadEnt.getKey();
-                            // System.out.println("Payload Field Scanned: " + payloadFieldName);
+                            // log.info("Payload Field Scanned: " + payloadFieldName);
 
                             if (payloadFieldName.equals("value"))
                             {
                                 Iterator<JsonNode> casesItr = payloadEnt.getValue().elements();
-                                // System.out.println("Cases Iterator Bound");
+                                // log.info("Cases Iterator Bound");
                                 while (casesItr.hasNext())
                                 {
 
@@ -2061,15 +2058,16 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                         String caseid = null, caseguid = null, caseType = null,
                                                 caseTypeDescription = null, subject = null, status = null,
                                                 createdOn = null, accountId = null, contactId = null, origin = null;
-                                        // System.out.println("Cases Entity Bound - Reading Case...");
+
+                                        // log.info("Cases Entity Bound - Reading Case...");
                                         Iterator<String> fieldNames = caseEnt.fieldNames();
                                         while (fieldNames.hasNext())
                                         {
                                             String caseFieldName = fieldNames.next();
-                                            // System.out.println("Case Entity Field Scanned: " + caseFieldName);
+                                            // log.info("Case Entity Field Scanned: " + caseFieldName);
                                             if (caseFieldName.equals("id"))
                                             {
-                                                // System.out.println("Case GUID Added : " +
+                                                // log.info("Case GUID Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -2079,7 +2077,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("displayId"))
                                             {
-                                                // System.out.println("Case Id Added : " +
+                                                // log.info("Case Id Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -2089,7 +2087,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("caseType"))
                                             {
-                                                // System.out.println("Case Type Added : " +
+                                                // log.info("Case Type Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -2099,7 +2097,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("caseTypeDescription"))
                                             {
-                                                // System.out.println("Case Type Description Added : " +
+                                                // log.info("Case Type Description Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -2109,7 +2107,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("subject"))
                                             {
-                                                // System.out.println("Case Subject Added : " +
+                                                // log.info("Case Subject Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -2119,7 +2117,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("origin"))
                                             {
-                                                // System.out.println("Case Subject Added : " +
+                                                // log.info("Case Subject Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -2129,7 +2127,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("statusDescription"))
                                             {
-                                                // System.out.println("Case Status Added : " +
+                                                // log.info("Case Status Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -2139,7 +2137,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("statusDescription"))
                                             {
-                                                // System.out.println("Case Status Added : " +
+                                                // log.info("Case Status Added : " +
                                                 // caseEnt.get(caseFieldName).asText());
                                                 if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                                 {
@@ -2149,12 +2147,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("adminData"))
                                             {
-                                                // System.out.println("Inside Admin Data: " );
+                                                // log.info("Inside Admin Data: " );
 
                                                 JsonNode admEnt = caseEnt.path("adminData");
                                                 if (admEnt != null)
                                                 {
-                                                    // System.out.println("AdminData Node Bound");
+                                                    // log.info("AdminData Node Bound");
 
                                                     Iterator<String> fieldNamesAdm = admEnt.fieldNames();
                                                     while (fieldNamesAdm.hasNext())
@@ -2162,7 +2160,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         String admFieldName = fieldNamesAdm.next();
                                                         if (admFieldName.equals("createdOn"))
                                                         {
-                                                            // System.out.println( "Created On : " +
+                                                            // log.info( "Created On : " +
                                                             // admEnt.get(admFieldName).asText());
                                                             createdOn = admEnt.get(admFieldName).asText();
                                                         }
@@ -2173,12 +2171,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("account"))
                                             {
-                                                // System.out.println("Inside Account: " );
+                                                // log.info("Inside Account: " );
 
                                                 JsonNode accEnt = caseEnt.path("account");
                                                 if (accEnt != null)
                                                 {
-                                                    // System.out.println("Account Node Bound");
+                                                    // log.info("Account Node Bound");
 
                                                     Iterator<String> fieldNamesAcc = accEnt.fieldNames();
                                                     while (fieldNamesAcc.hasNext())
@@ -2186,7 +2184,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         String accFieldName = fieldNamesAcc.next();
                                                         if (accFieldName.equals("id"))
                                                         {
-                                                            // System.out.println(
+                                                            // log.info(
                                                             // "Account ID : " + accEnt.get(accFieldName).asText());
                                                             accountId = accEnt.get(accFieldName).asText();
                                                         }
@@ -2198,12 +2196,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                             if (caseFieldName.equals("individualCustomer")
                                                     && (!StringUtils.hasText(accountId)))
                                             {
-                                                // System.out.println("Inside Account: " );
+                                                // log.info("Inside Account: " );
 
                                                 JsonNode accEnt = caseEnt.path("individualCustomer");
                                                 if (accEnt != null)
                                                 {
-                                                    // System.out.println("Account Node Bound");
+                                                    // log.info("Account Node Bound");
 
                                                     Iterator<String> fieldNamesAcc = accEnt.fieldNames();
                                                     while (fieldNamesAcc.hasNext())
@@ -2211,7 +2209,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         String accFieldName = fieldNamesAcc.next();
                                                         if (accFieldName.equals("id"))
                                                         {
-                                                            // System.out.println(
+                                                            // log.info(
                                                             // "Account ID : " + accEnt.get(accFieldName).asText());
                                                             accountId = accEnt.get(accFieldName).asText();
                                                         }
@@ -2222,12 +2220,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                             if (caseFieldName.equals("reporter"))
                                             {
-                                                // System.out.println("Inside Reporter: " );
+                                                // log.info("Inside Reporter: " );
 
                                                 JsonNode repEnt = caseEnt.path("reporter");
                                                 if (repEnt != null)
                                                 {
-                                                    // System.out.println("Reporter Node Bound");
+                                                    // log.info("Reporter Node Bound");
 
                                                     Iterator<String> fieldNamesRep = repEnt.fieldNames();
                                                     while (fieldNamesRep.hasNext())
@@ -2235,7 +2233,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         String repFieldName = fieldNamesRep.next();
                                                         if (repFieldName.equals("id"))
                                                         {
-                                                            // System.out.println(
+                                                            // log.info(
                                                             // "Reporter ID : " + repEnt.get(repFieldName).asText());
                                                             contactId = repEnt.get(repFieldName).asText();
                                                         }
@@ -2401,7 +2399,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 HttpEntity entity = response.getEntity();
                 String apiOutput = EntityUtils.toString(entity);
                 // Lets see what we got from API
-                // System.out.println(apiOutput);
+                // log.info(apiOutput);
 
                 // Conerting to JSON
                 ObjectMapper mapper = new ObjectMapper();
@@ -2545,7 +2543,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     HttpEntity entity = response.getEntity();
                     String apiOutput = EntityUtils.toString(entity);
                     // Lets see what we got from API
-                    // System.out.println(apiOutput);
+                    // log.info(apiOutput);
 
                     // Get Response Header(s) from API REsponse
                     Header[] headers = response.getAllHeaders();
@@ -2690,12 +2688,12 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                     if (descFieldName.equals("adminData"))
                                     {
-                                        // System.out.println("Inside Reporter: " );
+                                        // log.info("Inside Reporter: " );
 
                                         JsonNode admEnt = descNode.path("adminData");
                                         if (admEnt != null)
                                         {
-                                            // System.out.println("Reporter Node Bound");
+                                            // log.info("Reporter Node Bound");
 
                                             Iterator<String> fieldNamesAdm = admEnt.fieldNames();
                                             while (fieldNamesAdm.hasNext())
@@ -2796,7 +2794,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 HttpEntity entity = response.getEntity();
                 String apiOutput = EntityUtils.toString(entity);
                 // Lets see what we got from API
-                // System.out.println(apiOutput);
+                // log.info(apiOutput);
 
                 // Conerting to JSON
                 ObjectMapper mapper = new ObjectMapper();

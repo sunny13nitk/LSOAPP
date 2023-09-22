@@ -158,6 +158,7 @@ public class APIRestController
                                     String caseid = null, caseguid = null, caseType = null, caseTypeDescription = null,
                                             subject = null, status = null, createdOn = null, accountId = null,
                                             contactId = null, origin = null;
+
                                     System.out.println("Cases Entity Bound - Reading Case...");
                                     Iterator<String> fieldNames = caseEnt.fieldNames();
                                     while (fieldNames.hasNext())
@@ -206,8 +207,7 @@ public class APIRestController
 
                                         if (caseFieldName.equals("origin"))
                                         {
-                                            System.out.println("Origin Added : "
-                                                    + caseEnt.get(caseFieldName).asText());
+                                            System.out.println("Origin Added : " + caseEnt.get(caseFieldName).asText());
                                             if (StringUtils.hasText(caseEnt.get(caseFieldName).asText()))
                                             {
                                                 origin = caseEnt.get(caseFieldName).asText();
@@ -334,14 +334,14 @@ public class APIRestController
 
                                             casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType,
                                                     caseTypeDescription, subject, status, accountId, contactId,
-                                                    createdOn, date, dateFormatted,origin));
+                                                    createdOn, date, dateFormatted, origin));
 
                                         }
                                         else
                                         {
                                             casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType,
                                                     caseTypeDescription, subject, status, accountId, contactId,
-                                                    createdOn, null, null,origin));
+                                                    createdOn, null, null, origin));
                                         }
 
                                     }
