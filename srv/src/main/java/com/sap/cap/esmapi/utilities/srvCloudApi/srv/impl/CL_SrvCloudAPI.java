@@ -2886,6 +2886,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     // alongwith Note(s)
                     if (CollectionUtils.isNotEmpty(caseReply.getNotes()))
                     {
+                        // Remove null Note Type Note(s)
+                        caseReply.getNotes().removeIf(n -> n.getNoteType() == null);
                         caseReply.getNotes()
                                 .removeIf(n -> n.getNoteType().equalsIgnoreCase(GC_Constants.gc_DescNoteType));
                     }

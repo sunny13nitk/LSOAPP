@@ -980,73 +980,71 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                     // If The Channel is SELF_SERVICE, then only seek Notes and Use Other Case
                     // details from Session Var
-                    if (caseESS.getOrigin().equals(GC_Constants.gc_SelfServiceChannel))
+                    // if (caseESS.getOrigin().equals(GC_Constants.gc_SelfServiceChannel))
+                    // {
+                    try
                     {
-                        try
+                        TY_CaseDetails caseDetails = srvCloudApiSrv.getCaseDetails4Case(caseESS.getGuid());
+                        // --- Filter by External Note Type(s) only
+                        if (caseDetails != null)
                         {
-                            TY_CaseDetails caseDetails = srvCloudApiSrv.getCaseDetails4Case(caseESS.getGuid());
-                            // --- Filter by External Note Type(s) only
-                            if (caseDetails != null)
+                            caseEditForm = new TY_CaseEdit_Form();
+                            caseDetails.setCaseType(caseESS.getCaseType());
+                            caseDetails.setCaseId(caseESS.getId());
+                            caseDetails.setStatus(caseESS.getStatusDesc());
+                            caseDetails.setDescription(caseESS.getSubject());
+                            caseDetails.setOrigin(caseESS.getOrigin());
+                            if (CollectionUtils.isNotEmpty(caseDetails.getNotes()))
                             {
-                                caseEditForm = new TY_CaseEdit_Form();
-                                caseDetails.setCaseType(caseESS.getCaseType());
-                                caseDetails.setCaseId(caseESS.getId());
-                                caseDetails.setStatus(caseESS.getStatusDesc());
-                                caseDetails.setDescription(caseESS.getSubject());
-                                caseDetails.setOrigin(caseESS.getOrigin());
-                                if (CollectionUtils.isNotEmpty(caseDetails.getNotes()))
+                                // Get External Note Type(s) for Current Case Type
+                                if (CollectionUtils.isNotEmpty(catgCusSrv.getCustomizations()))
                                 {
-                                    // Get External Note Type(s) for Current Case Type
-                                    if (CollectionUtils.isNotEmpty(catgCusSrv.getCustomizations()))
+                                    // Get Customization for Current Case Type
+                                    Optional<TY_CatgCusItem> cusIO = catgCusSrv.getCustomizations().stream()
+                                            .filter(c -> c.getCaseType().equals(caseDetails.getCaseType())).findFirst();
+                                    if (cusIO.isPresent())
                                     {
-                                        // Get Customization for Current Case Type
-                                        Optional<TY_CatgCusItem> cusIO = catgCusSrv.getCustomizations().stream()
-                                                .filter(c -> c.getCaseType().equals(caseDetails.getCaseType()))
-                                                .findFirst();
-                                        if (cusIO.isPresent())
+                                        // Check if Note Type configured for External Note(s)
+                                        if (StringUtils.hasText(cusIO.get().getAppNoteTypes()))
                                         {
-                                            // Check if Note Type configured for External Note(s)
-                                            if (StringUtils.hasText(cusIO.get().getAppNoteTypes()))
+                                            List<String> appNoteTypes = Arrays
+                                                    .asList(cusIO.get().getAppNoteTypes().split("\\|"));
+                                            if (CollectionUtils.isNotEmpty(appNoteTypes))
                                             {
-                                                List<String> appNoteTypes = Arrays
-                                                        .asList(cusIO.get().getAppNoteTypes().split("\\|"));
-                                                if (CollectionUtils.isNotEmpty(appNoteTypes))
+                                                // Filter by External Note Type(s) only
+                                                List<TY_NotesDetails> notesExternal = caseDetails.getNotes().stream()
+                                                        .filter(n -> appNoteTypes.contains(n.getNoteType()))
+                                                        .collect(Collectors.toList());
+
+                                                if (CollectionUtils.isNotEmpty(notesExternal))
                                                 {
-                                                    // Filter by External Note Type(s) only
-                                                    List<TY_NotesDetails> notesExternal = caseDetails.getNotes()
-                                                            .stream()
-                                                            .filter(n -> appNoteTypes.contains(n.getNoteType()))
-                                                            .collect(Collectors.toList());
 
-                                                    if (CollectionUtils.isNotEmpty(notesExternal))
-                                                    {
-
-                                                        Collections.sort(notesExternal, Comparator
-                                                                .comparing(TY_NotesDetails::getTimestamp).reversed());
-                                                        caseDetails.setNotes(notesExternal);
-                                                    }
-
+                                                    Collections.sort(notesExternal, Comparator
+                                                            .comparing(TY_NotesDetails::getTimestamp).reversed());
+                                                    caseDetails.setNotes(notesExternal);
                                                 }
+
                                             }
                                         }
                                     }
-
                                 }
 
-                                caseEditForm.setCaseDetails(caseDetails);
-
-                                caseEditForm.getCaseDetails().setStatusTransitionCFG(
-                                        statusSrv.getPortalStatusTransition4CaseTypeandCaseStatus(
-                                                caseDetails.getCaseType(), caseDetails.getStatus()));
-
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            handleErrorCaseFetch(caseID, e);
-                        }
 
+                            caseEditForm.setCaseDetails(caseDetails);
+
+                            caseEditForm.getCaseDetails().setStatusTransitionCFG(
+                                    statusSrv.getPortalStatusTransition4CaseTypeandCaseStatus(caseDetails.getCaseType(),
+                                            caseDetails.getStatus()));
+
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        handleErrorCaseFetch(caseID, e);
+                    }
+
+                    // }
 
                     // Else Only Use Case Details from Sess Var and prepare the Case Edit Form Model
                 }
