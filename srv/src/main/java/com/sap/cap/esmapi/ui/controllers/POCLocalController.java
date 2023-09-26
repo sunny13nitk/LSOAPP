@@ -1,7 +1,6 @@
 package com.sap.cap.esmapi.ui.controllers;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -26,7 +25,6 @@ import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
 import com.sap.cap.esmapi.events.event.EV_CaseReplySubmit;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
-import com.sap.cap.esmapi.status.pojos.TY_StatusCfgItem;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
@@ -531,37 +529,6 @@ public class POCLocalController
         }
 
         return "caseFormReplyPOCLocal";
-    }
-
-    // #TEST
-    @GetMapping("/schDetails/{schID}")
-    public String getStatusSchemaDetails(@PathVariable String schID)
-    {
-        if (StringUtils.hasText(schID) && apiSrv != null)
-        {
-
-            try
-            {
-
-                List<TY_StatusCfgItem> cfgs = apiSrv.getStatusCfg4StatusSchema(schID);
-
-                if (CollectionUtils.isNotEmpty(cfgs))
-                {
-                    for (TY_StatusCfgItem cfg : cfgs)
-                    {
-                        log.info(cfg.toString());
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-
-        return "success";
     }
 
 }

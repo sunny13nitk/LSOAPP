@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.ui.controllers;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -22,7 +24,9 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplates;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
+import com.sap.cap.esmapi.events.event.EV_CaseReplySubmit;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
@@ -67,7 +71,9 @@ public class LSOController
     private final String caseListVWRedirect = "redirect:/lso/";
     private final String caseFormErrorRedirect = "redirect:/lso/errForm/";
     private final String caseFormView = "caseFormLSO";
+    private final String caseFormReply = "caseFormReplyLSO";
     private final String lsoCaseListView = "lsoCasesListView";
+    private final String caseFormReplyErrorRedirect = "redirect:/lso/errCaseReply/";
 
     @GetMapping("/")
     public String showCasesList(@AuthenticationPrincipal Token token, Model model)
@@ -429,6 +435,131 @@ public class LSOController
 
         return viewCaseForm;
 
+    }
+
+    @PostMapping(value = "/saveCaseReply", params = "action=saveCaseEdit")
+    public String saveCaseReply(@ModelAttribute("caseEditForm") TY_CaseEdit_Form caseReplyForm, Model model)
+            throws EX_ESMAPI, IOException
+    {
+
+        String viewName = caseListVWRedirect;
+        if (caseReplyForm != null && userSessSrv != null)
+        {
+
+            log.info("Processing of Case Reply Form - UI layer :Begins....");
+
+            // Any Validation Error(s) on the Form or Submission not possible
+            if (!userSessSrv.SubmitCaseReply(caseReplyForm))
+            {
+                // Redirect to Error Processing of Form
+                viewName = caseFormReplyErrorRedirect;
+            }
+            else
+            {
+                // Fire Case Submission Event - To be processed Asyncronously
+                EV_CaseReplySubmit eventCaseReplySubmit = new EV_CaseReplySubmit(this,
+                        userSessSrv.getCurrentReplyForm4Submission());
+                applicationEventPublisher.publishEvent(eventCaseReplySubmit);
+            }
+
+            log.info("Processing of Case Form - UI layer :Ends....");
+        }
+        return viewName;
+    }
+
+    @GetMapping("/errCaseReply/")
+    public String showErrorCaseReplyForm(Model model)
+    {
+        if (userSessSrv != null)
+        {
+
+            if (userSessSrv.getCurrentReplyForm4Submission() != null && StringUtils.hasText(
+                    userSessSrv.getCurrentReplyForm4Submission().getCaseReply().getCaseDetails().getCaseGuid()))
+            {
+
+                // Populate User Details
+                TY_UserESS userDetails = new TY_UserESS();
+                userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                model.addAttribute("userInfo", userDetails);
+
+                model.addAttribute("formErrors", userSessSrv.getFormErrors());
+
+                // Get Case Details
+                TY_CaseEdit_Form caseEditForm = userSessSrv.getCaseDetails4Edit(
+                        userSessSrv.getCurrentReplyForm4Submission().getCaseReply().getCaseDetails().getCaseGuid());
+
+                if (caseEditForm != null)
+                {
+                    // Super Impose Reply from User Form 4m Session
+                    caseEditForm.setReply(userSessSrv.getCurrentReplyForm4Submission().getCaseReply().getReply());
+                    // Not Feasible to have a Validation Error in Form and Attachment Persisted -
+                    // But just to handle theoratically in case there is an Error in Attachment
+                    // Persistence only- Remove the attachment otherwise let it persist
+                    if (CollectionUtils.isNotEmpty(userSessSrv.getMessageStack()))
+                    {
+                        Optional<TY_Message> attErrO = userSessSrv.getMessageStack().stream()
+                                .filter(e -> e.getMsgType().equals(EnumMessageType.ERR_ATTACHMENT)).findFirst();
+                        if (attErrO.isPresent())
+                        {
+                            // Attachment able to presist do not remove it from Current Payload
+                            caseEditForm.setAttachment(null);
+
+                        }
+                    }
+
+                    model.addAttribute("caseEditForm", caseEditForm);
+                }
+
+            }
+            else
+            {
+
+                throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_DET_FETCH", new Object[]
+                { userSessSrv.getCurrentReplyForm4Submission().getCaseReply().getCaseDetails().getCaseGuid() },
+                        Locale.ENGLISH));
+            }
+        }
+        return caseFormReply;
+
+    }
+
+    @GetMapping("/caseDetails/{caseID}")
+    public String getCaseDetails(@PathVariable String caseID, Model model)
+    {
+        if (StringUtils.hasText(caseID))
+        {
+            if (userSessSrv != null)
+            {
+
+                try
+                {
+
+                    // Populate User Details
+                    TY_UserESS userDetails = new TY_UserESS();
+                    userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                    model.addAttribute("userInfo", userDetails);
+
+                    // Get Case Details
+                    TY_CaseEdit_Form caseEditForm = userSessSrv.getCaseDetails4Edit(caseID);
+                    if (caseEditForm != null)
+                    {
+                        model.addAttribute("caseEditForm", caseEditForm);
+                        if (CollectionUtils.isNotEmpty(caseEditForm.getCaseDetails().getNotes()))
+                        {
+                            log.info("# External Notes Bound for Case ID - "
+                                    + caseEditForm.getCaseDetails().getNotes().size());
+
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    return "error";
+                }
+            }
+        }
+
+        return caseFormReply;
     }
 
 }

@@ -22,7 +22,7 @@
          <!--Title Head - Begin -->
          <div class="colspan-5">
             <h2 style="color: #54627B; margin: 10px; margin-left: 20px">
-               <span class="mif-contacts-mail"></span> Employee Self Service(s)
+               <span class="mif-contacts-mail"></span> SAP Learning Self Service(s)
             </h2>
          </div>
 
@@ -129,8 +129,9 @@
 
                      <th data-name="subject" data-cls-column=" text-left">Issue Description</th>
 
-
                      <th data-name="formattedDate" data-format="number" data-cls-column=" text-left">Created On</th>
+
+                     <th data-cls-column=" text-left">Details</th>
 
 
                   </tr>
@@ -144,6 +145,15 @@
                      <td><span class=" tally yellow" th:text="${case.statusDesc}"></span></td>
                      <td style="text-align: left" th:text="${case.subject}"></td>
                      <td style="text-align: left" th:text="${case.formattedDate}"></td>
+
+                     <td>
+
+                        <a href="#" class="button primary mini rounded outline"
+                           th:href="@{'/lso/caseDetails/' + ${case.guid}}" role="button" data-role="hint"
+                           data-hint-position="right" data-cls-hint="fg-black" data-hint-text="Reply for Case">
+                           <span class="mif-reply icon" style="margin-left: 0px"></span> <span
+                              style="margin-left: 3px">Reply</span></a>
+                     </td>
 
                </tbody>
             </table>
@@ -188,7 +198,7 @@
       {
          var toast = Metro.toast.create("Rate Limit Exceeded!! ", function ()
          {
-            alert('Rate Limit Exceeded!! You can only submit a maximum of 2 incidents in a 2 min slot for an Active Session.')
+            alert('Rate Limit Exceeded!! You can only submit a maximum of 2 incidents in a 5 min slot for an Active Session.')
          });
 
       }
