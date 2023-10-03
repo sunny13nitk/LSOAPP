@@ -31,6 +31,7 @@ import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_SessAttachmentsService;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpLOBUIModelSrv;
@@ -62,6 +63,9 @@ public class POCLocalController
 
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Autowired
+    private IF_SessAttachmentsService attSrv;
 
     // #TEST - Begin
     @Autowired
@@ -155,6 +159,12 @@ public class POCLocalController
                     userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
                     model.addAttribute("userInfo", userDetails);
 
+                    // Initialize Attachments Session Service
+                    if (attSrv != null)
+                    {
+                        attSrv.initialize();
+                    }
+
                     // Populate Case Form Details
                     TY_Case_Form caseForm = new TY_Case_Form();
                     if (userSessSrv.getUserDetails4mSession().isEmployee())
@@ -205,6 +215,41 @@ public class POCLocalController
 
     @PostMapping(value = "/saveCase", params = "action=saveCase")
     public String saveCase(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
+    {
+
+        String viewName = caseListVWRedirect;
+        if (caseForm != null && userSessSrv != null)
+        {
+            if (userSessSrv.getUserDetails4mSession().isEmployee())
+            {
+                caseForm.setEmployee(true);
+            }
+
+            log.info("Processing of Case Form - UI layer :Begins....");
+
+            // Any Validation Error(s) on the Form or Submission not possible
+            if (!userSessSrv.SubmitCaseForm(caseForm))
+            {
+                // Redirect to Error Processing of Form
+                viewName = caseFormErrorRedirect;
+            }
+            else
+            {
+                // Fire Case Submission Event - To be processed Asyncronously
+                EV_CaseFormSubmit eventCaseSubmit = new EV_CaseFormSubmit(this,
+                        userSessSrv.getCurrentForm4Submission());
+                applicationEventPublisher.publishEvent(eventCaseSubmit);
+            }
+
+            log.info("Processing of Case Form - UI layer :Ends....");
+        }
+
+        return viewName;
+
+    }
+
+    @PostMapping(value = "/saveCase", params = "action=upload")
+    public String uploadAttachments(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
     {
 
         String viewName = caseListVWRedirect;
@@ -517,6 +562,12 @@ public class POCLocalController
                             log.info("# External Notes Bound for Case ID - "
                                     + caseEditForm.getCaseDetails().getNotes().size());
 
+                        }
+
+                        // Initialize Attachments Session Service
+                        if (attSrv != null)
+                        {
+                            attSrv.initialize();
                         }
                     }
                 }
