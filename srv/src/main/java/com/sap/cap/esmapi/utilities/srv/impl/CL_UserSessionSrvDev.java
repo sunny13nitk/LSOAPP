@@ -21,6 +21,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -68,6 +69,7 @@ import lombok.extern.slf4j.Slf4j;
 @SessionScope
 @Slf4j
 @Profile(GC_Constants.gc_DEVProfile)
+@Primary
 public class CL_UserSessionSrvDev implements IF_UserSessionSrv
 {
 

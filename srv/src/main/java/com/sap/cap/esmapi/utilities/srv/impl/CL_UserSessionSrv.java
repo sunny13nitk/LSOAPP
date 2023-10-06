@@ -66,7 +66,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @SessionScope
 @Slf4j
-@Profile(GC_Constants.gc_PRODProfile)
+
 public class CL_UserSessionSrv implements IF_UserSessionSrv
 {
 
