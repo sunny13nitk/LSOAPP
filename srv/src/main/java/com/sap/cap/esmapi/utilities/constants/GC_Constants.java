@@ -30,4 +30,10 @@ public class GC_Constants
 
     public static final String gc_DescNoteType = "S000";
 
+    public static final String gc_DEVProfile = "dev";
+
+    public static final String gc_TESTProfile = "test";
+
+    public static final String gc_PRODProfile = "prod";
+
 }

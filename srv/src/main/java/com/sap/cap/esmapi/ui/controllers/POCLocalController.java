@@ -253,7 +253,7 @@ public class POCLocalController
     {
 
         String viewName = caseListVWRedirect;
-        if (caseForm != null && userSessSrv != null)
+        if (caseForm != null && attSrv != null)
         {
             if (userSessSrv.getUserDetails4mSession().isEmployee())
             {
@@ -261,20 +261,26 @@ public class POCLocalController
             }
 
             log.info("Processing of Case Form - UI layer :Begins....");
+            if (caseForm.getAttachment() != null)
+            {
+                if (!attSrv.addAttachment(caseForm.getAttachment()))
+                {
+                    // Attachment to Local Storage Persistence Error
+                    // Get Errors from attachments Service and add to Form Error(s) via User Session
+                    // service
+                    for (String msg : attSrv.getSessionMessages())
+                    {
+                        userSessSrv.addFormErrors(msg);
+                    }
 
-            // Any Validation Error(s) on the Form or Submission not possible
-            if (!userSessSrv.SubmitCaseForm(caseForm))
-            {
-                // Redirect to Error Processing of Form
-                viewName = caseFormErrorRedirect;
+                    // Clear Attachment Service Seeion Messages for subsequent roundtip
+                    attSrv.clearSessionMessages();
+
+                }
+
             }
-            else
-            {
-                // Fire Case Submission Event - To be processed Asyncronously
-                EV_CaseFormSubmit eventCaseSubmit = new EV_CaseFormSubmit(this,
-                        userSessSrv.getCurrentForm4Submission());
-                applicationEventPublisher.publishEvent(eventCaseSubmit);
-            }
+
+            // Populate the REst of the Form
 
             log.info("Processing of Case Form - UI layer :Ends....");
         }

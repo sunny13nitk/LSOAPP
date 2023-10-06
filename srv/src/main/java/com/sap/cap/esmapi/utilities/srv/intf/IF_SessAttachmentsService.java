@@ -19,6 +19,8 @@ public interface IF_SessAttachmentsService
 
     public boolean checkIFExists(String fileName);
 
+    public void clearSessionMessages();
+
     // Get All Session messages
     public List<String> getSessionMessages();
 }

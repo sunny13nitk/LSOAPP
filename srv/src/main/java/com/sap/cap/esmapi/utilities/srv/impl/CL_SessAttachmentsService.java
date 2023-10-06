@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.pojos.TY_SessAttContainer;
 import com.sap.cap.esmapi.utilities.pojos.TY_SessionAttachment;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_AttachmentValdationSrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_SessAttachmentsService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,8 @@ public class CL_SessAttachmentsService implements IF_SessAttachmentsService
 
     private final MessageSource msgSrc; // Autowired - Cons. Injection
 
+    private final IF_AttachmentValdationSrv attVldSrv; // Autowired - Cons. Injection
+
     private TY_SessAttContainer SAC; // Session Attachments Container
 
     @Override
@@ -43,48 +46,72 @@ public class CL_SessAttachmentsService implements IF_SessAttachmentsService
     public boolean addAttachment(MultipartFile file) throws EX_ESMAPI
     {
         boolean uploaded = false;
-        if (file != null)
+        if (file != null && attVldSrv != null)
         {
-            if (StringUtils.hasText(file.getOriginalFilename()))
+            // Validate the Attachment
+            boolean isFileNameValid = attVldSrv.isValidAttachmentByName(file);
+            if (!isFileNameValid)
             {
-                try
+                // Invalid Populate Error(s)
+
+                String filename = file.getOriginalFilename();
+                String[] fNameSplits = filename.split("\\.");
+                String extnType = null;
+                if (fNameSplits != null)
                 {
-                    if (file.getBytes() != null)
+                    if (fNameSplits.length >= 1)
                     {
-                        // check for Duplicate Attachment - Already Exists
-                        if (!checkIFExists(file.getOriginalFilename()))
+                        extnType = fNameSplits[fNameSplits.length - 1];
+                    }
+
+                }
+                handleInvalidAttachment(filename, extnType);
+            }
+
+            else // Attachment Valid - Check for Duplicate
+            {
+                if (StringUtils.hasText(file.getOriginalFilename()))
+                {
+                    try
+                    {
+                        if (file.getBytes() != null)
                         {
-                            // Add to Session
-                            SAC.getAttachments()
-                                    .add(new TY_SessionAttachment(file.getOriginalFilename(), file.getBytes()));
-                            uploaded = true;
-                        }
-                        else
-                        {
-                            // DUPLICATE_ATTACHMENT= Attachment with Filename - {0} already exists. Not able
-                            // to upload.
-                            if (msgSrc != null)
+                            // check for Duplicate Attachment - Already Exists
+                            if (!checkIFExists(file.getOriginalFilename()))
                             {
-                                String msg = msgSrc.getMessage("DUPLICATE_ATTACHMENT", new Object[]
-                                { file.getOriginalFilename() }, Locale.ENGLISH);
-                                log.error(msg); // System Log
-                                SAC.getMessages().add(msg);
+                                // Add to Session
+                                SAC.getAttachments()
+                                        .add(new TY_SessionAttachment(file.getOriginalFilename(), file.getBytes()));
+                                uploaded = true;
+                            }
+                            else
+                            {
+                                // DUPLICATE_ATTACHMENT= Attachment with Filename - {0} already exists. Not able
+                                // to upload.
+                                if (msgSrc != null)
+                                {
+                                    String msg = msgSrc.getMessage("DUPLICATE_ATTACHMENT", new Object[]
+                                    { file.getOriginalFilename() }, Locale.ENGLISH);
+                                    log.error(msg); // System Log
+                                    SAC.getMessages().add(msg);
+                                }
                             }
                         }
                     }
-                }
-                catch (IOException e)
-                {
-                    // ERR_ATT_BYTES= Error Accessing Binary Data from attachment - {0}, Details -
-                    // {1}. Not able to upload.
-                    if (msgSrc != null)
+                    catch (IOException e)
                     {
-                        String msg = msgSrc.getMessage("ERR_ATT_BYTES", new Object[]
-                        { file.getOriginalFilename(), e.getMessage() }, Locale.ENGLISH);
-                        log.error(msg); // System Log
-                        SAC.getMessages().add(msg);
+                        // ERR_ATT_BYTES= Error Accessing Binary Data from attachment - {0}, Details -
+                        // {1}. Not able to upload.
+                        if (msgSrc != null)
+                        {
+                            String msg = msgSrc.getMessage("ERR_ATT_BYTES", new Object[]
+                            { file.getOriginalFilename(), e.getMessage() }, Locale.ENGLISH);
+                            log.error(msg); // System Log
+                            SAC.getMessages().add(msg);
+                        }
                     }
                 }
+
             }
         }
 
@@ -141,4 +168,23 @@ public class CL_SessAttachmentsService implements IF_SessAttachmentsService
         return attachmentExists;
     }
 
+    @Override
+    public void clearSessionMessages()
+    {
+        if (CollectionUtils.isNotEmpty(getSessionMessages()))
+        {
+            SAC.getMessages().clear();
+        }
+    }
+
+    private void handleInvalidAttachment(String filename, String extnType)
+    {
+        String msg;
+        msg = msgSrc.getMessage("ERR_INVALID_ATT_TYPE", new Object[]
+        { extnType, filename }, Locale.ENGLISH);
+
+        log.error(msg);
+        SAC.getMessages().add(msg);
+
+    }
 }
