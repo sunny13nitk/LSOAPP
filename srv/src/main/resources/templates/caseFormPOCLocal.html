@@ -59,8 +59,9 @@
          <div class="col-xs-15">
             <div th:if="${formErrors != null}">
                <!-- Check for Form error -->
-               <div th:if="${formErrors.size() > 0}" data-role="panel" data-title-caption="Case Form Validation Error(s)" data-collapsed="true"
-                  data-collapsible="true" data-cls-panel="shadow-3" data-cls-title="bg-lightRed fg-white"
+               <div th:if="${formErrors.size() > 0}" data-role="panel"
+                  data-title-caption="Case Form Validation Error(s)" data-collapsed="true" data-collapsible="true"
+                  data-cls-panel="shadow-3" data-cls-title="bg-lightRed fg-white"
                   data-cls-content="bg-lightRed fg-white">
 
                   <div class="cell-11">
@@ -188,8 +189,29 @@
                   </div>
 
                   <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px">
-                     <label>Attachment</label>
-                     <input type="file" data-role="file" name="attachment" th:field="*{attachment}" data-mode="drop">
+                     <label>Attachment(s)</label>
+
+                     <div class="row">
+
+                        <div class="cell-10 flex-align-self-start">
+                           <input type="file" data-role="file" name="attachment" th:field="*{attachment}"
+                              data-mode="drop">
+
+                           <small class="text-muted">Upload the File after selection. </small>
+                        </div>
+
+                        <div class="cell-1 flex-align-self-end">
+                           <button class="button rounded primary outline" name="action" value="upload"
+                              style="margin-top: 70px">
+                              <span class="mif-file-upload" style="margin-left: 0px"> </span> <span
+                                 style="margin-left: 3px">Upload</span>
+                           </button>
+
+
+                        </div>
+
+                     </div>
+
 
                   </div>
 

@@ -21,6 +21,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -53,6 +54,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserSessionInfo;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_AttachmentValdationSrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
@@ -66,8 +68,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @SessionScope
 @Slf4j
-
-public class CL_UserSessionSrv implements IF_UserSessionSrv
+@Profile(GC_Constants.gc_DEVProfile)
+@Primary
+public class CL_UserSessionSrvDev implements IF_UserSessionSrv
 {
 
     @Autowired
@@ -102,6 +105,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
     @Autowired
     private IF_StatusSrv statusSrv;
+
+    @Autowired
+    private IF_AttachmentValdationSrv attValdSrv;
 
     // Properties
 
@@ -696,44 +702,26 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         if (rlConfig != null
                                 && userSessInfo.getCurrentForm4Submission().getCaseForm().getAttachment() != null)
                         {
-                            if (CollectionUtils.isEmpty(userSessInfo.getAllowedAttachmentTypes()))
+                            if (attValdSrv != null)
                             {
-                                // Populate Attachment Types allowed in Session
-                                userSessInfo.setAllowedAttachmentTypes(
-                                        Arrays.asList(rlConfig.getAllowedAttachments().split("\\|")));
-
-                            }
-                            if (StringUtils
-                                    .hasText(userSessInfo.getCurrentForm4Submission().getCaseForm().getAttachment()
-                                            .getOriginalFilename())
-                                    && CollectionUtils.isNotEmpty(userSessInfo.getAllowedAttachmentTypes()))
-                            {
-                                // Get the Extension Type for Attachment
-                                String filename = userSessInfo.getCurrentForm4Submission().getCaseForm().getAttachment()
-                                        .getOriginalFilename();
-                                String[] fNameSplits = filename.split("\\.");
-
-                                if (fNameSplits != null)
+                                isValid = attValdSrv.isValidAttachmentByName(
+                                        userSessInfo.getCurrentForm4Submission().getCaseForm().getAttachment());
+                                if (!isValid)
                                 {
-                                    String extensionAttachment = null;
-                                    if (fNameSplits.length >= 1)
+                                    String filename = userSessInfo.getCurrentForm4Submission().getCaseForm()
+                                            .getAttachment().getOriginalFilename();
+                                    String[] fNameSplits = filename.split("\\.");
+                                    String extnType = null;
+                                    if (fNameSplits != null)
                                     {
-                                        extensionAttachment = fNameSplits[fNameSplits.length - 1];
-                                    }
-                                    if (StringUtils.hasText(extensionAttachment))
-                                    {
-                                        String extnType = extensionAttachment;
-                                        Optional<String> extnfoundO = userSessInfo.getAllowedAttachmentTypes().stream()
-                                                .filter(a -> a.equalsIgnoreCase(extnType)).findFirst();
-                                        if (!extnfoundO.isPresent())
+                                        if (fNameSplits.length >= 1)
                                         {
-                                            // Invalid Attachment TYpe Error
-                                            handleInvalidAttachment(filename, extnType);
-                                            isValid = false;
+                                            extnType = fNameSplits[fNameSplits.length - 1];
                                         }
-                                    }
-                                }
 
+                                    }
+                                    handleInvalidAttachment(filename, extnType);
+                                }
                             }
                         }
                     }
