@@ -131,7 +131,7 @@
 
                      <th data-name="formattedDate" data-format="number" data-cls-column=" text-left">Created On</th>
 
-                     <!-- <th data-cls-column=" text-left">Details</th> -->
+                     <th data-cls-column=" text-left">Details</th>
 
 
                   </tr>
@@ -146,14 +146,14 @@
                      <td style="text-align: left" th:text="${case.subject}"></td>
                      <td style="text-align: left" th:text="${case.formattedDate}"></td>
 
-                     <!-- <td>
+                     <td>
 
                         <a href="#" class="button primary mini rounded outline"
                            th:href="@{'/lso/caseDetails/' + ${case.guid}}" role="button" data-role="hint"
                            data-hint-position="right" data-cls-hint="fg-black" data-hint-text="Reply for Case">
                            <span class="mif-reply icon" style="margin-left: 0px"></span> <span
                               style="margin-left: 3px">Reply</span></a>
-                     </td> -->
+                     </td>
 
                </tbody>
             </table>
