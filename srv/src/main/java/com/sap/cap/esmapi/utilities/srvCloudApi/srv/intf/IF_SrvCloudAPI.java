@@ -63,6 +63,8 @@ public interface IF_SrvCloudAPI
 
         public boolean persistAttachment(String url, MultipartFile file) throws EX_ESMAPI, IOException;
 
+        public boolean persistAttachment(String url, String fileName, byte[] blob) throws EX_ESMAPI, IOException;
+
         public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType)
                         throws EX_ESMAPI, IOException;
 

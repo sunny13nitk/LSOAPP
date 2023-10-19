@@ -1918,6 +1918,46 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
+    public boolean persistAttachment(String url, String fileName, byte[] blob) throws EX_ESMAPI, IOException
+    {
+        boolean isPersisted = false;
+        if (StringUtils.hasText(url))
+        {
+            HttpClient httpclient = HttpClients.createDefault();
+            HttpPut httpPut = new HttpPut(url);
+            if (httpPut != null)
+            {
+                ByteArrayEntity requestEntity = new ByteArrayEntity(blob);
+                if (requestEntity != null)
+                {
+                    httpPut.setEntity(requestEntity);
+
+                    // Fire the Url
+                    HttpResponse response = httpclient.execute(httpPut);
+                    // verify the valid error code first
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    if (statusCode == HttpStatus.SC_OK)
+                    {
+                        isPersisted = true;
+                    }
+                    else
+                    {
+                        HttpEntity entityResp = response.getEntity();
+                        String apiOutput = EntityUtils.toString(entityResp);
+                        log.error(apiOutput);
+                        throw new EX_ESMAPI("Error peristing Attachment for filename : " + fileName + "HTTPSTATUS Code"
+                                + statusCode + "Details :" + apiOutput);
+                    }
+
+                }
+            }
+
+        }
+
+        return isPersisted;
+    }
+
+    @Override
     public String getEmployeeIdByUserId(String userId) throws EX_ESMAPI
     {
 

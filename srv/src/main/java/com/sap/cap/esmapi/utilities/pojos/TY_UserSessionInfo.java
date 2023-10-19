@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sap.cap.esmapi.ui.pojos.TY_CaseEditFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
+import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,4 +27,6 @@ public class TY_UserSessionInfo
     private List<String> allowedAttachmentTypes;
     private List<String> submissionIDs = new ArrayList<String>();
     private TY_CaseEditFormAsync currentCaseReply; // Case Reply in Session
+    private TY_Case_Form caseFormB4Subm; // Temporary placeholder for CaseForm : toggle b/w POST/GET
+
 }

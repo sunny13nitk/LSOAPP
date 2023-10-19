@@ -1,6 +1,8 @@
 package com.sap.cap.esmapi.ui.controllers;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -252,37 +254,65 @@ public class POCLocalController
     public String uploadAttachments(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
     {
 
-        String viewName = caseListVWRedirect;
-        if (caseForm != null && attSrv != null)
-        {
-            if (userSessSrv.getUserDetails4mSession().isEmployee())
-            {
-                caseForm.setEmployee(true);
-            }
+        String viewName = caseFormView;
+        List<String> attMsgs = Collections.emptyList();
 
-            log.info("Processing of Case Form - UI layer :Begins....");
+        if (caseForm != null && attSrv != null && userSessSrv != null)
+        {
+
+            log.info("Processing of Case Attachment Upload Form - UI layer :Begins....");
             if (caseForm.getAttachment() != null)
             {
-                if (!attSrv.addAttachment(caseForm.getAttachment()))
+                if (StringUtils.hasText(caseForm.getAttachment().getOriginalFilename()))
                 {
-                    // Attachment to Local Storage Persistence Error
-                    // Get Errors from attachments Service and add to Form Error(s) via User Session
-                    // service
-                    for (String msg : attSrv.getSessionMessages())
-                    {
-                        userSessSrv.addFormErrors(msg);
-                    }
-
-                    // Clear Attachment Service Seeion Messages for subsequent roundtip
+                    // Clear Attachment Service Session Messages for subsequent roundtip
                     attSrv.clearSessionMessages();
+                    if (!attSrv.addAttachment(caseForm.getAttachment()))
+                    {
+                        // Attachment to Local Storage Persistence Error
+                        attMsgs = attSrv.getSessionMessages();
+
+                    }
 
                 }
 
             }
 
-            // Populate the REst of the Form
+            // Clear form for New Attachment as Current Attachment already in Container
+            caseForm.setAttachment(null);
 
-            log.info("Processing of Case Form - UI layer :Ends....");
+            Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+                    .filter(g -> g.getCaseTypeEnum().toString().equals(EnumCaseTypes.Learning.toString())).findFirst();
+            if (cusItemO.isPresent() && catgTreeSrv != null)
+            {
+
+                model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
+
+                // Populate User Details
+                TY_UserESS userDetails = new TY_UserESS();
+                userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                model.addAttribute("userInfo", userDetails);
+
+                if (userSessSrv.getUserDetails4mSession().isEmployee())
+                {
+                    caseForm.setEmployee(true);
+                }
+
+                model.addAttribute("caseForm", caseForm);
+                // also Place the form in Session
+                userSessSrv.setCaseFormB4Submission(caseForm);
+
+                model.addAttribute("formErrors", attMsgs);
+
+                // also Upload the Catg. Tree as per Case Type
+                model.addAttribute("catgsList",
+                        catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
+
+                model.addAttribute("attachments", attSrv.getAttachmentNames());
+
+            }
+
+            log.info("Processing of Case Attachment Upload Form - UI layer :Ends....");
         }
 
         return viewName;
@@ -454,6 +484,59 @@ public class POCLocalController
 
         return viewCaseForm;
 
+    }
+
+    @GetMapping("/removeAttachment/{fileName}")
+    public String removeAttachmentCaseCreate(@PathVariable String fileName, Model model)
+    {
+        if (StringUtils.hasText(fileName) && attSrv != null && userSessSrv != null)
+        {
+            if (attSrv.checkIFExists(fileName))
+            {
+                attSrv.removeAttachmentByName(fileName);
+            }
+
+            // Populate the view
+
+            Optional<TY_CatgCusItem> cusItemO = catgCusSrv.getCustomizations().stream()
+                    .filter(g -> g.getCaseTypeEnum().toString().equals(EnumCaseTypes.Learning.toString())).findFirst();
+            if (cusItemO.isPresent() && catgTreeSrv != null)
+            {
+
+                model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
+
+                // Populate User Details
+                TY_UserESS userDetails = new TY_UserESS();
+                userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                model.addAttribute("userInfo", userDetails);
+
+                // Get Case from Session Service
+
+                TY_Case_Form caseForm = userSessSrv.getCaseFormB4Submission();
+
+                if (caseForm != null)
+                {
+
+                    if (userSessSrv.getUserDetails4mSession().isEmployee())
+                    {
+                        caseForm.setEmployee(true);
+                    }
+
+                    // Clear form for New Attachment as Current Attachment already in Container
+                    caseForm.setAttachment(null);
+
+                    model.addAttribute("caseForm", caseForm);
+
+                    // also Upload the Catg. Tree as per Case Type
+                    model.addAttribute("catgsList",
+                            catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
+
+                    model.addAttribute("attachments", attSrv.getAttachmentNames());
+                }
+
+            }
+        }
+        return caseFormView;
     }
 
     @PostMapping(value = "/saveCaseReply", params = "action=saveCaseEdit")

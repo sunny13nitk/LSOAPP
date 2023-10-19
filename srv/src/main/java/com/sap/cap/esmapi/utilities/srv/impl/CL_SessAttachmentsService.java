@@ -2,9 +2,12 @@ package com.sap.cap.esmapi.utilities.srv.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.MessageSource;
@@ -175,6 +178,34 @@ public class CL_SessAttachmentsService implements IF_SessAttachmentsService
         {
             SAC.getMessages().clear();
         }
+    }
+
+    @Override
+    public List<TY_SessionAttachment> getAttachments()
+    {
+        List<TY_SessionAttachment> attachments = null;
+        if (this.SAC != null)
+        {
+            if (CollectionUtils.isNotEmpty(this.SAC.getAttachments()))
+            {
+                attachments = this.SAC.getAttachments();
+            }
+        }
+        return attachments;
+    }
+
+    @Override
+    public List<String> getAttachmentNames()
+    {
+        List<String> fileNames = Collections.emptyList();
+
+        if (SAC != null)
+        {
+            fileNames = SAC.getAttachments().stream().map(e -> e.getName()).collect(Collectors.toList());
+        }
+
+        return fileNames;
+
     }
 
     private void handleInvalidAttachment(String filename, String extnType)

@@ -189,15 +189,15 @@
                   </div>
 
                   <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px">
-                     <label>Attachment(s)</label>
+                     <label>Attachment(s) - Choose the File and Upload to Attach to the Case</label>
 
-                     <div class="row">
+                     <div class="row" style="margin-top: 10px;">
 
                         <div class="cell-10 flex-align-self-start">
                            <input type="file" data-role="file" name="attachment" th:field="*{attachment}"
                               data-mode="drop">
 
-                           <small class="text-muted">Upload the File after selection. </small>
+                           <small class="text-muted">Max file size allowed : 20MB </small>
                         </div>
 
                         <div class="cell-1 flex-align-self-end">
@@ -209,7 +209,33 @@
 
 
                         </div>
+                     </div>
 
+                     <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px"
+                        th:if="${attachments != null}">
+
+                        <table class="table  table-border compact striped">
+                           <thead>
+                              <tr>
+                                 <th style="text-align: center;">File(s)</th>
+                                 <th data-cls-column=" text-left">Action(s)</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <tr th:each="file : ${attachments}">
+
+                                 <td style="text-align: left" th:text="${file}"></td>
+                                 <td>
+                                    <a href="#" class="button alert mini rounded outline"
+                                       th:href="@{'/poclocal/removeAttachment/' + ${file}}" role="button"
+                                       data-role="hint" data-hint-position="right" data-cls-hint="fg-black"
+                                       data-hint-text="Remove Attachment">
+                                       <span class="mif-bin icon" style="margin-left: 0px"></span> <span
+                                          style="margin-left: 3px">Delete</span></a>
+                                 </td>
+                              </tr>
+                           </tbody>
+                        </table>
                      </div>
 
 

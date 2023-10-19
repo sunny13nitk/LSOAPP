@@ -1476,4 +1476,18 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         throw new EX_ESMAPI(msg);
     }
 
+    @Override
+    public void setCaseFormB4Submission(TY_Case_Form caseForm)
+    {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setCaseFormB4Submission'");
+    }
+
+    @Override
+    public TY_Case_Form getCaseFormB4Submission()
+    {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getCaseFormB4Submission'");
+    }
+
 }

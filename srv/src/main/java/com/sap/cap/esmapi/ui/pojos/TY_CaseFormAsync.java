@@ -1,6 +1,8 @@
 package com.sap.cap.esmapi.ui.pojos;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
 
@@ -19,6 +21,7 @@ public class TY_CaseFormAsync
     private Timestamp timestamp;
     private boolean valid; // To be set post Payload Validation
     private String[] catTreeSelCatg;
-    private TY_AttachmentResponse attR;
+    private TY_AttachmentResponse attR; // #Delete
+    private List<TY_AttachmentResponse> attRespList = new ArrayList<TY_AttachmentResponse>();
 
 }

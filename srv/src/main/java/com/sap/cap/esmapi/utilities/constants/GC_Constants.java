@@ -24,6 +24,8 @@ public class GC_Constants
 
     public static final String gc_SelfServiceChannel = "SELF_SERVICE";
 
+    public static final String gc_NoteTypeDescription = "S001";
+
     public static final String gc_ETag = "ETag";
 
     public static final String gc_IFMatch = "If-Match";

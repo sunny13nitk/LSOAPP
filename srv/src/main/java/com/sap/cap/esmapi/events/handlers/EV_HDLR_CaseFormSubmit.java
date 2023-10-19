@@ -142,8 +142,9 @@ public class EV_HDLR_CaseFormSubmit
                             if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getDescription()))
                             {
                                 // Create Note and Get Guid back
-                                String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(
-                                        evCaseFormSubmit.getPayload().getCaseForm().getDescription(), null));
+                                String noteId = srvCloudApiSrv.createNotes(
+                                        new TY_NotesCreate(evCaseFormSubmit.getPayload().getCaseForm().getDescription(),
+                                                GC_Constants.gc_NoteTypeDescription));
                                 if (StringUtils.hasText(noteId))
                                 {
                                     newCaseEntity.setDescription(new TY_Description_CaseCreate(noteId));

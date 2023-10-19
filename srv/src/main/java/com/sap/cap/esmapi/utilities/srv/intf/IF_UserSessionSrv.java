@@ -26,6 +26,12 @@ public interface IF_UserSessionSrv
     // For Test Purpose Only to Test the Controller - #Test
     public TY_UserSessionInfo getSessionInfo4Test();
 
+    // Set Case Form in Session to Toggle b/w GET & POST w/o lossing form Data
+    public void setCaseFormB4Submission(TY_Case_Form caseForm);
+
+    // Get Case Form in Session to Toggle b/w GET & POST w/o lossing form Dat
+    public TY_Case_Form getCaseFormB4Submission();
+
     public List<TY_CaseESS> getCases4User4mSession();
 
     /*
