@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
@@ -76,8 +77,6 @@ public class EV_HDLR_CaseFormSubmit
                     if (StringUtils.hasText(evCaseFormSubmit.getPayload().getSubmGuid()) && cusItemO.isPresent())
                     {
                         TY_Case_SrvCloud newCaseEntity = new TY_Case_SrvCloud();
-
-                        TY_AttachmentResponse attR = null;
 
                         // If An Employee has not logged in
                         if (!evCaseFormSubmit.getPayload().getCaseForm().isEmployee())
@@ -152,29 +151,53 @@ public class EV_HDLR_CaseFormSubmit
                             }
 
                             // Check if Attachment needs to be Created
-                            if (evCaseFormSubmit.getPayload().getCaseForm().getAttachment() != null)
+                            if (CollectionUtils.isNotEmpty(evCaseFormSubmit.getPayload().getAttRespList()))
                             {
-
-                                attR = evCaseFormSubmit.getPayload().getAttR();
-                                if (attR != null)
+                                // Prepare POJOdetails for TY_Case_SrvCloud newCaseEntity
+                                List<TY_Attachment_CaseCreate> caseAttachmentsNew = new ArrayList<TY_Attachment_CaseCreate>();
+                                for (TY_AttachmentResponse attR : evCaseFormSubmit.getPayload().getAttRespList())
                                 {
+
                                     if (StringUtils.hasText(attR.getId()) && StringUtils.hasText(attR.getUploadUrl()))
                                     {
                                         log.info("Attachment with id : " + attR.getId()
                                                 + " already Persisted in Document Container..");
 
-                                        // Prepare POJOdetails for TY_Case_SrvCloud newCaseEntity
-                                        List<TY_Attachment_CaseCreate> caseAttachmentsNew = new ArrayList<TY_Attachment_CaseCreate>();
                                         TY_Attachment_CaseCreate caseAttachment = new TY_Attachment_CaseCreate(
                                                 attR.getId());
                                         caseAttachmentsNew.add(caseAttachment);
-                                        newCaseEntity.setAttachments(caseAttachmentsNew);
 
                                     }
-
                                 }
+                                newCaseEntity.setAttachments(caseAttachmentsNew);
 
                             }
+
+                            // if (evCaseFormSubmit.getPayload().getCaseForm().getAttachment() != null)
+                            // {
+
+                            // attR = evCaseFormSubmit.getPayload().getAttR();
+                            // if (attR != null)
+                            // {
+                            // if (StringUtils.hasText(attR.getId()) &&
+                            // StringUtils.hasText(attR.getUploadUrl()))
+                            // {
+                            // log.info("Attachment with id : " + attR.getId()
+                            // + " already Persisted in Document Container..");
+
+                            // // Prepare POJOdetails for TY_Case_SrvCloud newCaseEntity
+                            // List<TY_Attachment_CaseCreate> caseAttachmentsNew = new
+                            // ArrayList<TY_Attachment_CaseCreate>();
+                            // TY_Attachment_CaseCreate caseAttachment = new TY_Attachment_CaseCreate(
+                            // attR.getId());
+                            // caseAttachmentsNew.add(caseAttachment);
+                            // newCaseEntity.setAttachments(caseAttachmentsNew);
+
+                            // }
+
+                            // }
+
+                            // }
 
                             // For Extensions
                             if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getCountry())

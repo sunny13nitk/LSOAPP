@@ -354,9 +354,9 @@ public class CL_UserSessionSrvDev implements IF_UserSessionSrv
                             // Attachments Bound
                             if (CollectionUtils.isNotEmpty(attSrv.getAttachments()))
                             {
+                                int i = 0;
                                 for (TY_SessionAttachment attachment : attSrv.getAttachments())
                                 {
-                                    int i = 0;
                                     // Create Attachment
                                     TY_Attachment newAttachment = new TY_Attachment(
                                             FilenameUtils.getName(attachment.getName()),

@@ -298,6 +298,23 @@ public class POCLocalController
                     caseForm.setEmployee(true);
                 }
 
+                // Scan for Template Load
+                TY_CatgTemplates catgTemplate = catalogTreeSrv.getTemplates4Catg(caseForm.getCatgDesc(),
+                        EnumCaseTypes.Learning);
+                if (catgTemplate != null)
+                {
+
+                    // Set Questionnaire for Category
+                    caseForm.setTemplate(catgTemplate.getQuestionnaire());
+
+                }
+
+                if (vhlpUISrv != null)
+                {
+                    model.addAllAttributes(
+                            vhlpUISrv.getVHelpUIModelMap4LobCatg(EnumCaseTypes.Learning, caseForm.getCatgDesc()));
+                }
+
                 model.addAttribute("caseForm", caseForm);
                 // also Place the form in Session
                 userSessSrv.setCaseFormB4Submission(caseForm);
@@ -397,6 +414,14 @@ public class POCLocalController
                 model.addAttribute("catgsList",
                         catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
 
+                if (attSrv != null)
+                {
+                    if (CollectionUtils.isNotEmpty(attSrv.getAttachmentNames()))
+                    {
+                        model.addAttribute("attachments", attSrv.getAttachmentNames());
+                    }
+                }
+
             }
             else
             {
@@ -470,6 +495,14 @@ public class POCLocalController
 
                     // Case Form Model Set at last
                     model.addAttribute("caseForm", caseForm);
+
+                    if (attSrv != null)
+                    {
+                        if (CollectionUtils.isNotEmpty(attSrv.getAttachmentNames()))
+                        {
+                            model.addAttribute("attachments", attSrv.getAttachmentNames());
+                        }
+                    }
                 }
                 else
                 {
@@ -524,6 +557,23 @@ public class POCLocalController
 
                     // Clear form for New Attachment as Current Attachment already in Container
                     caseForm.setAttachment(null);
+
+                    // Scan for Template Load
+                    TY_CatgTemplates catgTemplate = catalogTreeSrv.getTemplates4Catg(caseForm.getCatgDesc(),
+                            EnumCaseTypes.Learning);
+                    if (catgTemplate != null)
+                    {
+
+                        // Set Questionnaire for Category
+                        caseForm.setTemplate(catgTemplate.getQuestionnaire());
+
+                    }
+
+                    if (vhlpUISrv != null)
+                    {
+                        model.addAllAttributes(
+                                vhlpUISrv.getVHelpUIModelMap4LobCatg(EnumCaseTypes.Learning, caseForm.getCatgDesc()));
+                    }
 
                     model.addAttribute("caseForm", caseForm);
 
