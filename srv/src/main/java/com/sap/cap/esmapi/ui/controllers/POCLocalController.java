@@ -253,8 +253,8 @@ public class POCLocalController
     @PostMapping(value = "/saveCase", params = "action=upload")
     public String uploadAttachments(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
     {
-
         String viewName = caseFormView;
+
         List<String> attMsgs = Collections.emptyList();
 
         if (caseForm != null && attSrv != null && userSessSrv != null)
@@ -708,6 +708,7 @@ public class POCLocalController
                         {
                             attSrv.initialize();
                         }
+
                     }
                 }
                 catch (Exception e)

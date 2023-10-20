@@ -17,6 +17,7 @@ import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_SessAttContainer;
 import com.sap.cap.esmapi.utilities.pojos.TY_SessionAttachment;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_AttachmentValdationSrv;
@@ -49,8 +50,9 @@ public class CL_SessAttachmentsService implements IF_SessAttachmentsService
     public boolean addAttachment(MultipartFile file) throws EX_ESMAPI
     {
         boolean uploaded = false;
-        if (file != null && attVldSrv != null)
+        if (file != null && attVldSrv != null && !file.isEmpty())
         {
+
             // Validate the Attachment
             boolean isFileNameValid = attVldSrv.isValidAttachmentByName(file);
             if (!isFileNameValid)
