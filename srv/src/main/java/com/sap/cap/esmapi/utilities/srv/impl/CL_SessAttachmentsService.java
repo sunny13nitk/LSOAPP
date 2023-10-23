@@ -17,6 +17,7 @@ import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.utilities.pojos.TY_FlagMsg;
 import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_SessAttContainer;
 import com.sap.cap.esmapi.utilities.pojos.TY_SessionAttachment;
@@ -54,23 +55,13 @@ public class CL_SessAttachmentsService implements IF_SessAttachmentsService
         {
 
             // Validate the Attachment
-            boolean isFileNameValid = attVldSrv.isValidAttachmentByName(file);
-            if (!isFileNameValid)
+            TY_FlagMsg flagMsg = attVldSrv.isValidAttachmentByNameAndSize(file);
+
+            if (!flagMsg.isCheck())
             {
-                // Invalid Populate Error(s)
 
-                String filename = file.getOriginalFilename();
-                String[] fNameSplits = filename.split("\\.");
-                String extnType = null;
-                if (fNameSplits != null)
-                {
-                    if (fNameSplits.length >= 1)
-                    {
-                        extnType = fNameSplits[fNameSplits.length - 1];
-                    }
-
-                }
-                handleInvalidAttachment(filename, extnType);
+                log.error(flagMsg.getMsg());
+                this.SAC.getMessages().add(flagMsg.getMsg());
             }
 
             else // Attachment Valid - Check for Duplicate
@@ -210,14 +201,4 @@ public class CL_SessAttachmentsService implements IF_SessAttachmentsService
 
     }
 
-    private void handleInvalidAttachment(String filename, String extnType)
-    {
-        String msg;
-        msg = msgSrc.getMessage("ERR_INVALID_ATT_TYPE", new Object[]
-        { extnType, filename }, Locale.ENGLISH);
-
-        log.error(msg);
-        SAC.getMessages().add(msg);
-
-    }
 }

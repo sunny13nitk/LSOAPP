@@ -197,7 +197,8 @@
                            <input type="file" data-role="file" name="attachment" th:field="*{attachment}"
                               data-mode="drop">
 
-                           <small class="text-muted">Max file size allowed : 20MB </small>
+                           <small class="text-muted">Max file size allowed : <span style="color: #B1365B"
+                                 th:text="${attSize}"></span> ! </small>
                         </div>
 
                         <div class="cell-1 flex-align-self-end">

@@ -32,6 +32,7 @@ import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
+import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_SessAttachmentsService;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
@@ -68,6 +69,9 @@ public class POCLocalController
 
     @Autowired
     private IF_SessAttachmentsService attSrv;
+
+    @Autowired
+    private TY_RLConfig rlConfig;
 
     // #TEST - Begin
     @Autowired
@@ -193,6 +197,9 @@ public class POCLocalController
                     // also Upload the Catg. Tree as per Case Type
                     model.addAttribute("catgsList",
                             catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
+
+                    // Attachment file Size
+                    model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
 
                 }
                 else
@@ -327,6 +334,8 @@ public class POCLocalController
 
                 model.addAttribute("attachments", attSrv.getAttachmentNames());
 
+                // Attachment file Size
+                model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
             }
 
             log.info("Processing of Case Attachment Upload Form - UI layer :Ends....");
@@ -422,6 +431,9 @@ public class POCLocalController
                     }
                 }
 
+                // Attachment file Size
+                model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
+
             }
             else
             {
@@ -503,6 +515,9 @@ public class POCLocalController
                             model.addAttribute("attachments", attSrv.getAttachmentNames());
                         }
                     }
+
+                    // Attachment file Size
+                    model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
                 }
                 else
                 {
@@ -582,6 +597,9 @@ public class POCLocalController
                             catalogTreeSrv.getCaseCatgTree4LoB(EnumCaseTypes.Learning).getCategories());
 
                     model.addAttribute("attachments", attSrv.getAttachmentNames());
+
+                    // Attachment file Size
+                    model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
                 }
 
             }
@@ -660,6 +678,9 @@ public class POCLocalController
                     }
 
                     model.addAttribute("caseEditForm", caseEditForm);
+
+                    // Attachment file Size
+                    model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
                 }
 
             }
@@ -708,6 +729,9 @@ public class POCLocalController
                         {
                             attSrv.initialize();
                         }
+
+                        // Attachment file Size
+                        model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
 
                     }
                 }
