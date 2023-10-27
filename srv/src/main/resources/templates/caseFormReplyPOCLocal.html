@@ -171,7 +171,8 @@
                                  <span style="margin-left: 10px;" class="mif-user fg-blue"></span>
                                  <span style="margin-left: 5px;" th:text="${note.createdByName }"></span>
                                  <span style="margin-left: 20px;" class="mif-alarm-on fg-blue"></span>
-                                 <span style="margin-left: 5px;" th:text="${note.timestamp }"></span>
+                                 <span style="margin-left: 5px;"
+                                    th:text="${#temporals.format(note.timestamp, 'yyyy-MM-dd HH:mm:ss')}"></span>
                               </h6>
 
 

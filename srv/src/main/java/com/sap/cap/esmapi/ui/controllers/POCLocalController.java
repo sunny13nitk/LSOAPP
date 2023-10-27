@@ -637,6 +637,62 @@ public class POCLocalController
         return viewName;
     }
 
+    @PostMapping(value = "/saveCaseReply", params = "action=upload")
+    public String uploadCaseReplyAttachment(@ModelAttribute("caseEditForm") TY_CaseEdit_Form caseReplyForm, Model model)
+    {
+
+        List<String> attMsgs = Collections.emptyList();
+        if (caseReplyForm != null)
+        {
+            if (StringUtils.hasText(caseReplyForm.getCaseDetails().getCaseGuid()))
+            {
+
+                // Get Case Details
+                TY_CaseEdit_Form caseEditForm = userSessSrv
+                        .getCaseDetails4Edit(caseReplyForm.getCaseDetails().getCaseGuid());
+
+                // Super Impose Reply from User Form 4m Session
+                caseEditForm.setReply(caseReplyForm.getReply());
+
+                // Clear form for New Attachment as Current Attachment already in Container
+                caseEditForm.setAttachment(null);
+
+                // Populate User Details
+                TY_UserESS userDetails = new TY_UserESS();
+                userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+                model.addAttribute("userInfo", userDetails);
+
+                if (caseReplyForm.getAttachment() != null)
+                {
+                    if (StringUtils.hasText(caseReplyForm.getAttachment().getOriginalFilename()))
+                    {
+                        // Clear Attachment Service Session Messages for subsequent roundtip
+                        attSrv.clearSessionMessages();
+                        if (!attSrv.addAttachment(caseReplyForm.getAttachment()))
+                        {
+                            // Attachment to Local Storage Persistence Error
+                            attMsgs = attSrv.getSessionMessages();
+
+                        }
+
+                    }
+
+                }
+
+                model.addAttribute("caseEditForm", caseEditForm);
+
+                model.addAttribute("formErrors", attMsgs);
+
+                model.addAttribute("attachments", attSrv.getAttachmentNames());
+                // Attachment file Size
+                model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
+
+            }
+        }
+
+        return caseFormReply;
+    }
+
     @GetMapping("/errCaseReply/")
     public String showErrorCaseReplyForm(Model model)
     {
