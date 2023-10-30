@@ -345,7 +345,7 @@ public class CL_UserSessionSrvDev implements IF_UserSessionSrv
                 if (this.isCaseFormValid())
                 {
 
-                    // Attchments to be handled Here in Session service Only once the Form is
+                    // Attachments to be handled Here in Session service Only once the Form is
                     // Validated Successfully
                     try
                     {
@@ -1061,27 +1061,34 @@ public class CL_UserSessionSrvDev implements IF_UserSessionSrv
                 // Validated Successfully
                 try
                 {
-                    if (caseReplyForm.getAttachment() != null)
+                    if (attSrv != null)
                     {
-                        if (caseReplyForm.getAttachment().getBytes() != null)
+                        // Attachments Bound
+                        if (CollectionUtils.isNotEmpty(attSrv.getAttachments()))
                         {
-                            // Create Attachment here to prevent Data loss in ASyncronous Thread
-                            // Create Attachment
-                            TY_Attachment newAttachment = new TY_Attachment(
-                                    FilenameUtils.getName(caseReplyForm.getAttachment().getOriginalFilename()),
-                                    GC_Constants.gc_Attachment_Category, false);
-                            caseReplyAsync.setAttR(srvCloudApiSrv.createAttachment(newAttachment));
-                            if (caseReplyAsync.getAttR() != null)
+                            int i = 0;
+                            for (TY_SessionAttachment attachment : attSrv.getAttachments())
                             {
-                                if (srvCloudApiSrv.persistAttachment(caseReplyAsync.getAttR().getUploadUrl(),
-                                        caseReplyForm.getAttachment()))
+                                // Create Attachment
+                                TY_Attachment newAttachment = new TY_Attachment(
+                                        FilenameUtils.getName(attachment.getName()),
+                                        GC_Constants.gc_Attachment_Category, false);
+                                caseReplyAsync.getAttRespList().add(srvCloudApiSrv.createAttachment(newAttachment));
+                                if (caseReplyAsync.getAttRespList().get(i) != null)
                                 {
-                                    log.info("Attachment with id : " + caseReplyAsync.getAttR()
-                                            + " Persisted in Document Container.. for Submission ID: "
-                                            + caseReplyAsync.getSubmGuid());
+                                    if (srvCloudApiSrv.persistAttachment(
+                                            caseReplyAsync.getAttRespList().get(i).getUploadUrl(), attachment.getName(),
+                                            attachment.getBlob()))
+                                    {
+                                        log.info(
+                                                "Attachment with id : " + caseReplyAsync.getAttRespList().get(i).getId()
+                                                        + " Persisted in Document Container.. for Submission ID: "
+                                                        + caseReplyAsync.getSubmGuid());
+                                    }
                                 }
-                            }
 
+                                i++;
+                            }
                         }
                     }
 
@@ -1152,49 +1159,7 @@ public class CL_UserSessionSrvDev implements IF_UserSessionSrv
                 // REply Text is Mandatory
                 if (StringUtils.hasText(userSessInfo.getCurrentCaseReply().getCaseReply().getReply()))
                 {
-
-                    // Also check for Allowed Attachment Type(s) as provided by the business
-                    if (rlConfig != null && userSessInfo.getCurrentCaseReply().getCaseReply().getAttachment() != null)
-                    {
-                        if (CollectionUtils.isEmpty(userSessInfo.getAllowedAttachmentTypes()))
-                        {
-                            // Populate Attachment Types allowed in Session
-                            userSessInfo.setAllowedAttachmentTypes(
-                                    Arrays.asList(rlConfig.getAllowedAttachments().split("\\|")));
-
-                        }
-                        if (StringUtils.hasText(
-                                userSessInfo.getCurrentCaseReply().getCaseReply().getAttachment().getOriginalFilename())
-                                && CollectionUtils.isNotEmpty(userSessInfo.getAllowedAttachmentTypes()))
-                        {
-                            // Get the Extension Type for Attachment
-                            String filename = userSessInfo.getCurrentCaseReply().getCaseReply().getAttachment()
-                                    .getOriginalFilename();
-                            String[] fNameSplits = filename.split("\\.");
-
-                            if (fNameSplits != null)
-                            {
-                                String extensionAttachment = null;
-                                if (fNameSplits.length >= 1)
-                                {
-                                    extensionAttachment = fNameSplits[fNameSplits.length - 1];
-                                }
-                                if (StringUtils.hasText(extensionAttachment))
-                                {
-                                    String extnType = extensionAttachment;
-                                    Optional<String> extnfoundO = userSessInfo.getAllowedAttachmentTypes().stream()
-                                            .filter(a -> a.equalsIgnoreCase(extnType)).findFirst();
-                                    if (!extnfoundO.isPresent())
-                                    {
-                                        // Invalid Attachment TYpe Error
-                                        handleInvalidAttachmentCaseReply(filename, extnType);
-                                        isValid = false;
-                                    }
-                                }
-                            }
-
-                        }
-                    }
+                    isValid = true;
                 }
                 else
                 {
@@ -1323,46 +1288,6 @@ public class CL_UserSessionSrvDev implements IF_UserSessionSrv
         applicationEventPublisher.publishEvent(logMsgEvent);
 
         this.addFormErrors(msg);// For Form Display
-    }
-
-    private void handleInvalidAttachment(String filename, String extnType)
-    {
-        String msg;
-        msg = msgSrc.getMessage("ERR_INVALID_ATT_TYPE", new Object[]
-        { extnType, filename }, Locale.ENGLISH);
-
-        log.error(msg);
-        this.addFormErrors(msg);
-        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
-                userSessInfo.getCurrentForm4Submission().getSubmGuid(), msg);
-        this.addMessagetoStack(logMsg);
-
-        // Instantiate and Fire the Event
-        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) userSessInfo.getCurrentForm4Submission().getSubmGuid(),
-                logMsg);
-        applicationEventPublisher.publishEvent(logMsgEvent);
-
-    }
-
-    private void handleInvalidAttachmentCaseReply(String filename, String extnType)
-    {
-        String msg;
-        msg = msgSrc.getMessage("ERR_INVALID_ATT_TYPE", new Object[]
-        { extnType, filename }, Locale.ENGLISH);
-
-        log.error(msg);
-        this.addFormErrors(msg);
-        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
-                Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
-                userSessInfo.getCurrentCaseReply().getSubmGuid(), msg);
-        this.addMessagetoStack(logMsg);
-
-        // Instantiate and Fire the Event
-        EV_LogMessage logMsgEvent = new EV_LogMessage((Object) userSessInfo.getCurrentCaseReply().getSubmGuid(),
-                logMsg);
-        applicationEventPublisher.publishEvent(logMsgEvent);
-
     }
 
     private void handleAttachmentPersistError(TY_CaseFormAsync caseFormAsync, Exception e)

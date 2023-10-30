@@ -173,32 +173,6 @@ public class EV_HDLR_CaseFormSubmit
 
                             }
 
-                            // if (evCaseFormSubmit.getPayload().getCaseForm().getAttachment() != null)
-                            // {
-
-                            // attR = evCaseFormSubmit.getPayload().getAttR();
-                            // if (attR != null)
-                            // {
-                            // if (StringUtils.hasText(attR.getId()) &&
-                            // StringUtils.hasText(attR.getUploadUrl()))
-                            // {
-                            // log.info("Attachment with id : " + attR.getId()
-                            // + " already Persisted in Document Container..");
-
-                            // // Prepare POJOdetails for TY_Case_SrvCloud newCaseEntity
-                            // List<TY_Attachment_CaseCreate> caseAttachmentsNew = new
-                            // ArrayList<TY_Attachment_CaseCreate>();
-                            // TY_Attachment_CaseCreate caseAttachment = new TY_Attachment_CaseCreate(
-                            // attR.getId());
-                            // caseAttachmentsNew.add(caseAttachment);
-                            // newCaseEntity.setAttachments(caseAttachmentsNew);
-
-                            // }
-
-                            // }
-
-                            // }
-
                             // For Extensions
                             if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getCountry())
                                     || StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getLanguage()))
