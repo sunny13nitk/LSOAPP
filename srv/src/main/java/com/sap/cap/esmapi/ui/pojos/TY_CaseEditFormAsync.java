@@ -20,6 +20,5 @@ public class TY_CaseEditFormAsync
     private String userId;
     private Timestamp timestamp;
     private boolean valid; // To be set post Payload Validation
-    private TY_AttachmentResponse attR;
     private List<TY_AttachmentResponse> attRespList = new ArrayList<TY_AttachmentResponse>();
 }

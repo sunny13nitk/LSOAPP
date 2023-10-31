@@ -222,34 +222,81 @@
 
                   <div th:if="*{caseDetails.statusTransitionCFG.transCfg.editAllowed == true}"
                      class="colspan-9 offset-1" style="margin-top: 15px; margin-bottom: 10px">
-                     <label>Attachment</label>
-                     <input type="file" data-role="file" name="attachment" th:field="*{attachment}" data-mode="drop">
+                     <label>Attachment(s) - Choose the File and Upload to Attach to the Case</label>
 
-                  </div>
+                     <div class="row" style="margin-top: 10px;">
 
+                        <div class="cell-10 flex-align-self-start">
+                           <input type="file" data-role="file" name="attachment" th:field="*{attachment}"
+                              data-mode="drop">
 
-                  <div th:if="*{caseDetails.statusTransitionCFG.transCfg.editAllowed == true}" class="d-flex flex-row-r"
-                     style="margin-top: 30px; margin-bottom: 10px; margin-right: 20px;">
-                     <button class="button rounded " style="color: #004466; background: #00ffb3" data-role="hint"
-                        data-hint-position="top" data-cls-hint="fg-black" data-hint-text="Submit Reply" name="action"
-                        value="saveCaseEdit">
-                        <span class="mif-reply_all" style="margin-left: 0px"> </span> <span
-                           style="margin-left: 3px">Reply</span>
-                     </button>
+                           <small class="text-muted">Max file size allowed : 20MB </small>
+                        </div>
 
-
-                     <a href="#" class="button rounded "
-                        style="color: #004466; background: #FF004C; margin-left: 10px; margin-right: 20px;"
-                        data-role="hint" th:href="@{/lso/}" role="button" data-hint-position="top"
-                        data-cls-hint="fg-black" data-hint-text="Cancel Case Submission.">
-                        <span class="mif-cancel" style="margin-left: 0px">
-                        </span>
-                        <span style="margin-left: 3px">Cancel
-                        </span>
-                     </a>
+                        <div class="cell-1 flex-align-self-end">
+                           <button class="button rounded primary outline" name="action" value="upload"
+                              style="margin-top: 70px">
+                              <span class="mif-file-upload" style="margin-left: 0px"> </span> <span
+                                 style="margin-left: 3px">Upload</span>
+                           </button>
 
 
-                  </div>
+                        </div>
+
+                        <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px"
+                           th:if="${attachments != null}">
+
+                           <table class="table  table-border compact striped">
+                              <thead>
+                                 <tr>
+                                    <th style="text-align: center;">File(s)</th>
+                                    <th data-cls-column=" text-left">Action(s)</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 <tr th:each="file : ${attachments}">
+
+                                    <td style="text-align: left" th:text="${file}"></td>
+                                    <td>
+                                       <a href="#" class="button alert mini rounded outline"
+                                          th:href="@{'/lso/caseReply/removeAttachment/' + ${file}}" role="button"
+                                          data-role="hint" data-hint-position="right" data-cls-hint="fg-black"
+                                          data-hint-text="Remove Attachment">
+                                          <span class="mif-bin icon" style="margin-left: 0px"></span> <span
+                                             style="margin-left: 3px">Delete</span></a>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
+
+
+
+                     </div>
+
+
+                     <div th:if="*{caseDetails.statusTransitionCFG.transCfg.editAllowed == true}"
+                        class="d-flex flex-row-r" style="margin-top: 30px; margin-bottom: 10px; margin-right: 20px;">
+                        <button class="button rounded " style="color: #004466; background: #00ffb3" data-role="hint"
+                           data-hint-position="top" data-cls-hint="fg-black" data-hint-text="Submit Reply" name="action"
+                           value="saveCaseEdit">
+                           <span class="mif-reply_all" style="margin-left: 0px"> </span> <span
+                              style="margin-left: 3px">Reply</span>
+                        </button>
+
+
+                        <a href="#" class="button rounded "
+                           style="color: #004466; background: #FF004C; margin-left: 10px; margin-right: 20px;"
+                           data-role="hint" th:href="@{/lso/}" role="button" data-hint-position="top"
+                           data-cls-hint="fg-black" data-hint-text="Cancel Case Submission.">
+                           <span class="mif-cancel" style="margin-left: 0px">
+                           </span>
+                           <span style="margin-left: 3px">Cancel
+                           </span>
+                        </a>
+
+
+                     </div>
 
                </form>
 

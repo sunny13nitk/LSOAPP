@@ -735,6 +735,8 @@ public class POCLocalController
 
                     model.addAttribute("caseEditForm", caseEditForm);
 
+                    model.addAttribute("attachments", attSrv.getAttachmentNames());
+
                     // Attachment file Size
                     model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
                 }
@@ -755,7 +757,7 @@ public class POCLocalController
     @GetMapping("/caseDetails/{caseID}")
     public String getCaseDetails(@PathVariable String caseID, Model model)
     {
-        if (StringUtils.hasText(caseID) && apiSrv != null)
+        if (StringUtils.hasText(caseID))
         {
             if (userSessSrv != null)
             {
