@@ -214,30 +214,33 @@
 
                      <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px"
                         th:if="${attachments != null}">
+                        <div th:if="${attachments.size() > 0}">
 
-                        <table class="table  table-border compact striped">
-                           <thead>
-                              <tr>
-                                 <th style="text-align: center;">File(s)</th>
-                                 <th data-cls-column=" text-left">Action(s)</th>
-                              </tr>
-                           </thead>
-                           <tbody>
-                              <tr th:each="file : ${attachments}">
+                           <table class="table  table-border compact striped">
+                              <thead>
+                                 <tr>
+                                    <th style="text-align: center;">File(s)</th>
+                                    <th data-cls-column=" text-left">Action(s)</th>
+                                 </tr>
+                              </thead>
+                              <tbody>
+                                 <tr th:each="file : ${attachments}">
 
-                                 <td style="text-align: left" th:text="${file}"></td>
-                                 <td>
-                                    <a href="#" class="button alert mini rounded outline"
-                                       th:href="@{'/poclocal/removeAttachment/' + ${file}}" role="button"
-                                       data-role="hint" data-hint-position="right" data-cls-hint="fg-black"
-                                       data-hint-text="Remove Attachment">
-                                       <span class="mif-bin icon" style="margin-left: 0px"></span> <span
-                                          style="margin-left: 3px">Delete</span></a>
-                                 </td>
-                              </tr>
-                           </tbody>
-                        </table>
+                                    <td style="text-align: left" th:text="${file}"></td>
+                                    <td>
+                                       <a href="#" class="button alert mini rounded outline"
+                                          th:href="@{'/poclocal/removeAttachment/' + ${file}}" role="button"
+                                          data-role="hint" data-hint-position="right" data-cls-hint="fg-black"
+                                          data-hint-text="Remove Attachment">
+                                          <span class="mif-bin icon" style="margin-left: 0px"></span> <span
+                                             style="margin-left: 3px">Delete</span></a>
+                                    </td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
                      </div>
+
 
 
                   </div>

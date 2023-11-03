@@ -80,9 +80,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@Primary
-@Profile(GC_Constants.gc_DEVProfile)
-public class CL_SrvCloudAPI implements IF_SrvCloudAPI
+@Profile(GC_Constants.gc_TESTProfile)
+public class CL_SrvCloudAPITest implements IF_SrvCloudAPI
 {
 
     @Autowired
@@ -594,121 +593,109 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     @Override
     public String getAccountIdByUserEmail(String userEmail) throws EX_ESMAPI
     {
-
-        JsonNode jsonNode = null;
-        HttpResponse response = null;
-        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         String accountID = null;
+        Map<String, String> accEmails = new HashMap<String, String>();
         if (StringUtils.hasText(userEmail) && srvCloudUrls != null)
         {
-            userEmail = '\'' + userEmail + '\''; // In Parmeter Form
-            if (StringUtils.hasText(srvCloudUrls.getAccByEmail()))
+            if (StringUtils.hasText(srvCloudUrls.getAccountsUrl()))
             {
-
                 try
                 {
-                    String urlLink = StringsUtility.replaceURLwithParams(srvCloudUrls.getAccByEmail(), new String[]
-                    { userEmail, userEmail }, GC_Constants.gc_UrlReplParam);
-
-                    if (StringUtils.hasText(urlLink))
+                    JsonNode accountsResp = getAllAccounts();
+                    if (accountsResp != null)
                     {
-
-                        String encoding = Base64.getEncoder().encodeToString(
-                                (srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
-
-                        try
+                        JsonNode rootNode = accountsResp.path("value");
+                        if (rootNode != null)
                         {
+                            log.info("Accounts Bound!!");
 
-                            URL url = new URL(urlLink);
-                            URI uri = new URI(url.getProtocol(), url.getUserInfo(), IDN.toASCII(url.getHost()),
-                                    url.getPort(), url.getPath(), url.getQuery(), url.getRef());
-                            String correctEncodedURL = uri.toASCIIString();
-
-                            HttpGet httpGet = new HttpGet(correctEncodedURL);
-                            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
-                            httpGet.addHeader("accept", "application/json");
-                            // Fire the Url
-                            response = httpClient.execute(httpGet);
-
-                            // verify the valid error code first
-                            int statusCode = response.getStatusLine().getStatusCode();
-                            if (statusCode != HttpStatus.SC_OK)
+                            Iterator<Map.Entry<String, JsonNode>> payloadItr = accountsResp.fields();
+                            while (payloadItr.hasNext())
                             {
-                                throw new RuntimeException("Failed with HTTP error code : " + statusCode);
-                            }
+                                log.info("Payload Iterator Bound");
+                                Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                                String payloadFieldName = payloadEnt.getKey();
+                                log.info("Payload Field Scanned:  " + payloadFieldName);
 
-                            // Try and Get Entity from Response
-                            org.apache.http.HttpEntity entity = response.getEntity();
-                            String apiOutput = EntityUtils.toString(entity);
-
-                            // Conerting to JSON
-                            ObjectMapper mapper = new ObjectMapper();
-                            jsonNode = mapper.readTree(apiOutput);
-                            if (jsonNode != null)
-                            {
-                                Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
-                                while (payloadItr.hasNext())
+                                if (payloadFieldName.equals("value"))
                                 {
-                                    Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
-                                    String payloadFieldName = payloadEnt.getKey();
-                                    if (payloadFieldName.equals("value"))
+                                    Iterator<JsonNode> accItr = payloadEnt.getValue().elements();
+                                    log.info("Accounts Iterator Bound");
+                                    while (accItr.hasNext())
                                     {
-                                        Iterator<JsonNode> accItr = payloadEnt.getValue().elements();
-                                        while (accItr.hasNext())
+
+                                        JsonNode accEnt = accItr.next();
+                                        if (accEnt != null)
                                         {
-                                            JsonNode accEnt = accItr.next();
-                                            if (accEnt != null)
+                                            String accid = null, accEmail = null;
+                                            log.info("Account Entity Bound - Reading Account...");
+                                            Iterator<String> fieldNames = accEnt.fieldNames();
+                                            while (fieldNames.hasNext())
                                             {
-
-                                                Iterator<String> fieldNames = accEnt.fieldNames();
-                                                while (fieldNames.hasNext())
+                                                String accFieldName = fieldNames.next();
+                                                log.info("Account Entity Field Scanned:  " + accFieldName);
+                                                if (accFieldName.equals("id"))
                                                 {
-                                                    String accFieldName = fieldNames.next();
-                                                    if (accFieldName.equals("id"))
-                                                    {
-                                                        log.info("Account Id Added : "
-                                                                + accEnt.get(accFieldName).asText());
-                                                        accountID = accEnt.get(accFieldName).asText();
-                                                    }
+                                                    log.info("Account Id Added : " + accEnt.get(accFieldName).asText());
+                                                    accid = accEnt.get(accFieldName).asText();
+                                                }
 
+                                                if (accFieldName.equals("defaultCommunication"))
+                                                {
+                                                    log.info("Inside Default Communication:  ");
+
+                                                    JsonNode commEnt = accEnt.path("defaultCommunication");
+                                                    if (commEnt != null)
+                                                    {
+                                                        log.info("Comm's Node Bound");
+
+                                                        Iterator<String> fieldNamesComm = commEnt.fieldNames();
+                                                        while (fieldNamesComm.hasNext())
+                                                        {
+                                                            String commFieldName = fieldNamesComm.next();
+                                                            if (commFieldName.equals("eMail"))
+                                                            {
+                                                                log.info("Account Email Added : "
+                                                                        + commEnt.get(commFieldName).asText());
+                                                                accEmail = commEnt.get(commFieldName).asText();
+                                                            }
+                                                        }
+
+                                                    }
                                                 }
 
                                             }
+                                            // avoid null email accounts
+                                            if (StringUtils.hasText(accid) && StringUtils.hasText(accEmail))
+                                            {
+                                                accEmails.put(accid, accEmail);
+                                            }
+
                                         }
 
                                     }
 
                                 }
+
                             }
 
-                        }
-
-                        catch (Exception e)
-                        {
-                            if (e != null)
+                            // Filter by Email
+                            Optional<Map.Entry<String, String>> OptionalAcc = accEmails.entrySet().stream()
+                                    .filter(u -> u.getValue().equals(userEmail)).findFirst();
+                            if (OptionalAcc.isPresent())
                             {
-                                log.error(e.getLocalizedMessage());
+                                Map.Entry<String, String> account = OptionalAcc.get();
+                                accountID = account.getKey(); // Return Account ID
                             }
+
                         }
-
                     }
                 }
-
-                finally
+                catch (IOException e)
                 {
-
-                    try
-                    {
-                        httpClient.close();
-                    }
-                    catch (IOException e)
-                    {
-
-                        log.error(e.getLocalizedMessage());
-                    }
-
+                    throw new EX_ESMAPI(msgSrc.getMessage("API_AC_ERROR", new Object[]
+                    { e.getLocalizedMessage() }, Locale.ENGLISH));
                 }
-
             }
 
         }

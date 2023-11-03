@@ -607,6 +607,73 @@ public class POCLocalController
         return caseFormView;
     }
 
+    @GetMapping("/caseReply/removeAttachment/{fileName}")
+    public String removeAttachmentCaseReply(@PathVariable String fileName, Model model)
+    {
+        if (StringUtils.hasText(fileName) && attSrv != null && userSessSrv != null)
+        {
+            if (attSrv.checkIFExists(fileName))
+            {
+                attSrv.removeAttachmentByName(fileName);
+            }
+
+            // Populate User Details
+            TY_UserESS userDetails = new TY_UserESS();
+            userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
+            model.addAttribute("userInfo", userDetails);
+
+            model.addAttribute("formErrors", userSessSrv.getFormErrors());
+
+            // Get Case Details
+            TY_CaseEdit_Form caseEditForm = null;
+
+            // Try to Get Case Edit Form from Upload Form from User Submit
+            if (userSessSrv.getCurrentReplyForm4Submission() != null)
+            {
+                caseEditForm = userSessSrv.getCaseDetails4Edit(
+                        userSessSrv.getCurrentReplyForm4Submission().getCaseReply().getCaseDetails().getCaseGuid());
+
+                // Super Impose Reply from User Form 4m Session
+                caseEditForm.setReply(userSessSrv.getCurrentReplyForm4Submission().getCaseReply().getReply());
+                // Not Feasible to have a Validation Error in Form and Attachment Persisted -
+                // But just to handle theoratically in case there is an Error in Attachment
+                // Persistence only- Remove the attachment otherwise let it persist
+                if (CollectionUtils.isNotEmpty(userSessSrv.getMessageStack()))
+                {
+                    Optional<TY_Message> attErrO = userSessSrv.getMessageStack().stream()
+                            .filter(e -> e.getMsgType().equals(EnumMessageType.ERR_ATTACHMENT)).findFirst();
+                    if (attErrO.isPresent())
+                    {
+                        // Attachment able to presist do not remove it from Current Payload
+                        caseEditForm.setAttachment(null);
+
+                    }
+                }
+            }
+            else
+            {
+                caseEditForm = userSessSrv
+                        .getCaseDetails4Edit(userSessSrv.getCaseEditFormB4Submission().getCaseDetails().getCaseGuid());
+                // Super Impose Reply from User Form 4m Session
+                caseEditForm.setReply(userSessSrv.getCaseEditFormB4Submission().getReply());
+            }
+
+            if (caseEditForm != null)
+            {
+
+                model.addAttribute("caseEditForm", caseEditForm);
+
+                model.addAttribute("attachments", attSrv.getAttachmentNames());
+
+                // Attachment file Size
+                model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
+            }
+        }
+
+        return caseFormReply;
+
+    }
+
     @PostMapping(value = "/saveCaseReply", params = "action=saveCaseEdit")
     public String saveCaseReply(@ModelAttribute("caseEditForm") TY_CaseEdit_Form caseReplyForm, Model model)
             throws EX_ESMAPI, IOException
@@ -642,7 +709,7 @@ public class POCLocalController
     {
 
         List<String> attMsgs = Collections.emptyList();
-        if (caseReplyForm != null)
+        if (caseReplyForm != null && userSessSrv != null)
         {
             if (StringUtils.hasText(caseReplyForm.getCaseDetails().getCaseGuid()))
             {
@@ -678,6 +745,8 @@ public class POCLocalController
                     }
 
                 }
+
+                userSessSrv.setCaseEditFormB4Submission(caseEditForm);
 
                 model.addAttribute("caseEditForm", caseEditForm);
 

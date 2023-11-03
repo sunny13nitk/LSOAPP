@@ -178,31 +178,6 @@ public class EV_HDLR_CaseReplySubmit
                                 caseReplyPayload.setAttachments(caseAttachmentsNew);
 
                             }
-                            // if (evCaseReply.getPayload().getCaseReply().getAttachment() != null)
-                            // {
-
-                            // TY_AttachmentResponse attR = evCaseReply.getPayload().getAttR();
-                            // if (attR != null)
-                            // {
-                            // if (StringUtils.hasText(attR.getId()) &&
-                            // StringUtils.hasText(attR.getUploadUrl()))
-                            // {
-                            // log.info("Attachment with id : " + attR.getId()
-                            // + " already Persisted in Document Container..");
-
-                            // // Prepare POJOdetails for TY_Case_SrvCloud newCaseEntity
-                            // List<TY_Attachment_CaseCreate> caseAttachmentsNew = new
-                            // ArrayList<TY_Attachment_CaseCreate>();
-                            // TY_Attachment_CaseCreate caseAttachment = new TY_Attachment_CaseCreate(
-                            // attR.getId());
-                            // caseAttachmentsNew.add(caseAttachment);
-                            // caseReplyPayload.setAttachments(caseAttachmentsNew);
-
-                            // }
-
-                            // }
-
-                            // }
 
                             if (caseReplyPayload != null)
                             {

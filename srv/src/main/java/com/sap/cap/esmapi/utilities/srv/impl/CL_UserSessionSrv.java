@@ -767,10 +767,11 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         {
 
             TY_UserDetails userDetails = new TY_UserDetails();
+            String userEmail = "sunny.bhardwaj@sap.com";
             userDetails.setAuthenticated(true);
             // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
             Ty_UserAccountContactEmployee usAccConEmpl = new Ty_UserAccountContactEmployee("I057386", "Sunny Bhardwaj",
-                    "sunny.bhardwaj@sap.com", "11eda929-5152-18be-afdb-81d9ac010a00",
+                    userEmail, srvCloudApiSrv.getAccountIdByUserEmail(userEmail),
                     "11eda929-71b5-43ce-afdb-81d9ac010a00", "11ed17c5-47d5-c4de-afdb-818bd8010a00", false, false);
 
             userDetails.setUsAcConEmpl(usAccConEmpl);
@@ -1383,6 +1384,18 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     public TY_Case_Form getCaseFormB4Submission()
     {
         return userSessInfo.getCaseFormB4Subm();
+    }
+
+    @Override
+    public void setCaseEditFormB4Submission(TY_CaseEdit_Form caseEditForm)
+    {
+        this.userSessInfo.setCaseReplyFormB4Subm(caseEditForm);
+    }
+
+    @Override
+    public TY_CaseEdit_Form getCaseEditFormB4Submission()
+    {
+        return userSessInfo.getCaseReplyFormB4Subm();
     }
 
 }

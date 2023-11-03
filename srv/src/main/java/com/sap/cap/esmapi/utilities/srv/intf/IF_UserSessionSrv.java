@@ -29,8 +29,14 @@ public interface IF_UserSessionSrv
     // Set Case Form in Session to Toggle b/w GET & POST w/o lossing form Data
     public void setCaseFormB4Submission(TY_Case_Form caseForm);
 
-    // Get Case Form in Session to Toggle b/w GET & POST w/o lossing form Dat
+    // Get Case Form in Session to Toggle b/w GET & POST w/o lossing form Data
     public TY_Case_Form getCaseFormB4Submission();
+
+    // Set Case Edit Form in Session to Toggle b/w GET & POST w/o lossing form Data
+    public void setCaseEditFormB4Submission(TY_CaseEdit_Form caseEditForm);
+
+    // Get Case Form in Session to Toggle b/w GET & POST w/o lossing form Data
+    public TY_CaseEdit_Form getCaseEditFormB4Submission();
 
     public List<TY_CaseESS> getCases4User4mSession();
 

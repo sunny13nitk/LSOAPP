@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.cap.esmapi.ui.pojos.TY_CaseEditFormAsync;
+import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
 
@@ -28,5 +29,6 @@ public class TY_UserSessionInfo
     private List<String> submissionIDs = new ArrayList<String>();
     private TY_CaseEditFormAsync currentCaseReply; // Case Reply in Session
     private TY_Case_Form caseFormB4Subm; // Temporary placeholder for CaseForm : toggle b/w POST/GET
+    private TY_CaseEdit_Form caseReplyFormB4Subm; // Temporary placeholder for CaseEditForm : toggle b/w POST/GET
 
 }
