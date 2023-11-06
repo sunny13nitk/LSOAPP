@@ -919,96 +919,126 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     @Override
     public String getContactPersonIdByUserEmail(String userEmail) throws EX_ESMAPI
     {
-        String accountID = null;
-        Map<String, String> accEmails = new HashMap<String, String>();
+
+        JsonNode jsonNode = null;
+        HttpResponse response = null;
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        String contactID = null;
         if (StringUtils.hasText(userEmail) && srvCloudUrls != null)
         {
-            if (StringUtils.hasText(srvCloudUrls.getCpUrl()))
+            userEmail = '\'' + userEmail + '\''; // In Parmeter Form
+            if (StringUtils.hasText(srvCloudUrls.getConByEmail()))
             {
+
                 try
                 {
-                    JsonNode accountsResp = getAllContacts();
-                    if (accountsResp != null)
+                    String urlLink = StringsUtility.replaceURLwithParams(srvCloudUrls.getConByEmail(), new String[]
+                    { userEmail }, GC_Constants.gc_UrlReplParam);
+
+                    if (StringUtils.hasText(urlLink))
                     {
-                        JsonNode rootNode = accountsResp.path("value");
-                        if (rootNode != null)
+
+                        String encoding = Base64.getEncoder().encodeToString(
+                                (srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                        try
                         {
-                            log.info("Contacts Bound!!");
 
-                            Iterator<Map.Entry<String, JsonNode>> payloadItr = accountsResp.fields();
-                            while (payloadItr.hasNext())
+                            URL url = new URL(urlLink);
+                            URI uri = new URI(url.getProtocol(), url.getUserInfo(), IDN.toASCII(url.getHost()),
+                                    url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+                            String correctEncodedURL = uri.toASCIIString();
+
+                            HttpGet httpGet = new HttpGet(correctEncodedURL);
+                            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                            httpGet.addHeader("accept", "application/json");
+                            // Fire the Url
+                            response = httpClient.execute(httpGet);
+
+                            // verify the valid error code first
+                            int statusCode = response.getStatusLine().getStatusCode();
+                            if (statusCode != HttpStatus.SC_OK)
                             {
-                                log.info("Payload Iterator Bound");
-                                Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
-                                String payloadFieldName = payloadEnt.getKey();
-                                log.info("Payload Field Scanned:  " + payloadFieldName);
+                                throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                            }
 
-                                if (payloadFieldName.equals("value"))
+                            // Try and Get Entity from Response
+                            org.apache.http.HttpEntity entity = response.getEntity();
+                            String apiOutput = EntityUtils.toString(entity);
+
+                            // Conerting to JSON
+                            ObjectMapper mapper = new ObjectMapper();
+                            jsonNode = mapper.readTree(apiOutput);
+                            if (jsonNode != null)
+                            {
+                                Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
+                                while (payloadItr.hasNext())
                                 {
-                                    Iterator<JsonNode> accItr = payloadEnt.getValue().elements();
-                                    log.info("Contacts Iterator Bound");
-                                    while (accItr.hasNext())
+                                    Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                                    String payloadFieldName = payloadEnt.getKey();
+                                    if (payloadFieldName.equals("value"))
                                     {
-
-                                        JsonNode accEnt = accItr.next();
-                                        if (accEnt != null)
+                                        Iterator<JsonNode> accItr = payloadEnt.getValue().elements();
+                                        while (accItr.hasNext())
                                         {
-                                            String accid = null, accEmail = null;
-                                            log.info("Contact Entity Bound - Reading Contact...");
-                                            Iterator<String> fieldNames = accEnt.fieldNames();
-                                            while (fieldNames.hasNext())
+                                            JsonNode accEnt = accItr.next();
+                                            if (accEnt != null)
                                             {
-                                                String accFieldName = fieldNames.next();
-                                                log.info("Contact Entity Field Scanned:  " + accFieldName);
-                                                if (accFieldName.equals("id"))
-                                                {
-                                                    log.info("Account Id Added : " + accEnt.get(accFieldName).asText());
-                                                    accid = accEnt.get(accFieldName).asText();
-                                                }
 
-                                                if (accFieldName.equals("eMail"))
+                                                Iterator<String> fieldNames = accEnt.fieldNames();
+                                                while (fieldNames.hasNext())
                                                 {
-                                                    log.info("Account Email Added : "
-                                                            + accEnt.get(accFieldName).asText());
-                                                    accEmail = accEnt.get(accFieldName).asText();
+                                                    String accFieldName = fieldNames.next();
+                                                    if (accFieldName.equals("id"))
+                                                    {
+                                                        log.info("Contact Id Added : "
+                                                                + accEnt.get(accFieldName).asText());
+                                                        contactID = accEnt.get(accFieldName).asText();
+                                                    }
+
                                                 }
 
                                             }
-                                            // avoid null email accounts
-                                            if (StringUtils.hasText(accid) && StringUtils.hasText(accEmail))
-                                            {
-                                                accEmails.put(accid, accEmail);
-                                            }
-
                                         }
 
                                     }
 
                                 }
-
-                            }
-
-                            // Filter by Email
-                            Optional<Map.Entry<String, String>> OptionalAcc = accEmails.entrySet().stream()
-                                    .filter(u -> u.getValue().equals(userEmail)).findFirst();
-                            if (OptionalAcc.isPresent())
-                            {
-                                Map.Entry<String, String> account = OptionalAcc.get();
-                                accountID = account.getKey(); // Return Account ID
                             }
 
                         }
+
+                        catch (Exception e)
+                        {
+                            if (e != null)
+                            {
+                                log.error(e.getLocalizedMessage());
+                            }
+                        }
+
                     }
                 }
-                catch (IOException e)
+
+                finally
                 {
-                    throw new EX_ESMAPI(msgSrc.getMessage("API_AC_ERROR", new Object[]
-                    { e.getLocalizedMessage() }, Locale.ENGLISH));
+
+                    try
+                    {
+                        httpClient.close();
+                    }
+                    catch (IOException e)
+                    {
+
+                        log.error(e.getLocalizedMessage());
+                    }
+
                 }
+
             }
 
         }
-        return accountID;
+        return contactID;
+
     }
 
     @Override
@@ -1976,98 +2006,124 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     @Override
     public String getEmployeeIdByUserId(String userId) throws EX_ESMAPI
     {
-
+        JsonNode jsonNode = null;
+        HttpResponse response = null;
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         String empID = null;
-        Map<String, String> empUserIds = new HashMap<String, String>();
         if (StringUtils.hasText(userId) && srvCloudUrls != null)
         {
-            if (StringUtils.hasText(srvCloudUrls.getEmplUrl()))
+            userId = '\'' + userId + '\''; // In Parmeter Form
+            if (StringUtils.hasText(srvCloudUrls.getEmpById()))
             {
+
                 try
                 {
-                    JsonNode empResp = getAllEmployees();
-                    if (empResp != null)
+                    String urlLink = srvCloudUrls.getEmpById() + userId;
+
+                    if (StringUtils.hasText(urlLink))
                     {
-                        JsonNode rootNode = empResp.path("value");
-                        if (rootNode != null)
+
+                        String encoding = Base64.getEncoder().encodeToString(
+                                (srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                        try
                         {
-                            log.info("Employees Bound!!");
 
-                            Iterator<Map.Entry<String, JsonNode>> payloadItr = empResp.fields();
-                            while (payloadItr.hasNext())
+                            URL url = new URL(urlLink);
+                            URI uri = new URI(url.getProtocol(), url.getUserInfo(), IDN.toASCII(url.getHost()),
+                                    url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+                            String correctEncodedURL = uri.toASCIIString();
+
+                            HttpGet httpGet = new HttpGet(correctEncodedURL);
+                            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                            httpGet.addHeader("accept", "application/json");
+                            // Fire the Url
+                            response = httpClient.execute(httpGet);
+
+                            // verify the valid error code first
+                            int statusCode = response.getStatusLine().getStatusCode();
+                            if (statusCode != HttpStatus.SC_OK)
                             {
-                                log.info("Payload Iterator Bound");
-                                Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
-                                String payloadFieldName = payloadEnt.getKey();
-                                log.info("Payload Field Scanned:  " + payloadFieldName);
+                                throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                            }
 
-                                if (payloadFieldName.equals("value"))
+                            // Try and Get Entity from Response
+                            org.apache.http.HttpEntity entity = response.getEntity();
+                            String apiOutput = EntityUtils.toString(entity);
+
+                            // Conerting to JSON
+                            ObjectMapper mapper = new ObjectMapper();
+                            jsonNode = mapper.readTree(apiOutput);
+                            if (jsonNode != null)
+                            {
+                                Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
+                                while (payloadItr.hasNext())
                                 {
-                                    Iterator<JsonNode> empItr = payloadEnt.getValue().elements();
-                                    log.info("Employee Iterator Bound");
-                                    while (empItr.hasNext())
+                                    Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                                    String payloadFieldName = payloadEnt.getKey();
+                                    if (payloadFieldName.equals("value"))
                                     {
-
-                                        JsonNode empEnt = empItr.next();
-                                        if (empEnt != null)
+                                        Iterator<JsonNode> accItr = payloadEnt.getValue().elements();
+                                        while (accItr.hasNext())
                                         {
-                                            String empid = null, empUserId = null;
-                                            log.info("Employee Entity Bound - Reading Employee...");
-                                            Iterator<String> fieldNames = empEnt.fieldNames();
-                                            while (fieldNames.hasNext())
+                                            JsonNode accEnt = accItr.next();
+                                            if (accEnt != null)
                                             {
-                                                String empFieldName = fieldNames.next();
-                                                log.info("Employee Entity Field Scanned:  " + empFieldName);
-                                                if (empFieldName.equals("id"))
-                                                {
-                                                    log.info(
-                                                            "Employee Id Added : " + empEnt.get(empFieldName).asText());
-                                                    empid = empEnt.get(empFieldName).asText();
-                                                }
 
-                                                if (empFieldName.equals("employeeDisplayId"))
+                                                Iterator<String> fieldNames = accEnt.fieldNames();
+                                                while (fieldNames.hasNext())
                                                 {
-                                                    log.info("Employee User Id Added : "
-                                                            + empEnt.get(empFieldName).asText());
-                                                    empUserId = empEnt.get(empFieldName).asText();
+                                                    String accFieldName = fieldNames.next();
+                                                    if (accFieldName.equals("id"))
+                                                    {
+                                                        log.info("Employee Id Added : "
+                                                                + accEnt.get(accFieldName).asText());
+                                                        empID = accEnt.get(accFieldName).asText();
+                                                    }
+
                                                 }
 
                                             }
-                                            // avoid null email accounts
-                                            if (StringUtils.hasText(empid) && StringUtils.hasText(empUserId))
-                                            {
-                                                empUserIds.put(empid, empUserId);
-                                            }
-
                                         }
 
                                     }
 
                                 }
-
-                            }
-
-                            // Filter by Email
-                            Optional<Map.Entry<String, String>> OptionalEmp = empUserIds.entrySet().stream()
-                                    .filter(u -> u.getValue().equals(userId)).findFirst();
-                            if (OptionalEmp.isPresent())
-                            {
-                                Map.Entry<String, String> employee = OptionalEmp.get();
-                                empID = employee.getKey(); // Return Account ID
                             }
 
                         }
+
+                        catch (Exception e)
+                        {
+                            if (e != null)
+                            {
+                                log.error(e.getLocalizedMessage());
+                            }
+                        }
+
                     }
                 }
-                catch (IOException e)
+
+                finally
                 {
-                    throw new EX_ESMAPI(msgSrc.getMessage("API_EMP_ERROR", new Object[]
-                    { e.getLocalizedMessage() }, Locale.ENGLISH));
+
+                    try
+                    {
+                        httpClient.close();
+                    }
+                    catch (IOException e)
+                    {
+
+                        log.error(e.getLocalizedMessage());
+                    }
+
                 }
+
             }
 
         }
         return empID;
+
     }
 
     @Override
@@ -2531,25 +2587,10 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     {
 
         List<TY_CaseESS> casesByCaseType = null;
-        List<TY_CaseESS> allCases = this.getCases4User(userDetails);
-        if (caseTypeCus != null)
+
+        if (caseType != null && userDetails != null)
         {
-            Optional<TY_CatgCusItem> cusO = caseTypeCus.getCustomizations().stream()
-                    .filter(c -> c.getCaseTypeEnum().equals(caseType)).findFirst();
-            if (cusO.isPresent() && CollectionUtils.isNotEmpty(allCases))
-            {
-                casesByCaseType = allCases.stream().filter(t -> t.getCaseType().equals(cusO.get().getCaseType()))
-                        .collect(Collectors.toList());
-            }
-        }
-        if (CollectionUtils.isNotEmpty(casesByCaseType))
-        {
-            log.info("# Cases for Case Type - " + caseType.name() + "for Current User : " + casesByCaseType.size());
-        }
-        else
-        {
-            log.info("No Cases Found for the User - " + userDetails.getUserId()
-                    + ". Probable Account Creation Directly in Service Cloud!");
+            
         }
 
         return casesByCaseType;
