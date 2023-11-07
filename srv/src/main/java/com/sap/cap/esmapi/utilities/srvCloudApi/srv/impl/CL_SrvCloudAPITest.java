@@ -2346,7 +2346,7 @@ public class CL_SrvCloudAPITest implements IF_SrvCloudAPI
                     return false;
                 }
 
-                if (StringUtils.hasText(e.getContactId()))
+                if (StringUtils.hasText(e.getEmployeeId()))
                 {
 
                     if (e.getAccountId().equals(userDetails.getAccountId()))

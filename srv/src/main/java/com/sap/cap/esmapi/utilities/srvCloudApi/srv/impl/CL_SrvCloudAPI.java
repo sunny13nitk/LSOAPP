@@ -2414,7 +2414,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     return false;
                 }
 
-                if (StringUtils.hasText(e.getContactId()))
+                if (StringUtils.hasText(e.getEmployeeId()))
                 {
 
                     if (e.getAccountId().equals(userDetails.getAccountId()))
@@ -2679,7 +2679,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                 {
                                                     String caseid = null, caseguid = null, caseTypeVar = null,
                                                             caseTypeDescription = null, subject = null, status = null,
-                                                            createdOn = null, accountId = null, contactId = null,
+                                                            createdOn = null, accountId = null, employeeId = null,
                                                             origin = null;
 
                                                     // log.info("Cases Entity Bound - Reading Case...");
@@ -2827,16 +2827,16 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                             }
                                                         }
 
-                                                        if (caseFieldName.equals("reporter"))
+                                                        if (caseFieldName.equals("employee"))
                                                         {
                                                             // log.info("Inside Reporter: " );
 
-                                                            JsonNode repEnt = caseEnt.path("reporter");
-                                                            if (repEnt != null)
+                                                            JsonNode empEnt = caseEnt.path("employee");
+                                                            if (empEnt != null)
                                                             {
                                                                 // log.info("Reporter Node Bound");
 
-                                                                Iterator<String> fieldNamesRep = repEnt.fieldNames();
+                                                                Iterator<String> fieldNamesRep = empEnt.fieldNames();
                                                                 while (fieldNamesRep.hasNext())
                                                                 {
                                                                     String repFieldName = fieldNamesRep.next();
@@ -2845,7 +2845,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                                         // log.info(
                                                                         // "Reporter ID : " +
                                                                         // repEnt.get(repFieldName).asText());
-                                                                        contactId = repEnt.get(repFieldName).asText();
+                                                                        employeeId = empEnt.get(repFieldName).asText();
                                                                     }
                                                                 }
 
@@ -2870,7 +2870,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                                             casesByCaseType.add(new TY_CaseESS(caseguid, caseid,
                                                                     caseTypeVar, caseTypeDescription, subject, status,
-                                                                    accountId, contactId, createdOn, date,
+                                                                    accountId, employeeId, createdOn, date,
                                                                     dateFormatted, origin));
 
                                                         }
@@ -2878,7 +2878,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         {
                                                             casesByCaseType.add(new TY_CaseESS(caseguid, caseid,
                                                                     caseTypeVar, caseTypeDescription, subject, status,
-                                                                    accountId, contactId, createdOn, null, null,
+                                                                    accountId, employeeId, createdOn, null, null,
                                                                     origin));
                                                         }
 
