@@ -54,7 +54,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_SessionAttachment;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserSessionInfo;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_AttachmentValdationSrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_SessAttachmentsService;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
@@ -161,13 +161,11 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     log.info("Fetching Logged in User Details!!");
                     userDetails.setAuthenticated(true);
                     userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
-                    Ty_UserAccountContactEmployee usAccConEmpl = new Ty_UserAccountContactEmployee();
+                    Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee();
                     usAccConEmpl.setUserId(token.getLogonName());
                     usAccConEmpl.setUserName(token.getGivenName() + " " + token.getFamilyName());
                     usAccConEmpl.setUserEmail(token.getEmail());
                     usAccConEmpl.setAccountId(srvCloudApiSrv.getAccountIdByUserEmail(usAccConEmpl.getUserEmail()));
-                    usAccConEmpl
-                            .setContactId(srvCloudApiSrv.getContactPersonIdByUserEmail(usAccConEmpl.getUserEmail()));
 
                     // Only seek Employee If Account/Contact not Found
                     if (!StringUtils.hasText(usAccConEmpl.getAccountId()))
@@ -505,7 +503,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     }
 
     @Override
-    public Ty_UserAccountContactEmployee getUserDetails4mSession()
+    public Ty_UserAccountEmployee getUserDetails4mSession()
     {
         if (this.userSessInfo.getUserDetails() != null)
         {
@@ -771,9 +769,8 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             String userId = "I057386";
             userDetails.setAuthenticated(true);
             // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
-            Ty_UserAccountContactEmployee usAccConEmpl = new Ty_UserAccountContactEmployee(userId, "Sunny Bhardwaj",
+            Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, "Sunny Bhardwaj",
                     userEmail, srvCloudApiSrv.getAccountIdByUserEmail(userEmail),
-                    srvCloudApiSrv.getContactPersonIdByUserEmail(userEmail),
                     srvCloudApiSrv.getEmployeeIdByUserId(userId), false, false);
 
             userDetails.setUsAcConEmpl(usAccConEmpl);

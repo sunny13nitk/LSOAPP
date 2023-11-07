@@ -30,15 +30,15 @@ public class SrvCloudPropsTest
             @Value("${caseDetailsUrl}") final String caseDetailsUrl,
             @Value("${statusCfgUrl}") final String statusCfgUrl, @Value("${accByEmail}") final String accByEmailUrl,
             @Value("${conByEmail}") final String conByEmailUrl, @Value("${empById}") final String empByIdUrl,
-            @Value("${casesByAccContact}") final String casesByAccContactUrl,
-            @Value("${casesByAcc}") final String casesByAccUrl, @Value("${casesByEmpl}") final String casesByEmplUrl
+            @Value("${casesByAcc}") final String casesByAccUrl, @Value("${casesByEmpl}") final String casesByEmplUrl,
+            @Value("${customerurl}") final String customerUrl
 
     )
 
     {
         TY_SrvCloudUrls srvClUrls = new TY_SrvCloudUrls(userName, password, casesUrl, cpUrl, acUrl, notesUrl, topN,
                 caseTemplateUrl, catgTreeUrl, docSrvUrl, emplSrvUrl, vhlpUrl, caseDetailsUrl, statusCfgUrl,
-                accByEmailUrl, conByEmailUrl, empByIdUrl, casesByAccContactUrl, casesByAccUrl, casesByEmplUrl);
+                accByEmailUrl, conByEmailUrl, empByIdUrl, casesByAccUrl, casesByEmplUrl, customerUrl);
 
         return srvClUrls;
     }

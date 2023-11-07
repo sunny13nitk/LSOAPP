@@ -14,7 +14,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserSessionInfo;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cloud.security.xsuaa.token.Token;
 
 public interface IF_UserSessionSrv
@@ -93,7 +93,7 @@ public interface IF_UserSessionSrv
 
     public String createAccount() throws EX_ESMAPI;
 
-    public Ty_UserAccountContactEmployee getUserDetails4mSession();
+    public Ty_UserAccountEmployee getUserDetails4mSession();
 
     public void addSessionMessage(String msg);
 

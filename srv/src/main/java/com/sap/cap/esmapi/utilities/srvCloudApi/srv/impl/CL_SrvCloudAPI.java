@@ -71,7 +71,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_DefaultComm;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
@@ -168,7 +168,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CaseESS> getCases4User(String accountIdUser, String contactIdUser) throws IOException
+    public List<TY_CaseESS> getCases4User(String accountIdUser) throws IOException
     {
         List<TY_CaseESS> casesESSList = null;
 
@@ -464,15 +464,6 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     return false;
                 }
 
-                if (StringUtils.hasText(e.getContactId()))
-                {
-
-                    if (e.getAccountId().equals(accountIdUser) || e.getContactId().equals(contactIdUser))
-                    {
-                        return true;
-                    }
-
-                }
                 else
                 {
                     if (e.getAccountId().equals(accountIdUser))
@@ -2127,7 +2118,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails) throws IOException
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails) throws IOException
     {
         List<TY_CaseESS> casesESSList = null;
 
@@ -2427,8 +2418,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 if (StringUtils.hasText(e.getContactId()))
                 {
 
-                    if (e.getAccountId().equals(userDetails.getAccountId())
-                            || e.getContactId().equals(userDetails.getContactId()))
+                    if (e.getAccountId().equals(userDetails.getAccountId()))
                     {
                         return true;
                     }
@@ -2582,15 +2572,14 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails, EnumCaseTypes caseType)
-            throws IOException
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails, EnumCaseTypes caseType) throws IOException
     {
 
         List<TY_CaseESS> casesByCaseType = null;
 
         if (caseType != null && userDetails != null)
         {
-            
+
         }
 
         return casesByCaseType;

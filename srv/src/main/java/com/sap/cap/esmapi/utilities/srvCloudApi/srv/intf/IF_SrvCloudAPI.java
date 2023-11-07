@@ -20,7 +20,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CasePatchInfo;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud_Reply;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
 
 /*
@@ -30,11 +30,11 @@ public interface IF_SrvCloudAPI
 {
         public JsonNode getAllCases() throws IOException;
 
-        public List<TY_CaseESS> getCases4User(String accountIdUser, String contactIdUser) throws IOException;
+        public List<TY_CaseESS> getCases4User(String accountIdUser) throws IOException;
 
-        public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails) throws IOException;
+        public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails) throws IOException;
 
-        public List<TY_CaseESS> getCases4User(Ty_UserAccountContactEmployee userDetails, EnumCaseTypes caseType)
+        public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails, EnumCaseTypes caseType)
                         throws IOException;
 
         public List<TY_CaseGuidId> getCaseGuidIdList();

@@ -38,7 +38,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
@@ -99,7 +99,7 @@ public class APIRestController
     }
 
     @GetMapping("/userInfo")
-    public Ty_UserAccountContactEmployee getUserInfo(@AuthenticationPrincipal Token token)
+    public Ty_UserAccountEmployee getUserInfo(@AuthenticationPrincipal Token token)
     {
         return userSrv.getUserDetails(token);
 

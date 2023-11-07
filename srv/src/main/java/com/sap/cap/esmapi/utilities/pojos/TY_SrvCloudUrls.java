@@ -29,8 +29,8 @@ public class TY_SrvCloudUrls
     private String accByEmail;
     private String conByEmail;
     private String empById;
-    private String casesByAccContact;
     private String casesByAcc;
     private String casesByEmpl;
+    private String customerUrl;
 
 }

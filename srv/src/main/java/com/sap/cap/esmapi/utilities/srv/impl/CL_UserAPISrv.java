@@ -17,16 +17,19 @@ import org.springframework.util.StringUtils;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
-import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountContactEmployee;
+import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cloud.security.xsuaa.token.Token;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
 @Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Slf4j
 public class CL_UserAPISrv implements IF_UserAPISrv
 {
-    private Ty_UserAccountContactEmployee userData;
+    private Ty_UserAccountEmployee userData;
 
     private List<String> sessionMessages;
 
@@ -37,7 +40,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
     private IF_SrvCloudAPI srvCloudApiSrv;
 
     @Override
-    public Ty_UserAccountContactEmployee getUserDetails(@AuthenticationPrincipal Token token) throws EX_ESMAPI
+    public Ty_UserAccountEmployee getUserDetails(@AuthenticationPrincipal Token token) throws EX_ESMAPI
     {
         if (token == null)
         {
@@ -50,13 +53,12 @@ public class CL_UserAPISrv implements IF_UserAPISrv
             if (userData == null)
             {
                 // Fetch and Return
-                this.userData = new Ty_UserAccountContactEmployee();
+                this.userData = new Ty_UserAccountEmployee();
                 userData.setUserId(token.getLogonName());
                 userData.setUserName(token.getGivenName() + " " + token.getFamilyName());
                 userData.setUserEmail(token.getEmail());
                 userData.setAccountId(srvCloudApiSrv.getAccountIdByUserEmail(userData.getUserEmail()));
-                userData.setContactId(srvCloudApiSrv.getContactPersonIdByUserEmail(userData.getUserEmail()));
-                System.out.println(userData);
+                log.info(userData.toString());
 
             }
         }
@@ -75,8 +77,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
         // 2.a. Account Identified - Show tickets
         if (userDetails.getUserDetails() != null)
         {
-            if (StringUtils.hasText(userDetails.getUserDetails().getAccountId())
-                    || StringUtils.hasText(userDetails.getUserDetails().getContactId()))
+            if (StringUtils.hasText(userDetails.getUserDetails().getAccountId()))
             {
                 // Get All Cases for the User
                 // Account ID as Account
@@ -134,7 +135,7 @@ public class CL_UserAPISrv implements IF_UserAPISrv
     }
 
     @Override
-    public Ty_UserAccountContactEmployee getUserDetails4mSession()
+    public Ty_UserAccountEmployee getUserDetails4mSession()
     {
         return this.userData;
     }
@@ -162,14 +163,14 @@ public class CL_UserAPISrv implements IF_UserAPISrv
 
     // Temporary Method - To be deleted later
     @Override
-    public void setUserAccount(Ty_UserAccountContactEmployee userDetails)
+    public void setUserAccount(Ty_UserAccountEmployee userDetails)
     {
         this.userData = userDetails;
     }
 
     private List<TY_CaseESS> getCases4User() throws IOException
     {
-        return srvCloudApiSrv.getCases4User(userData.getAccountId(), userData.getContactId());
+        return srvCloudApiSrv.getCases4User(userData.getAccountId());
     }
 
 }

@@ -13,6 +13,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TY_UserESS
 {
-    private Ty_UserAccountContactEmployee userDetails;
+    private Ty_UserAccountEmployee userDetails;
     private List<TY_CaseESS>  cases;  
 }

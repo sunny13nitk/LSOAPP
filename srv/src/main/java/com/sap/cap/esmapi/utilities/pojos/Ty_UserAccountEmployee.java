@@ -9,13 +9,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Ty_UserAccountContactEmployee
+public class Ty_UserAccountEmployee
 {
     private String userId;
     private String userName;
     private String userEmail;
     private String accountId;
-    private String contactId;
     private String employeeId;
     private boolean employee;
     private boolean external;
@@ -23,9 +22,10 @@ public class Ty_UserAccountContactEmployee
     public String toString()
     {
         return "Ty_UserAccountContactEmployee [userId=" + userId + ", userName=" + userName + ", userEmail=" + userEmail
-                + ", accountId=" + accountId + ", contactId=" + contactId + ", employeeId=" + employeeId + ", employee="
-                + employee + ", external=" + external + "]";
+                + ", accountId=" + accountId + ", employeeId=" + employeeId + ", employee=" + employee + ", external="
+                + external + "]";
     }
 
     
+
 }
