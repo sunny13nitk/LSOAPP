@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TY_UserDetails
 {
-    private Ty_UserAccountEmployee usAcConEmpl;
+    private Ty_UserAccountEmployee usAccEmpl;
     private boolean authenticated;
     private List<String> roles = new ArrayList<String>();
 }

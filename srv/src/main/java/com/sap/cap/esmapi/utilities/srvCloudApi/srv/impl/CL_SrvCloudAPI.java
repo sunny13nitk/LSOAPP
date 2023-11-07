@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -2577,9 +2576,351 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
         List<TY_CaseESS> casesByCaseType = null;
 
-        if (caseType != null && userDetails != null)
+        JsonNode jsonNode = null;
+        HttpResponse response = null;
+        String id = null, correctEncodedURL = null, urlLink = null;
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+
+        if (caseType != null && userDetails != null && caseTypeCus != null)
         {
 
+            Optional<TY_CatgCusItem> cusItemO = caseTypeCus.getCustomizations().stream()
+                    .filter(g -> g.getCaseTypeEnum().toString().equals(EnumCaseTypes.Learning.toString())).findFirst();
+            if (cusItemO.isPresent())
+            {
+
+                try
+                {
+
+                    if (userDetails.isEmployee())
+                    {
+                        // Seek Cases for Employee Logged in
+                        if (StringUtils.hasText(userDetails.getEmployeeId()))
+                        {
+                            id = userDetails.getEmployeeId();
+                            urlLink = StringsUtility.replaceURLwithParams(srvCloudUrls.getCasesByEmpl(), new String[]
+                            { id, cusItemO.get().getCaseType() }, GC_Constants.gc_UrlReplParam);
+                        }
+                    }
+                    else
+                    {
+                        // Seek Cases for Individual Customer Logged In
+                        if (StringUtils.hasText(userDetails.getAccountId()))
+                        {
+                            id = userDetails.getAccountId();
+                            urlLink = StringsUtility.replaceURLwithParams(srvCloudUrls.getCasesByAcc(), new String[]
+                            { id, cusItemO.get().getCaseType() }, GC_Constants.gc_UrlReplParam);
+
+                        }
+                    }
+
+                    if (StringUtils.hasText(urlLink))
+                    {
+                        String encoding = Base64.getEncoder().encodeToString(
+                                (srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                        try
+                        {
+
+                            URL url = new URL(urlLink);
+                            URI uri = new URI(url.getProtocol(), url.getUserInfo(), IDN.toASCII(url.getHost()),
+                                    url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+                            correctEncodedURL = uri.toASCIIString();
+
+                            HttpGet httpGet = new HttpGet(correctEncodedURL);
+                            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                            httpGet.addHeader("accept", "application/json");
+                            // Fire the Url
+                            response = httpClient.execute(httpGet);
+
+                            // verify the valid error code first
+                            int statusCode = response.getStatusLine().getStatusCode();
+                            if (statusCode != HttpStatus.SC_OK)
+                            {
+                                throw new RuntimeException("Failed with HTTP error code : " + statusCode);
+                            }
+
+                            // Try and Get Entity from Response
+                            HttpEntity entity = response.getEntity();
+                            String apiOutput = EntityUtils.toString(entity);
+                            // Lets see what we got from API
+                            // Log.info(apiOutput);
+
+                            // Conerting to JSON
+                            ObjectMapper mapper = new ObjectMapper();
+                            jsonNode = mapper.readTree(apiOutput);
+
+                            if (jsonNode != null)
+                            {
+
+                                JsonNode rootNode = jsonNode.path("value");
+                                if (rootNode != null)
+                                {
+                                    log.info("Cases Bound!!");
+                                    casesByCaseType = new ArrayList<TY_CaseESS>();
+
+                                    Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
+                                    while (payloadItr.hasNext())
+                                    {
+                                        // log.info("Payload Iterator Bound");
+                                        Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                                        String payloadFieldName = payloadEnt.getKey();
+                                        // log.info("Payload Field Scanned: " + payloadFieldName);
+
+                                        if (payloadFieldName.equals("value"))
+                                        {
+                                            Iterator<JsonNode> casesItr = payloadEnt.getValue().elements();
+                                            // log.info("Cases Iterator Bound");
+                                            while (casesItr.hasNext())
+                                            {
+
+                                                JsonNode caseEnt = casesItr.next();
+                                                if (caseEnt != null)
+                                                {
+                                                    String caseid = null, caseguid = null, caseTypeVar = null,
+                                                            caseTypeDescription = null, subject = null, status = null,
+                                                            createdOn = null, accountId = null, contactId = null,
+                                                            origin = null;
+
+                                                    // log.info("Cases Entity Bound - Reading Case...");
+                                                    Iterator<String> fieldNames = caseEnt.fieldNames();
+                                                    while (fieldNames.hasNext())
+                                                    {
+                                                        String caseFieldName = fieldNames.next();
+                                                        // log.info("Case Entity Field Scanned: " + caseFieldName);
+                                                        if (caseFieldName.equals("id"))
+                                                        {
+                                                            // log.info("Case GUID Added : " +
+                                                            // caseEnt.get(caseFieldName).asText());
+                                                            if (StringUtils
+                                                                    .hasText(caseEnt.get(caseFieldName).asText()))
+                                                            {
+                                                                caseguid = caseEnt.get(caseFieldName).asText();
+                                                            }
+                                                        }
+
+                                                        if (caseFieldName.equals("displayId"))
+                                                        {
+                                                            // log.info("Case Id Added : " +
+                                                            // caseEnt.get(caseFieldName).asText());
+                                                            if (StringUtils
+                                                                    .hasText(caseEnt.get(caseFieldName).asText()))
+                                                            {
+                                                                caseid = caseEnt.get(caseFieldName).asText();
+                                                            }
+                                                        }
+
+                                                        if (caseFieldName.equals("caseType"))
+                                                        {
+                                                            // log.info("Case Type Added : " +
+                                                            // caseEnt.get(caseFieldName).asText());
+                                                            if (StringUtils
+                                                                    .hasText(caseEnt.get(caseFieldName).asText()))
+                                                            {
+                                                                caseTypeVar = caseEnt.get(caseFieldName).asText();
+                                                            }
+                                                        }
+
+                                                        if (caseFieldName.equals("caseTypeDescription"))
+                                                        {
+                                                            // log.info("Case Type Description Added : " +
+                                                            // caseEnt.get(caseFieldName).asText());
+                                                            if (StringUtils
+                                                                    .hasText(caseEnt.get(caseFieldName).asText()))
+                                                            {
+                                                                caseTypeDescription = caseEnt.get(caseFieldName)
+                                                                        .asText();
+                                                            }
+                                                        }
+
+                                                        if (caseFieldName.equals("subject"))
+                                                        {
+                                                            // log.info("Case Subject Added : " +
+                                                            // caseEnt.get(caseFieldName).asText());
+                                                            if (StringUtils
+                                                                    .hasText(caseEnt.get(caseFieldName).asText()))
+                                                            {
+                                                                subject = caseEnt.get(caseFieldName).asText();
+                                                            }
+                                                        }
+
+                                                        if (caseFieldName.equals("origin"))
+                                                        {
+                                                            // log.info("Case Subject Added : " +
+                                                            // caseEnt.get(caseFieldName).asText());
+                                                            if (StringUtils
+                                                                    .hasText(caseEnt.get(caseFieldName).asText()))
+                                                            {
+                                                                origin = caseEnt.get(caseFieldName).asText();
+                                                            }
+                                                        }
+
+                                                        if (caseFieldName.equals("statusDescription"))
+                                                        {
+                                                            // log.info("Case Status Added : " +
+                                                            // caseEnt.get(caseFieldName).asText());
+                                                            if (StringUtils
+                                                                    .hasText(caseEnt.get(caseFieldName).asText()))
+                                                            {
+                                                                status = caseEnt.get(caseFieldName).asText();
+                                                            }
+                                                        }
+
+                                                        if (caseFieldName.equals("statusDescription"))
+                                                        {
+                                                            // log.info("Case Status Added : " +
+                                                            // caseEnt.get(caseFieldName).asText());
+                                                            if (StringUtils
+                                                                    .hasText(caseEnt.get(caseFieldName).asText()))
+                                                            {
+                                                                status = caseEnt.get(caseFieldName).asText();
+                                                            }
+                                                        }
+
+                                                        if (caseFieldName.equals("adminData"))
+                                                        {
+                                                            // log.info("Inside Admin Data: " );
+
+                                                            JsonNode admEnt = caseEnt.path("adminData");
+                                                            if (admEnt != null)
+                                                            {
+                                                                // log.info("AdminData Node Bound");
+
+                                                                Iterator<String> fieldNamesAdm = admEnt.fieldNames();
+                                                                while (fieldNamesAdm.hasNext())
+                                                                {
+                                                                    String admFieldName = fieldNamesAdm.next();
+                                                                    if (admFieldName.equals("createdOn"))
+                                                                    {
+                                                                        // log.info( "Created On : " +
+                                                                        // admEnt.get(admFieldName).asText());
+                                                                        createdOn = admEnt.get(admFieldName).asText();
+                                                                    }
+                                                                }
+
+                                                            }
+                                                        }
+
+                                                        if (caseFieldName.equals("individualCustomer")
+                                                                && (!StringUtils.hasText(accountId)))
+                                                        {
+                                                            // log.info("Inside Account: " );
+
+                                                            JsonNode accEnt = caseEnt.path("individualCustomer");
+                                                            if (accEnt != null)
+                                                            {
+                                                                // log.info("Account Node Bound");
+
+                                                                Iterator<String> fieldNamesAcc = accEnt.fieldNames();
+                                                                while (fieldNamesAcc.hasNext())
+                                                                {
+                                                                    String accFieldName = fieldNamesAcc.next();
+                                                                    if (accFieldName.equals("id"))
+                                                                    {
+                                                                        // log.info(
+                                                                        // "Account ID : " +
+                                                                        // accEnt.get(accFieldName).asText());
+                                                                        accountId = accEnt.get(accFieldName).asText();
+                                                                    }
+                                                                }
+
+                                                            }
+                                                        }
+
+                                                        if (caseFieldName.equals("reporter"))
+                                                        {
+                                                            // log.info("Inside Reporter: " );
+
+                                                            JsonNode repEnt = caseEnt.path("reporter");
+                                                            if (repEnt != null)
+                                                            {
+                                                                // log.info("Reporter Node Bound");
+
+                                                                Iterator<String> fieldNamesRep = repEnt.fieldNames();
+                                                                while (fieldNamesRep.hasNext())
+                                                                {
+                                                                    String repFieldName = fieldNamesRep.next();
+                                                                    if (repFieldName.equals("id"))
+                                                                    {
+                                                                        // log.info(
+                                                                        // "Reporter ID : " +
+                                                                        // repEnt.get(repFieldName).asText());
+                                                                        contactId = repEnt.get(repFieldName).asText();
+                                                                    }
+                                                                }
+
+                                                            }
+                                                        }
+
+                                                    }
+
+                                                    if (StringUtils.hasText(caseid) && StringUtils.hasText(caseguid))
+                                                    {
+                                                        if (StringUtils.hasText(createdOn))
+                                                        {
+                                                            // Parse the date-time string into OffsetDateTime
+                                                            OffsetDateTime odt = OffsetDateTime.parse(createdOn);
+                                                            // Convert OffsetDateTime into Instant
+                                                            Instant instant = odt.toInstant();
+                                                            // If at all, you need java.util.Date
+                                                            Date date = Date.from(instant);
+
+                                                            SimpleDateFormat sdf = new SimpleDateFormat("dd/M/yyyy");
+                                                            String dateFormatted = sdf.format(date);
+
+                                                            casesByCaseType.add(new TY_CaseESS(caseguid, caseid,
+                                                                    caseTypeVar, caseTypeDescription, subject, status,
+                                                                    accountId, contactId, createdOn, date,
+                                                                    dateFormatted, origin));
+
+                                                        }
+                                                        else
+                                                        {
+                                                            casesByCaseType.add(new TY_CaseESS(caseguid, caseid,
+                                                                    caseTypeVar, caseTypeDescription, subject, status,
+                                                                    accountId, contactId, createdOn, null, null,
+                                                                    origin));
+                                                        }
+
+                                                    }
+
+                                                }
+
+                                            }
+
+                                        }
+
+                                    }
+                                }
+
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            if (e != null)
+                            {
+                                log.error(e.getLocalizedMessage());
+                            }
+                        }
+                    }
+
+                }
+                finally
+                {
+
+                    try
+                    {
+                        httpClient.close();
+                    }
+                    catch (IOException e)
+                    {
+
+                        log.error(e.getLocalizedMessage());
+                    }
+
+                }
+            }
         }
 
         return casesByCaseType;

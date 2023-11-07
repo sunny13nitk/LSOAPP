@@ -178,21 +178,21 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                         // For Now Always Create an Account -This PART needs to be commented once ESM
                         // module is live
-                        userDetails.setUsAcConEmpl(usAccConEmpl);
+                        userDetails.setUsAccEmpl(usAccConEmpl);
                         userSessInfo.setUserDetails(userDetails); // Set in Session
                         String accountID = this.createAccount();
-                        userSessInfo.getUserDetails().getUsAcConEmpl().setAccountId(accountID);
+                        userSessInfo.getUserDetails().getUsAccEmpl().setAccountId(accountID);
                         // For Now Always Create an Account -This PART needs to be commented once ESM
                         // module is live
 
                     }
                     else
                     {
-                        userDetails.setUsAcConEmpl(usAccConEmpl);
+                        userDetails.setUsAccEmpl(usAccConEmpl);
                         userSessInfo.setUserDetails(userDetails); // Set in Session
                     }
                     log.info("User Details populated in Session : "
-                            + userSessInfo.getUserDetails().getUsAcConEmpl().toString());
+                            + userSessInfo.getUserDetails().getUsAccEmpl().toString());
 
                 }
             }
@@ -222,7 +222,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         // userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl()));
 
                         // Get ONLY Learning Cases for User
-                        userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl(),
+                        userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAccEmpl(),
                                 EnumCaseTypes.Learning));
 
                         if (CollectionUtils.isNotEmpty(userSessInfo.getSubmissionIDs()))
@@ -236,12 +236,12 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     {
                         // Log error
                         log.error(msgSrc.getMessage("ERR_CASES_USER", new Object[]
-                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), e.getLocalizedMessage() },
+                        { userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), e.getLocalizedMessage() },
                                 Locale.ENGLISH));
 
                         // Raise Exception to be handled at UI via Central Aspect
                         throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_USER", new Object[]
-                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), e.getLocalizedMessage() },
+                        { userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), e.getLocalizedMessage() },
                                 Locale.ENGLISH));
                     }
                 }
@@ -322,7 +322,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             caseFormAsync.setSubmGuid(UUID.randomUUID().toString());
             // Latest time Stamp from Form Submissions
             caseFormAsync.setTimestamp(Timestamp.from(Instant.now()));
-            caseFormAsync.setUserId(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId());
+            caseFormAsync.setUserId(userSessInfo.getUserDetails().getUsAccEmpl().getUserId());
 
             if (!CollectionUtils.isEmpty(catgCusSrv.getCustomizations()))
 
@@ -437,38 +437,38 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         String accountId = null;
         // Only if no Account or Employee Identified in Current Session
         // No Account Determined
-        if (!StringUtils.hasText(userSessInfo.getUserDetails().getUsAcConEmpl().getAccountId()))
+        if (!StringUtils.hasText(userSessInfo.getUserDetails().getUsAccEmpl().getAccountId()))
         {
             // No Employee determined
-            if (!StringUtils.hasText(userSessInfo.getUserDetails().getUsAcConEmpl().getEmployeeId()))
+            if (!StringUtils.hasText(userSessInfo.getUserDetails().getUsAccEmpl().getEmployeeId()))
             {
                 // Create new Individual Customer Account with User Credentials
                 // User Email and UserName Bound
-                if (StringUtils.hasText(userSessInfo.getUserDetails().getUsAcConEmpl().getUserEmail())
-                        && StringUtils.hasText(userSessInfo.getUserDetails().getUsAcConEmpl().getUserName()))
+                if (StringUtils.hasText(userSessInfo.getUserDetails().getUsAccEmpl().getUserEmail())
+                        && StringUtils.hasText(userSessInfo.getUserDetails().getUsAccEmpl().getUserName()))
                 {
 
                     try
                     {
                         accountId = srvCloudApiSrv.createAccount(
-                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserEmail(),
-                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserName());
+                                userSessInfo.getUserDetails().getUsAccEmpl().getUserEmail(),
+                                userSessInfo.getUserDetails().getUsAccEmpl().getUserName());
                         // Also update in the session for newly created Account
                         if (StringUtils.hasText(accountId))
                         {
-                            userSessInfo.getUserDetails().getUsAcConEmpl().setAccountId(accountId);
+                            userSessInfo.getUserDetails().getUsAccEmpl().setAccountId(accountId);
                             // Session Display Message
                             this.addSessionMessage(msgSrc.getMessage("NEW_AC", new Object[]
-                            { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
+                            { userSessInfo.getUserDetails().getUsAccEmpl().getUserId() }, Locale.ENGLISH));
                             // Add to Log
                             log.info(msgSrc.getMessage("NEW_AC", new Object[]
-                            { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
+                            { userSessInfo.getUserDetails().getUsAccEmpl().getUserId() }, Locale.ENGLISH));
 
                             TY_Message message = new TY_Message(
-                                    userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                    userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                                     Timestamp.from(Instant.now()), EnumStatus.Success, EnumMessageType.SUCC_ACC_CREATE,
                                     accountId, msgSrc.getMessage("NEW_AC", new Object[]
-                                    { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
+                                    { userSessInfo.getUserDetails().getUsAccEmpl().getUserId() }, Locale.ENGLISH));
                             // For Logging Framework
                             userSessInfo.getMessagesStack().add(message);
                             // Instantiate and Fire the Event
@@ -479,13 +479,13 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     catch (EX_ESMAPI ex) // Any Error During Individual Customer Creation for the User
                     {
                         log.error(msgSrc.getMessage("ERR_API_AC", new Object[]
-                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
+                        { userSessInfo.getUserDetails().getUsAccEmpl().getUserId() }, Locale.ENGLISH));
 
-                        TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                        TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                                 Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ACC_CREATE,
-                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                                 msgSrc.getMessage("ERR_API_AC", new Object[]
-                                { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId() }, Locale.ENGLISH));
+                                { userSessInfo.getUserDetails().getUsAccEmpl().getUserId() }, Locale.ENGLISH));
                         // For Logging Framework
                         userSessInfo.getMessagesStack().add(message);
                         // Instantiate and Fire the Event
@@ -507,7 +507,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     {
         if (this.userSessInfo.getUserDetails() != null)
         {
-            return userSessInfo.getUserDetails().getUsAcConEmpl();
+            return userSessInfo.getUserDetails().getUsAccEmpl();
         }
 
         return null;
@@ -562,14 +562,14 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         withinRateLimit = false;
                         userSessInfo.setRateLimitBreached(true);
                         log.error(msgSrc.getMessage("ERR_RATE_LIMIT", new Object[]
-                        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                        { userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                                 new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(currTS) }, Locale.ENGLISH));
 
-                        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                                 currTS, EnumStatus.Error, EnumMessageType.ERR_RATELIMIT,
-                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                                 msgSrc.getMessage("ERR_RATE_LIMIT", new Object[]
-                                { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                { userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                                         new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(currTS) }, Locale.ENGLISH));
                         // For Logging Framework
                         userSessInfo.getMessagesStack().add(logMsg);
@@ -683,10 +683,10 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                                         // Logging Framework
                                         TY_Message logMsg = new TY_Message(
-                                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+                                                userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                                                 Timestamp.from(Instant.now()), EnumStatus.Error,
                                                 EnumMessageType.ERR_PAYLOAD,
-                                                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+                                                userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), msg);
                                         userSessInfo.getMessagesStack().add(logMsg);
 
                                         // Instantiate and Fire the Event : Syncronous processing
@@ -765,20 +765,21 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         {
 
             TY_UserDetails userDetails = new TY_UserDetails();
+            // String userEmail = "rsharma@gmail.com";
             String userEmail = "sunny.bhardwaj@sap.com";
             String userId = "I057386";
             userDetails.setAuthenticated(true);
             // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
-            Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, "Sunny Bhardwaj",
-                    userEmail, srvCloudApiSrv.getAccountIdByUserEmail(userEmail),
-                    srvCloudApiSrv.getEmployeeIdByUserId(userId), false, false);
+            Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, "Sunny Bhardwaj", userEmail,
+                    srvCloudApiSrv.getAccountIdByUserEmail(userEmail), srvCloudApiSrv.getEmployeeIdByUserId(userId),
+                    true, false);
 
-            userDetails.setUsAcConEmpl(usAccConEmpl);
+            userDetails.setUsAccEmpl(usAccConEmpl);
             userSessInfo.setUserDetails(userDetails); // Set in Session
 
         }
 
-        if (userSessInfo.getUserDetails().getUsAcConEmpl() != null)
+        if (userSessInfo.getUserDetails().getUsAccEmpl() != null)
         {
             try
             {
@@ -791,7 +792,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                 // Fetch Afresh and Reset
                 userSessInfo.setCases(
-                        essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl(), EnumCaseTypes.Learning));
+                        essSrv.getCases4User(userSessInfo.getUserDetails().getUsAccEmpl(), EnumCaseTypes.Learning));
                 if (CollectionUtils.isNotEmpty(userSessInfo.getSubmissionIDs()))
                 {
                     // Seek Case IDs for Submissions
@@ -803,13 +804,11 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             {
                 // Log error
                 log.error(msgSrc.getMessage("ERR_CASES_USER", new Object[]
-                { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), e.getLocalizedMessage() },
-                        Locale.ENGLISH));
+                { userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), e.getLocalizedMessage() }, Locale.ENGLISH));
 
                 // Raise Exception to be handled at UI via Central Aspect
                 throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_USER", new Object[]
-                { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), e.getLocalizedMessage() },
-                        Locale.ENGLISH));
+                { userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), e.getLocalizedMessage() }, Locale.ENGLISH));
             }
 
         }
@@ -1024,7 +1023,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                 }
                 else // Unauthorized Access - Case Is not in User's List
                 {
-                    handleUnauthorizedCaseAccess(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), caseID);
+                    handleUnauthorizedCaseAccess(userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), caseID);
                 }
             }
 
@@ -1049,7 +1048,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             caseReplyAsync.setSubmGuid(UUID.randomUUID().toString());
             // Latest time Stamp from Form Submissions
             caseReplyAsync.setTimestamp(Timestamp.from(Instant.now()));
-            caseReplyAsync.setUserId(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId());
+            caseReplyAsync.setUserId(userSessInfo.getUserDetails().getUsAccEmpl().getUserId());
             userSessInfo.setCurrentCaseReply(caseReplyAsync);
 
             if (isCaseReplyValid())
@@ -1184,13 +1183,13 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     private void handleCaseReplyError()
     {
         String msg = msgSrc.getMessage("ERR_CASE_PAYLOAD", new Object[]
-        { userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+        { userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                 new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(Timestamp.from(Instant.now())) }, Locale.ENGLISH);
         log.error(msg);
 
-        TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+        TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                 Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
-                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+                userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), msg);
 
         // For Logging Framework
         userSessInfo.getMessagesStack().add(message);
@@ -1206,9 +1205,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         String msg = msgSrc.getMessage("ERR_BLANK_CASE_REPLY", null, Locale.ENGLISH);
         log.error(msg);
 
-        TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+        TY_Message message = new TY_Message(userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                 Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
-                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+                userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), msg);
 
         // For Logging Framework
         userSessInfo.getMessagesStack().add(message);
@@ -1238,7 +1237,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         { caseID, e.getLocalizedMessage() }, Locale.ENGLISH);
 
         log.error(msg);
-        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                 Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_CASE_DET_FETCH, caseID, msg);
         this.addMessagetoStack(logMsg);
 
@@ -1276,9 +1275,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         log.error(msg); // System Log
 
         // Logging Framework
-        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                 Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_PAYLOAD,
-                userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(), msg);
+                userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), msg);
         userSessInfo.getMessagesStack().add(logMsg);
 
         // Instantiate and Fire the Event : Syncronous processing
@@ -1298,7 +1297,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
         this.addFormErrors(msg);// For Form Display
 
-        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                 Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
                 caseFormAsync.getSubmGuid(), msg);
         this.addMessagetoStack(logMsg);
@@ -1317,7 +1316,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         { caseFormAsync.getCaseForm().getAttachment().getOriginalFilename() }, Locale.ENGLISH);
 
         log.error(msg);
-        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                 Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
                 caseFormAsync.getSubmGuid(), msg);
         this.addMessagetoStack(logMsg);
@@ -1341,7 +1340,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
         this.addFormErrors(msg);// For Form Display
 
-        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                 Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
                 caseFormAsync.getSubmGuid(), msg);
         this.addMessagetoStack(logMsg);
@@ -1360,7 +1359,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         { caseFormAsync.getCaseReply().getAttachment().getOriginalFilename() }, Locale.ENGLISH);
 
         log.error(msg);
-        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAcConEmpl().getUserId(),
+        TY_Message logMsg = new TY_Message(userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
                 Timestamp.from(Instant.now()), EnumStatus.Error, EnumMessageType.ERR_ATTACHMENT,
                 caseFormAsync.getSubmGuid(), msg);
         this.addMessagetoStack(logMsg);
