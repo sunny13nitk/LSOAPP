@@ -21,8 +21,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.annotation.SessionScope;
@@ -119,6 +117,8 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     @Override
     public TY_UserDetails getUserDetails(Token token) throws EX_ESMAPI
     {
+
+        String newAccountID = null;
         // Token Blank
         if (token == null)
         {
@@ -171,19 +171,25 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     if (!StringUtils.hasText(usAccConEmpl.getAccountId()))
                     {
                         // Seek Employee and populate
-                        /* Enable once ESM Module is live and tested */
-                        // usAccConEmpl.setEmployeeId(srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId()));
-                        // usAccConEmpl.setEmployee(true);
-                        /* Enable once ESM Module is live and tested */
 
-                        // For Now Always Create an Account -This PART needs to be commented once ESM
-                        // module is live
+                        usAccConEmpl.setEmployeeId(srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId()));
+                        if (StringUtils.hasText(usAccConEmpl.getEmployeeId()))
+                        {
+                            usAccConEmpl.setEmployee(true);
+                        }
+                        else
+                        {
+                            // Go For Individual Customer Creation with the User Details
+                            newAccountID = this.createAccount();
+                        }
+
                         userDetails.setUsAccEmpl(usAccConEmpl);
                         userSessInfo.setUserDetails(userDetails); // Set in Session
-                        String accountID = this.createAccount();
-                        userSessInfo.getUserDetails().getUsAccEmpl().setAccountId(accountID);
-                        // For Now Always Create an Account -This PART needs to be commented once ESM
-                        // module is live
+
+                        if (StringUtils.hasText(newAccountID))
+                        {
+                            userSessInfo.getUserDetails().getUsAccEmpl().setAccountId(newAccountID);
+                        }
 
                     }
                     else
@@ -766,11 +772,17 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
             TY_UserDetails userDetails = new TY_UserDetails();
             // String userEmail = "rsharma@gmail.com";
+
+            /*
+             * Test with Existing Employee
+             */
             String userEmail = "sunny.bhardwaj@sap.com";
             String userId = "I057386";
+            String userName = "Sunny Bhardwaj";
+
             userDetails.setAuthenticated(true);
             // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
-            Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, "Sunny Bhardwaj", userEmail,
+            Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, userName, userEmail,
                     srvCloudApiSrv.getAccountIdByUserEmail(userEmail), srvCloudApiSrv.getEmployeeIdByUserId(userId),
                     true, false);
 

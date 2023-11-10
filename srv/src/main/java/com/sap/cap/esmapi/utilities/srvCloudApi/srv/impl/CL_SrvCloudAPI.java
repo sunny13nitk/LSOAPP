@@ -57,7 +57,6 @@ import com.sap.cap.esmapi.ui.pojos.TY_Attachment;
 import com.sap.cap.esmapi.utilities.StringsUtility;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
-import com.sap.cap.esmapi.utilities.pojos.TY_AccountCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseDetails;
@@ -66,6 +65,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseGuidId;
 import com.sap.cap.esmapi.utilities.pojos.TY_CasePatchInfo;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud_Reply;
+import com.sap.cap.esmapi.utilities.pojos.TY_CustomerCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_DefaultComm;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesDetails;
@@ -1035,16 +1035,26 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     public String createAccount(String userEmail, String userName) throws EX_ESMAPI
     {
         String accountId = null;
+        TY_CustomerCreate newAccount;
         // User Email and UserName Bound
         if (StringUtils.hasText(userEmail) && StringUtils.hasText(userName))
         {
-            TY_AccountCreate newAccount = new TY_AccountCreate(userName, GC_Constants.gc_roleCustomer,
-                    GC_Constants.gc_statusACTIVE, true, new TY_DefaultComm(userEmail));
+            String[] names = userName.split(" ");
+            if (names.length > 1)
+            {
+                newAccount = new TY_CustomerCreate(names[0], names[1], GC_Constants.gc_roleCustomer,
+                        GC_Constants.gc_statusACTIVE, new TY_DefaultComm(userEmail));
+            }
+            else
+            {
+                newAccount = new TY_CustomerCreate(names[0], names[0], GC_Constants.gc_roleCustomer,
+                        GC_Constants.gc_statusACTIVE, new TY_DefaultComm(userEmail));
+            }
 
             if (newAccount != null)
             {
                 HttpClient httpclient = HttpClients.createDefault();
-                String accPOSTURL = getPOSTURL4BaseUrl(srvCloudUrls.getAccountsUrl());
+                String accPOSTURL = getPOSTURL4BaseUrl(srvCloudUrls.getCustomerUrl());
                 if (StringUtils.hasText(accPOSTURL))
                 {
                     String encoding = Base64.getEncoder()
@@ -1111,8 +1121,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                 while (fieldNames.hasNext())
                                                 {
                                                     String accFieldName = fieldNames.next();
-                                                    System.out
-                                                            .println("Account Entity Field Scanned:  " + accFieldName);
+
                                                     if (accFieldName.equals("id"))
                                                     {
                                                         log.info("Account GUID Added : "
