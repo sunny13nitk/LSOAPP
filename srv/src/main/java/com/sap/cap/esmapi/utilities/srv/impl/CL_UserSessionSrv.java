@@ -776,53 +776,114 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             /*
              * Test with Existing Employee
              */
-            String userEmail = "sunny.bhardwaj@sap.com";
-            String userId = "I057386";
-            String userName = "Sunny Bhardwaj";
+            // String userEmail = "sunny.bhardwaj@sap.com";
+            // String userId = "I057386";
+            // String userName = "Sunny Bhardwaj";
+
+            // userDetails.setAuthenticated(true);
+            // //
+            // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
+
+            // Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId,
+            // userName, userEmail,
+            // srvCloudApiSrv.getAccountIdByUserEmail(userEmail),
+            // srvCloudApiSrv.getEmployeeIdByUserId(userId),
+            // true, false);
+
+            /*
+             * Test with Existing Employee
+             */
+
+            /*
+             * Test with Existing Customer
+             */
+            // String userEmail = "rsharma@gmail.com";
+            // String userId = "P565GJJH";
+            // String userName = "Rohit Sharma";
+
+            // userDetails.setAuthenticated(true);
+            // //
+            // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
+
+            // Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId,
+            // userName, userEmail,
+            // srvCloudApiSrv.getAccountIdByUserEmail(userEmail),
+            // srvCloudApiSrv.getEmployeeIdByUserId(userId),
+            // false, false);
+
+            /*
+             * Test with Existing Customer
+             */
+
+            /*
+             * Test with New Customer
+             */
+            String userEmail = "bbedi@gmail.com";
+            String userId = "S598GJJK";
+            String userName = "Bishan Bedi";
 
             userDetails.setAuthenticated(true);
-            // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
+            //
+            userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
+
             Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, userName, userEmail,
                     srvCloudApiSrv.getAccountIdByUserEmail(userEmail), srvCloudApiSrv.getEmployeeIdByUserId(userId),
-                    true, false);
+                    false, false);
+
+            /*
+             * Test with New Customer
+             */
 
             userDetails.setUsAccEmpl(usAccConEmpl);
             userSessInfo.setUserDetails(userDetails); // Set in Session
 
-        }
-
-        if (userSessInfo.getUserDetails().getUsAccEmpl() != null)
-        {
-            try
+            if (userSessInfo.getUserDetails().getUsAccEmpl() != null)
             {
-                // Get the cases for User
-                // Clear from Buffer
-                if (CollectionUtils.isNotEmpty(this.getCases4User4mSession()))
+                try
                 {
-                    userSessInfo.getCases().clear();
-                }
+                    // Create Customer for New User
+                    if ((!StringUtils.hasText(usAccConEmpl.getAccountId()))
+                            && (!StringUtils.hasText(usAccConEmpl.getEmployeeId())))
+                    {
+                        // Go For Individual Customer Creation with the User Details
+                        String newAccountID = this.createAccount();
+                        if (StringUtils.hasText(newAccountID))
+                        {
+                            userSessInfo.getUserDetails().getUsAccEmpl().setAccountId(newAccountID);
+                        }
+                    }
 
-                // Fetch Afresh and Reset
-                userSessInfo.setCases(
-                        essSrv.getCases4User(userSessInfo.getUserDetails().getUsAccEmpl(), EnumCaseTypes.Learning));
-                if (CollectionUtils.isNotEmpty(userSessInfo.getSubmissionIDs()))
+                    // Get the cases for User
+                    // Clear from Buffer
+                    if (CollectionUtils.isNotEmpty(this.getCases4User4mSession()))
+                    {
+                        userSessInfo.getCases().clear();
+                    }
+
+                    // Fetch Afresh and Reset
+                    userSessInfo.setCases(
+                            essSrv.getCases4User(userSessInfo.getUserDetails().getUsAccEmpl(), EnumCaseTypes.Learning));
+                    if (CollectionUtils.isNotEmpty(userSessInfo.getSubmissionIDs()))
+                    {
+                        // Seek Case IDs for Submissions
+                        updateCases4SubmissionIds();
+                    }
+
+                }
+                catch (Exception e)
                 {
-                    // Seek Case IDs for Submissions
-                    updateCases4SubmissionIds();
+                    // Log error
+                    log.error(msgSrc.getMessage("ERR_CASES_USER", new Object[]
+                    { userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), e.getLocalizedMessage() },
+                            Locale.ENGLISH));
+
+                    // Raise Exception to be handled at UI via Central Aspect
+                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_USER", new Object[]
+                    { userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), e.getLocalizedMessage() },
+                            Locale.ENGLISH));
                 }
 
             }
-            catch (Exception e)
-            {
-                // Log error
-                log.error(msgSrc.getMessage("ERR_CASES_USER", new Object[]
-                { userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), e.getLocalizedMessage() }, Locale.ENGLISH));
-
-                // Raise Exception to be handled at UI via Central Aspect
-                throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASES_USER", new Object[]
-                { userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), e.getLocalizedMessage() }, Locale.ENGLISH));
-            }
-
         }
 
     }

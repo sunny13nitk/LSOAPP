@@ -113,53 +113,61 @@
 
       <!--Table Row - Starts  -->
       <div class="row" style="margin-top: 20px" th:if="${userInfo.cases != null}">
-         <div class="colspan-12">
-            <table class="table compact striped table-border row-hover mt-4 " id="t-inspector" data-role="table"
-               data-show-search="true" data-show-rows-steps="false" data-table-search-title="Filter Cases:"
-               data-search-min-length="1" data-search-threshold="300" data-rows="10"
-               data-search-fields="subject,statusDesc,id" data-horizontal-scroll="true"
-               data-info-wrapper=".my-info-wrapper" data-thousand-separator=","
-               data-pagination-wrapper=".my-pagination-wrapper">
-               <thead>
-                  <tr>
 
-                     <th data-name="id" data-format="number" class="sortable-column sort-desc">Case ID</th>
+         <div class="row" style="margin-top: 20px" th:if="${userInfo.cases.size() >0}">
+            <div class="colspan-12">
+               <table class="table compact striped table-border row-hover mt-4 " id="t-inspector" data-role="table"
+                  data-show-search="true" data-show-rows-steps="false" data-table-search-title="Filter Cases:"
+                  data-search-min-length="1" data-search-threshold="300" data-rows="10"
+                  data-search-fields="subject,statusDesc,id" data-horizontal-scroll="true"
+                  data-info-wrapper=".my-info-wrapper" data-thousand-separator=","
+                  data-pagination-wrapper=".my-pagination-wrapper">
+                  <thead>
+                     <tr>
 
-                     <th data-name="statusDesc" data-cls-column=" text-left">Status</th>
+                        <th data-name="id" data-format="number" class="sortable-column sort-desc">Case ID</th>
 
-                     <th data-name="subject" data-cls-column=" text-left">Issue Description</th>
+                        <th data-name="statusDesc" data-cls-column=" text-left">Status</th>
 
-                     <th data-name="formattedDate" data-format="number" data-cls-column=" text-left">Created On</th>
+                        <th data-name="subject" data-cls-column=" text-left">Issue Description</th>
 
-                     <th data-cls-column=" text-left">Details</th>
+                        <th data-name="formattedDate" data-format="number" data-cls-column=" text-left">Created On</th>
 
-
-                  </tr>
-               </thead>
-               <tbody>
+                        <th data-cls-column=" text-left">Details</th>
 
 
-                  <tr th:each="case : ${userInfo.cases}">
+                     </tr>
+                  </thead>
+                  <tbody>
 
-                     <td style="text-align: center" th:text="${case.id}"></td>
-                     <td><span class=" tally yellow" th:text="${case.statusDesc}"></span></td>
-                     <td style="text-align: left" th:text="${case.subject}"></td>
-                     <td style="text-align: left" th:text="${case.formattedDate}"></td>
 
-                     <td>
+                     <tr th:each="case : ${userInfo.cases}">
 
-                        <a href="#" class="button primary mini rounded outline"
-                           th:href="@{'/lso/caseDetails/' + ${case.guid}}" role="button" data-role="hint"
-                           data-hint-position="right" data-cls-hint="fg-black" data-hint-text="Reply to Case">
-                           <span class="mif-reply icon" style="margin-left: 0px"></span> <span
-                              style="margin-left: 3px">Reply</span></a>
-                     </td>
+                        <td style="text-align: center" th:text="${case.id}"></td>
+                        <td><span class=" tally yellow" th:text="${case.statusDesc}"></span></td>
+                        <td style="text-align: left" th:text="${case.subject}"></td>
+                        <td style="text-align: left" th:text="${case.formattedDate}"></td>
 
-               </tbody>
-            </table>
+                        <td>
 
-            <p class="h5  text-center my-info-wrapper "></p>
-            <div class="d-flex flex-justify-center my-pagination-wrapper"></div>
+                           <a href="#" class="button primary mini rounded outline"
+                              th:href="@{'/lso/caseDetails/' + ${case.guid}}" role="button" data-role="hint"
+                              data-hint-position="right" data-cls-hint="fg-black" data-hint-text="Reply to Case">
+                              <span class="mif-reply icon" style="margin-left: 0px"></span> <span
+                                 style="margin-left: 3px">Reply</span></a>
+                        </td>
+
+                  </tbody>
+               </table>
+
+               <p class="h5  text-center my-info-wrapper "></p>
+               <div class="d-flex flex-justify-center my-pagination-wrapper"></div>
+            </div>
+         </div>
+
+         <div class="remark primary " style="margin-top: 20px" th:if="${userInfo.cases.size() == 0}">
+            <h6>No Cases could be identified for you! You can however create a new Case/Service Request using options as
+               below.</h6>
          </div>
       </div>
       <!--Table Row - Ends -->
