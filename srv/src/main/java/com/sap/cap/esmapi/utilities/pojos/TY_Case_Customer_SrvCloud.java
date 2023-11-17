@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TY_Case_SrvCloud
+public class TY_Case_Customer_SrvCloud
 {
     private String subject;
     private String caseType;

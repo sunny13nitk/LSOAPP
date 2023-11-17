@@ -111,7 +111,7 @@ public class POCLocalController
                         if (cusItemO.isPresent() && catgTreeSrv != null)
                         {
                             userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
-                            userDetails.setCases(userSessSrv.getSessionInfo4Test().getCases());
+                            userDetails.setCases(userSessSrv.getCases4User4mSession());
                             model.addAttribute("userInfo", userDetails);
                             model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
                             // Rate Limit Simulation

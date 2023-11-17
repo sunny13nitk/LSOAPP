@@ -122,7 +122,7 @@ public class LSOController
                                         userDetails.setUserDetails(userSessSrv.getUserDetails4mSession());
                                         log.info("Fetching Cases for User From Session : "
                                                 + userSessSrv.getUserDetails4mSession().toString());
-                                        userDetails.setCases(userSessSrv.getSessionInfo4Test().getCases());
+                                        userDetails.setCases(userSessSrv.getCases4User4mSession());
                                         model.addAttribute("userInfo", userDetails);
                                         model.addAttribute("caseTypeStr", EnumCaseTypes.Learning.toString());
                                         // Rate Limit Simulation

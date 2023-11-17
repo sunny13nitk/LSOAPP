@@ -34,7 +34,7 @@ import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.TY_Account_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
 import com.sap.cap.esmapi.utilities.pojos.TY_Attachment_CaseCreate;
-import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
+import com.sap.cap.esmapi.utilities.pojos.TY_Case_Customer_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_CatgLvl1_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Description_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
@@ -238,7 +238,7 @@ public class ESSLocalController
     public String saveCase(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
     {
         TY_UserESS userDetails = new TY_UserESS();
-        TY_Case_SrvCloud newCaseEntity = new TY_Case_SrvCloud();
+        TY_Case_Customer_SrvCloud newCaseEntity = new TY_Case_Customer_SrvCloud();
         Optional<TY_CatgCusItem> cusItemO = null;
         TY_AttachmentResponse attR = null;
 

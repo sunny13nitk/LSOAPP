@@ -28,9 +28,11 @@ import com.sap.cap.esmapi.utilities.enums.EnumStatus;
 import com.sap.cap.esmapi.utilities.pojos.TY_Account_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_AttachmentResponse;
 import com.sap.cap.esmapi.utilities.pojos.TY_Attachment_CaseCreate;
-import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud;
+import com.sap.cap.esmapi.utilities.pojos.TY_Case_Customer_SrvCloud;
+import com.sap.cap.esmapi.utilities.pojos.TY_Case_Employee_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_CatgLvl1_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Description_CaseCreate;
+import com.sap.cap.esmapi.utilities.pojos.TY_Employee_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Extensions_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
@@ -58,6 +60,10 @@ public class EV_HDLR_CaseFormSubmit
     @EventListener
     public void handleCaseFormSubmission(EV_CaseFormSubmit evCaseFormSubmit)
     {
+
+        TY_Case_Customer_SrvCloud newCaseEntity4Customer;
+        TY_Case_Employee_SrvCloud newCaseEntity4Employee;
+
         if (evCaseFormSubmit != null && catgCusSrv != null)
         {
             log.info("Inside Case Form Asyncronous Submit Event Processing---- for Case Submission ID: "
@@ -76,139 +82,305 @@ public class EV_HDLR_CaseFormSubmit
                     // Submission Id found on Case
                     if (StringUtils.hasText(evCaseFormSubmit.getPayload().getSubmGuid()) && cusItemO.isPresent())
                     {
-                        TY_Case_SrvCloud newCaseEntity = new TY_Case_SrvCloud();
 
-                        // If An Employee has not logged in
                         if (!evCaseFormSubmit.getPayload().getCaseForm().isEmployee())
                         {
+                            newCaseEntity4Customer = new TY_Case_Customer_SrvCloud();
                             // Account must be present
                             if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getAccId()))
                             {
-                                newCaseEntity.setAccount(new TY_Account_CaseCreate(
+                                newCaseEntity4Customer.setAccount(new TY_Account_CaseCreate(
                                         evCaseFormSubmit.getPayload().getCaseForm().getAccId())); // Account ID
-                            }
-                        }
-                        else
-                        {
-                            // #ESM
-                            // Push Employee ID from Session Service once #ESM module is enabled
-                        }
 
-                        // Case Txn. Type
-                        newCaseEntity.setCaseType(evCaseFormSubmit.getPayload().getCaseForm().getCaseTxnType());
-                        // Cae Subject
-                        newCaseEntity.setSubject(evCaseFormSubmit.getPayload().getCaseForm().getSubject());
+                                // Case Txn. Type
+                                newCaseEntity4Customer
+                                        .setCaseType(evCaseFormSubmit.getPayload().getCaseForm().getCaseTxnType());
+                                // Cae Subject
+                                newCaseEntity4Customer
+                                        .setSubject(evCaseFormSubmit.getPayload().getCaseForm().getSubject());
 
-                        // Fetch CatgGuid by description from Customizing - Set Categories
-                        if (evCaseFormSubmit.getPayload().getCatTreeSelCatg().length > 0)
-                        {
-                            String[] catTreeSelCatg = evCaseFormSubmit.getPayload().getCatTreeSelCatg();
-                            if (Arrays.stream(catTreeSelCatg).filter(e -> e != null).count() > 0)
-                            {
-                                switch ((int) Arrays.stream(catTreeSelCatg).filter(e -> e != null).count())
+                                // Fetch CatgGuid by description from Customizing - Set Categories
+                                if (evCaseFormSubmit.getPayload().getCatTreeSelCatg().length > 0)
                                 {
-                                case 4:
-                                    newCaseEntity.setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[3]));
-                                    newCaseEntity.setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[2]));
-                                    newCaseEntity.setCategoryLevel3(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
-                                    newCaseEntity.setCategoryLevel4(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
-                                    break;
-                                case 3:
-                                    newCaseEntity.setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[2]));
-                                    newCaseEntity.setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
-                                    newCaseEntity.setCategoryLevel3(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
-                                    break;
-                                case 2:
-                                    newCaseEntity.setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
-                                    newCaseEntity.setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
-                                    break;
-                                case 1:
-                                    newCaseEntity.setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
-                                default:
-
-                                    handleCatgError(evCaseFormSubmit, cusItemO);
-
-                                }
-                            }
-                            else
-                            {
-
-                                handleCatgError(evCaseFormSubmit, cusItemO);
-
-                            }
-
-                            // Create Notes if There is a description
-                            if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getDescription()))
-                            {
-                                // Create Note and Get Guid back
-                                String noteId = srvCloudApiSrv.createNotes(
-                                        new TY_NotesCreate(evCaseFormSubmit.getPayload().getCaseForm().getDescription(),
-                                                GC_Constants.gc_NoteTypeDescription));
-                                if (StringUtils.hasText(noteId))
-                                {
-                                    newCaseEntity.setDescription(new TY_Description_CaseCreate(noteId));
-                                }
-                            }
-
-                            // Check if Attachment needs to be Created
-                            if (CollectionUtils.isNotEmpty(evCaseFormSubmit.getPayload().getAttRespList()))
-                            {
-                                // Prepare POJOdetails for TY_Case_SrvCloud newCaseEntity
-                                List<TY_Attachment_CaseCreate> caseAttachmentsNew = new ArrayList<TY_Attachment_CaseCreate>();
-                                for (TY_AttachmentResponse attR : evCaseFormSubmit.getPayload().getAttRespList())
-                                {
-
-                                    if (StringUtils.hasText(attR.getId()) && StringUtils.hasText(attR.getUploadUrl()))
+                                    String[] catTreeSelCatg = evCaseFormSubmit.getPayload().getCatTreeSelCatg();
+                                    if (Arrays.stream(catTreeSelCatg).filter(e -> e != null).count() > 0)
                                     {
-                                        log.info("Attachment with id : " + attR.getId()
-                                                + " already Persisted in Document Container..");
+                                        switch ((int) Arrays.stream(catTreeSelCatg).filter(e -> e != null).count())
+                                        {
+                                        case 4:
+                                            newCaseEntity4Customer
+                                                    .setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[3]));
+                                            newCaseEntity4Customer
+                                                    .setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[2]));
+                                            newCaseEntity4Customer
+                                                    .setCategoryLevel3(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
+                                            newCaseEntity4Customer
+                                                    .setCategoryLevel4(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                                            break;
+                                        case 3:
+                                            newCaseEntity4Customer
+                                                    .setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[2]));
+                                            newCaseEntity4Customer
+                                                    .setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
+                                            newCaseEntity4Customer
+                                                    .setCategoryLevel3(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                                            break;
+                                        case 2:
+                                            newCaseEntity4Customer
+                                                    .setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
+                                            newCaseEntity4Customer
+                                                    .setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                                            break;
+                                        case 1:
+                                            newCaseEntity4Customer
+                                                    .setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                                        default:
 
-                                        TY_Attachment_CaseCreate caseAttachment = new TY_Attachment_CaseCreate(
-                                                attR.getId());
-                                        caseAttachmentsNew.add(caseAttachment);
+                                            handleCatgError(evCaseFormSubmit, cusItemO);
+
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                        handleCatgError(evCaseFormSubmit, cusItemO);
+
+                                    }
+
+                                    // Create Notes if There is a description
+                                    if (StringUtils
+                                            .hasText(evCaseFormSubmit.getPayload().getCaseForm().getDescription()))
+                                    {
+                                        // Create Note and Get Guid back
+                                        String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(
+                                                evCaseFormSubmit.getPayload().getCaseForm().getDescription(),
+                                                GC_Constants.gc_NoteTypeDescription));
+                                        if (StringUtils.hasText(noteId))
+                                        {
+                                            newCaseEntity4Customer
+                                                    .setDescription(new TY_Description_CaseCreate(noteId));
+                                        }
+                                    }
+
+                                    // Check if Attachment needs to be Created
+                                    if (CollectionUtils.isNotEmpty(evCaseFormSubmit.getPayload().getAttRespList()))
+                                    {
+                                        // Prepare POJOdetails for TY_Case_SrvCloud newCaseEntity4Customer
+                                        List<TY_Attachment_CaseCreate> caseAttachmentsNew = new ArrayList<TY_Attachment_CaseCreate>();
+                                        for (TY_AttachmentResponse attR : evCaseFormSubmit.getPayload()
+                                                .getAttRespList())
+                                        {
+
+                                            if (StringUtils.hasText(attR.getId())
+                                                    && StringUtils.hasText(attR.getUploadUrl()))
+                                            {
+                                                log.info("Attachment with id : " + attR.getId()
+                                                        + " already Persisted in Document Container..");
+
+                                                TY_Attachment_CaseCreate caseAttachment = new TY_Attachment_CaseCreate(
+                                                        attR.getId());
+                                                caseAttachmentsNew.add(caseAttachment);
+
+                                            }
+                                        }
+                                        newCaseEntity4Customer.setAttachments(caseAttachmentsNew);
+
+                                    }
+
+                                    // For Extensions
+                                    if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getCountry())
+                                            || StringUtils
+                                                    .hasText(evCaseFormSubmit.getPayload().getCaseForm().getLanguage()))
+                                    {
+                                        TY_Extensions_CaseCreate extn = new TY_Extensions_CaseCreate();
+                                        if (StringUtils
+                                                .hasText(evCaseFormSubmit.getPayload().getCaseForm().getCountry()))
+                                        {
+                                            extn.setLSO_Country(
+                                                    evCaseFormSubmit.getPayload().getCaseForm().getCountry());
+                                        }
+
+                                        if (StringUtils
+                                                .hasText(evCaseFormSubmit.getPayload().getCaseForm().getLanguage()))
+                                        {
+                                            extn.setLSO_Language(
+                                                    evCaseFormSubmit.getPayload().getCaseForm().getLanguage());
+                                        }
+
+                                        newCaseEntity4Customer.setExtensions(extn);
+
+                                    }
+
+                                    // Set the Channel
+                                    newCaseEntity4Customer.setOrigin(GC_Constants.gc_SelfServiceChannel);
+
+                                    try
+                                    {
+                                        String caseID = srvCloudApiSrv.createCase4Customer(newCaseEntity4Customer);
+                                        if (StringUtils.hasText(caseID))
+                                        {
+                                            handleCaseSuccCreated(evCaseFormSubmit, cusItemO, caseID);
+
+                                        }
+                                    }
+                                    catch (Exception e)
+                                    {
+
+                                        handleCaseCreationError(evCaseFormSubmit, e);
 
                                     }
                                 }
-                                newCaseEntity.setAttachments(caseAttachmentsNew);
 
                             }
 
-                            // For Extensions
-                            if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getCountry())
-                                    || StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getLanguage()))
+                        }
+                        else // Case Create for an Employee
+                        {
+                            newCaseEntity4Employee = new TY_Case_Employee_SrvCloud();
+                            // Account must be present
+                            if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getAccId()))
                             {
-                                TY_Extensions_CaseCreate extn = new TY_Extensions_CaseCreate();
-                                if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getCountry()))
+                                newCaseEntity4Employee.setEmployee(new TY_Employee_CaseCreate(
+                                        evCaseFormSubmit.getPayload().getCaseForm().getAccId())); // Account ID
+
+                                // Case Txn. Type
+                                newCaseEntity4Employee
+                                        .setCaseType(evCaseFormSubmit.getPayload().getCaseForm().getCaseTxnType());
+                                // Cae Subject
+                                newCaseEntity4Employee
+                                        .setSubject(evCaseFormSubmit.getPayload().getCaseForm().getSubject());
+
+                                // Fetch CatgGuid by description from Customizing - Set Categories
+                                if (evCaseFormSubmit.getPayload().getCatTreeSelCatg().length > 0)
                                 {
-                                    extn.setLSO_Country(evCaseFormSubmit.getPayload().getCaseForm().getCountry());
+                                    String[] catTreeSelCatg = evCaseFormSubmit.getPayload().getCatTreeSelCatg();
+                                    if (Arrays.stream(catTreeSelCatg).filter(e -> e != null).count() > 0)
+                                    {
+                                        switch ((int) Arrays.stream(catTreeSelCatg).filter(e -> e != null).count())
+                                        {
+                                        case 4:
+                                            newCaseEntity4Employee
+                                                    .setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[3]));
+                                            newCaseEntity4Employee
+                                                    .setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[2]));
+                                            newCaseEntity4Employee
+                                                    .setCategoryLevel3(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
+                                            newCaseEntity4Employee
+                                                    .setCategoryLevel4(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                                            break;
+                                        case 3:
+                                            newCaseEntity4Employee
+                                                    .setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[2]));
+                                            newCaseEntity4Employee
+                                                    .setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
+                                            newCaseEntity4Employee
+                                                    .setCategoryLevel3(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                                            break;
+                                        case 2:
+                                            newCaseEntity4Employee
+                                                    .setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[1]));
+                                            newCaseEntity4Employee
+                                                    .setCategoryLevel2(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                                            break;
+                                        case 1:
+                                            newCaseEntity4Employee
+                                                    .setCategoryLevel1(new TY_CatgLvl1_CaseCreate(catTreeSelCatg[0]));
+                                        default:
+
+                                            handleCatgError(evCaseFormSubmit, cusItemO);
+
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                        handleCatgError(evCaseFormSubmit, cusItemO);
+
+                                    }
+
+                                    // Create Notes if There is a description
+                                    if (StringUtils
+                                            .hasText(evCaseFormSubmit.getPayload().getCaseForm().getDescription()))
+                                    {
+                                        // Create Note and Get Guid back
+                                        String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(
+                                                evCaseFormSubmit.getPayload().getCaseForm().getDescription(),
+                                                GC_Constants.gc_NoteTypeDescription));
+                                        if (StringUtils.hasText(noteId))
+                                        {
+                                            newCaseEntity4Employee
+                                                    .setDescription(new TY_Description_CaseCreate(noteId));
+                                        }
+                                    }
+
+                                    // Check if Attachment needs to be Created
+                                    if (CollectionUtils.isNotEmpty(evCaseFormSubmit.getPayload().getAttRespList()))
+                                    {
+                                        // Prepare POJOdetails for TY_Case_SrvCloud newCaseEntity4Employee
+                                        List<TY_Attachment_CaseCreate> caseAttachmentsNew = new ArrayList<TY_Attachment_CaseCreate>();
+                                        for (TY_AttachmentResponse attR : evCaseFormSubmit.getPayload()
+                                                .getAttRespList())
+                                        {
+
+                                            if (StringUtils.hasText(attR.getId())
+                                                    && StringUtils.hasText(attR.getUploadUrl()))
+                                            {
+                                                log.info("Attachment with id : " + attR.getId()
+                                                        + " already Persisted in Document Container..");
+
+                                                TY_Attachment_CaseCreate caseAttachment = new TY_Attachment_CaseCreate(
+                                                        attR.getId());
+                                                caseAttachmentsNew.add(caseAttachment);
+
+                                            }
+                                        }
+                                        newCaseEntity4Employee.setAttachments(caseAttachmentsNew);
+
+                                    }
+
+                                    // For Extensions
+                                    if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getCountry())
+                                            || StringUtils
+                                                    .hasText(evCaseFormSubmit.getPayload().getCaseForm().getLanguage()))
+                                    {
+                                        TY_Extensions_CaseCreate extn = new TY_Extensions_CaseCreate();
+                                        if (StringUtils
+                                                .hasText(evCaseFormSubmit.getPayload().getCaseForm().getCountry()))
+                                        {
+                                            extn.setLSO_Country(
+                                                    evCaseFormSubmit.getPayload().getCaseForm().getCountry());
+                                        }
+
+                                        if (StringUtils
+                                                .hasText(evCaseFormSubmit.getPayload().getCaseForm().getLanguage()))
+                                        {
+                                            extn.setLSO_Language(
+                                                    evCaseFormSubmit.getPayload().getCaseForm().getLanguage());
+                                        }
+
+                                        newCaseEntity4Employee.setExtensions(extn);
+
+                                    }
+
+                                    // Set the Channel
+                                    newCaseEntity4Employee.setOrigin(GC_Constants.gc_SelfServiceChannel);
+
+                                    try
+                                    {
+                                        String caseID = srvCloudApiSrv.createCase4Employee(newCaseEntity4Employee);
+                                        if (StringUtils.hasText(caseID))
+                                        {
+                                            handleCaseSuccCreated(evCaseFormSubmit, cusItemO, caseID);
+
+                                        }
+                                    }
+                                    catch (Exception e)
+                                    {
+
+                                        handleCaseCreationError(evCaseFormSubmit, e);
+
+                                    }
                                 }
-
-                                if (StringUtils.hasText(evCaseFormSubmit.getPayload().getCaseForm().getLanguage()))
-                                {
-                                    extn.setLSO_Language(evCaseFormSubmit.getPayload().getCaseForm().getLanguage());
-                                }
-
-                                newCaseEntity.setExtensions(extn);
-
-                            }
-
-                            // Set the Channel
-                            newCaseEntity.setOrigin(GC_Constants.gc_SelfServiceChannel);
-
-                            // Case Payload is now Ready: Post and get the Case ID back
-                            try
-                            {
-                                String caseID = srvCloudApiSrv.createCase(newCaseEntity);
-                                if (StringUtils.hasText(caseID))
-                                {
-                                    handleCaseSuccCreated(evCaseFormSubmit, cusItemO, caseID);
-
-                                }
-                            }
-                            catch (Exception e)
-                            {
-
-                                handleCaseCreationError(evCaseFormSubmit, e);
 
                             }
 

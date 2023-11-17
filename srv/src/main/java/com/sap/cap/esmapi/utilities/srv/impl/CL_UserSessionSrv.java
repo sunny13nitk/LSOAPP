@@ -224,8 +224,6 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                 {
                     try
                     {
-                        // Get the cases for User
-                        // userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAcConEmpl()));
 
                         // Get ONLY Learning Cases for User
                         userSessInfo.setCases(essSrv.getCases4User(userSessInfo.getUserDetails().getUsAccEmpl(),
@@ -884,6 +882,34 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                 }
 
             }
+        }
+        else
+
+        {
+            // Get the cases for User
+            // Clear from Buffer
+            if (CollectionUtils.isNotEmpty(this.getCases4User4mSession()))
+            {
+                userSessInfo.getCases().clear();
+            }
+
+            // Fetch Afresh and Reset
+            try
+            {
+                userSessInfo.setCases(
+                        essSrv.getCases4User(userSessInfo.getUserDetails().getUsAccEmpl(), EnumCaseTypes.Learning));
+                if (CollectionUtils.isNotEmpty(userSessInfo.getSubmissionIDs()))
+                {
+                    // Seek Case IDs for Submissions
+                    updateCases4SubmissionIds();
+                }
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
         }
 
     }
