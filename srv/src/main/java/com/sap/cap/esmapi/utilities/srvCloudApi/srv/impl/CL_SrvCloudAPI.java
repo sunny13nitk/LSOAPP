@@ -70,6 +70,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CustomerCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_DefaultComm;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesDetails;
+import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
@@ -93,6 +94,9 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
     @Autowired
     private TY_CatgCus caseTypeCus;
+
+    @Autowired
+    private TY_RLConfig rlConfig;
 
     @Autowired
     private MessageSource msgSrc;
@@ -2010,7 +2014,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         HttpResponse response = null;
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         String empID = null;
-        if (StringUtils.hasText(userId) && srvCloudUrls != null)
+        // Only Internal User(s) Allowed Login can Execute Employee Search
+        if (StringUtils.hasText(userId) && srvCloudUrls != null && userId.matches(rlConfig.getInternlUsersRegex()))
         {
             userId = '\'' + userId + '\''; // In Parmeter Form
             if (StringUtils.hasText(srvCloudUrls.getEmpById()))

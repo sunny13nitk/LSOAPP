@@ -492,7 +492,7 @@ public class APIRestController
     @GetMapping("/notesURL")
     private String createNotes()
     {
-        TY_NotesCreate newNote = new TY_NotesCreate("This is a new Note dropped in via /n a Service call", null);
+        TY_NotesCreate newNote = new TY_NotesCreate(false,"This is a new Note dropped in via /n a Service call", null);
 
         return srvCloudApiSrv.createNotes(newNote);
     }

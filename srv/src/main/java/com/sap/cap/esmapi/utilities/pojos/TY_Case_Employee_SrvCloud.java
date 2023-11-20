@@ -14,6 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TY_Case_Employee_SrvCloud
 {
+
     private String subject;
     private String caseType;
     private TY_Employee_CaseCreate employee;

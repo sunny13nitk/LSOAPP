@@ -124,9 +124,9 @@ public class EV_HDLR_CaseReplySubmit
                                     if (StringUtils.hasText(cfgO.get().getReplyNoteType()))
                                     {
                                         // Create Note and Get Guid back
-                                        String noteId = srvCloudApiSrv.createNotes(
-                                                new TY_NotesCreate(evCaseReply.getPayload().getCaseReply().getReply(),
-                                                        cfgO.get().getReplyNoteType()));
+                                        String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(false,
+                                                evCaseReply.getPayload().getCaseReply().getReply(),
+                                                cfgO.get().getReplyNoteType()));
                                         if (StringUtils.hasText(noteId))
                                         {
                                             caseReplyPayload.getNotes()
@@ -139,7 +139,7 @@ public class EV_HDLR_CaseReplySubmit
                                     {
                                         // Create REply in Default Note Type
                                         // Create Note and Get Guid back
-                                        String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(
+                                        String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(false,
                                                 evCaseReply.getPayload().getCaseReply().getReply(), null));
                                         if (StringUtils.hasText(noteId))
                                         {

@@ -306,7 +306,7 @@ public class ESSController
                     if (StringUtils.hasText(caseForm.getDescription()))
                     {
                         // Create Note and Get Guid back
-                        String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(caseForm.getDescription(), null));
+                        String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(false,caseForm.getDescription(), null));
                         if (StringUtils.hasText(noteId))
                         {
                             newCaseEntity.setDescription(new TY_Description_CaseCreate(noteId));

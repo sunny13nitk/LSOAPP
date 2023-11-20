@@ -164,20 +164,38 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee();
                     usAccConEmpl.setUserId(token.getLogonName());
                     usAccConEmpl.setUserName(token.getGivenName() + " " + token.getFamilyName());
+
+                    // External/Internal User Classification
+                    if (StringUtils.hasText(token.getLogonName()))
+                    {
+                        if (!token.getLogonName().matches(rlConfig.getInternlUsersRegex()))
+                        {
+                            usAccConEmpl.setExternal(true);
+                        }
+                    }
+
                     usAccConEmpl.setUserEmail(token.getEmail());
                     usAccConEmpl.setAccountId(srvCloudApiSrv.getAccountIdByUserEmail(usAccConEmpl.getUserEmail()));
 
                     // Only seek Employee If Account/Contact not Found
                     if (!StringUtils.hasText(usAccConEmpl.getAccountId()))
                     {
-                        // Seek Employee and populate
-
-                        usAccConEmpl.setEmployeeId(srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId()));
-                        if (StringUtils.hasText(usAccConEmpl.getEmployeeId()))
+                        // If not an External Employee - Only then Seek Employee
+                        if (!usAccConEmpl.isExternal())
                         {
-                            usAccConEmpl.setEmployee(true);
+                            // Seek Employee and populate
+                            usAccConEmpl.setEmployeeId(srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId()));
+                            if (StringUtils.hasText(usAccConEmpl.getEmployeeId()))
+                            {
+                                usAccConEmpl.setEmployee(true);
+                            }
+                            else
+                            {
+                                // Go For Individual Customer Creation with the User Details
+                                newAccountID = this.createAccount();
+                            }
                         }
-                        else
+                        else // External User - Customer Not Found - Direct Customer Creation
                         {
                             // Go For Individual Customer Creation with the User Details
                             newAccountID = this.createAccount();
@@ -816,9 +834,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             /*
              * Test with New Customer
              */
-            String userEmail = "bbedi@gmail.com";
-            String userId = "S598GJJK";
-            String userName = "Bishan Bedi";
+            String userEmail = "ptripathi@gmail.com";
+            String userId = "SGJ456K";
+            String userName = "Pankaj Tripathi";
 
             userDetails.setAuthenticated(true);
             //
@@ -832,6 +850,13 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
              * Test with New Customer
              */
 
+            if (StringUtils.hasText(userId))
+            {
+                if (!userId.matches(rlConfig.getInternlUsersRegex()))
+                {
+                    usAccConEmpl.setExternal(true);
+                }
+            }
             userDetails.setUsAccEmpl(usAccConEmpl);
             userSessInfo.setUserDetails(userDetails); // Set in Session
 

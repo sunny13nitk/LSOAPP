@@ -21,7 +21,8 @@ public class SrvCloudPropsDev
     @Autowired // For PropertySourcesPlaceholderConfigurer
     @Profile(GC_Constants.gc_DEVProfile)
     public TY_SrvCloudUrls SrvCloudUrls(@Value("${username}") final String userName,
-            @Value("${password}") final String password, @Value("${casesurl}") final String casesUrl,
+            @Value("${password}") final String password, @Value("${usernameext}") final String userNameExt,
+            @Value("${passwordext}") final String passwordExt, @Value("${casesurl}") final String casesUrl,
             @Value("${cpurl}") final String cpUrl, @Value("${accountsurl}") final String acUrl,
             @Value("${notesurl}") final String notesUrl, @Value("${topN}") final String topN,
             @Value("${caseTemplateUrl}") final String caseTemplateUrl,
@@ -36,9 +37,9 @@ public class SrvCloudPropsDev
     )
 
     {
-        TY_SrvCloudUrls srvClUrls = new TY_SrvCloudUrls(userName, password, casesUrl, cpUrl, acUrl, notesUrl, topN,
-                caseTemplateUrl, catgTreeUrl, docSrvUrl, emplSrvUrl, vhlpUrl, caseDetailsUrl, statusCfgUrl,
-                accByEmailUrl, conByEmailUrl, empByIdUrl, casesByAccUrl, casesByEmplUrl, customerUrl);
+        TY_SrvCloudUrls srvClUrls = new TY_SrvCloudUrls(userName, password, userNameExt, passwordExt, casesUrl, cpUrl,
+                acUrl, notesUrl, topN, caseTemplateUrl, catgTreeUrl, docSrvUrl, emplSrvUrl, vhlpUrl, caseDetailsUrl,
+                statusCfgUrl, accByEmailUrl, conByEmailUrl, empByIdUrl, casesByAccUrl, casesByEmplUrl, customerUrl);
 
         return srvClUrls;
     }

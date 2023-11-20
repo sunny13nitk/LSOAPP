@@ -39,9 +39,11 @@ public class PropertyConfig
 	@Autowired // For PropertySourcesPlaceholderConfigurer
 	public TY_RLConfig RatelimitConfigLoad(@Value("${numFormSubms}") final int numFormSubms,
 			@Value("${intvSecs}") final long intvSecs, @Value("${allowedAttachments}") final String allowedAttachments,
-			@Value("${allowedSizeAttachmentMB}") final long allowedSizeAttachmentMB)
+			@Value("${allowedSizeAttachmentMB}") final long allowedSizeAttachmentMB,
+			@Value("${internalUsers}") final String internalUsersRegex)
 	{
-		TY_RLConfig rlConfig = new TY_RLConfig(numFormSubms, intvSecs, allowedAttachments, allowedSizeAttachmentMB);
+		TY_RLConfig rlConfig = new TY_RLConfig(numFormSubms, intvSecs, allowedAttachments, allowedSizeAttachmentMB,
+				internalUsersRegex);
 		return rlConfig;
 	}
 

@@ -3,6 +3,8 @@ package com.sap.cap.esmapi.utilities.pojos;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TY_Case_Customer_SrvCloud
 {
+    @JsonIgnore
+    private boolean external;
     private String subject;
     private String caseType;
     private TY_Account_CaseCreate account;

@@ -14,6 +14,8 @@ public class TY_SrvCloudUrls
 {
     private String userName;
     private String password;
+    private String userNameExt;
+    private String passwordExt;
     private String casesUrl;
     private String cpUrl;
     private String accountsUrl;
