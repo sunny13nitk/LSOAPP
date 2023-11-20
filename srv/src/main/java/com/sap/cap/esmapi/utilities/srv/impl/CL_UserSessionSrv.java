@@ -168,7 +168,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     // External/Internal User Classification
                     if (StringUtils.hasText(token.getLogonName()))
                     {
-                        if (!token.getLogonName().matches(rlConfig.getInternlUsersRegex()))
+                        if (!token.getLogonName().matches(rlConfig.getInternalUsersRegex()))
                         {
                             usAccConEmpl.setExternal(true);
                         }
@@ -377,6 +377,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                                 {
                                     // Create Attachment
                                     TY_Attachment newAttachment = new TY_Attachment(
+                                            userSessInfo.getUserDetails().getUsAccEmpl().isExternal(),
                                             FilenameUtils.getName(attachment.getName()),
                                             GC_Constants.gc_Attachment_Category, false);
                                     caseFormAsync.getAttRespList().add(srvCloudApiSrv.createAttachment(newAttachment));
@@ -852,7 +853,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
             if (StringUtils.hasText(userId))
             {
-                if (!userId.matches(rlConfig.getInternlUsersRegex()))
+                if (!userId.matches(rlConfig.getInternalUsersRegex()))
                 {
                     usAccConEmpl.setExternal(true);
                 }
@@ -1192,6 +1193,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                             {
                                 // Create Attachment
                                 TY_Attachment newAttachment = new TY_Attachment(
+                                        userSessInfo.getUserDetails().getUsAccEmpl().isExternal(),
                                         FilenameUtils.getName(attachment.getName()),
                                         GC_Constants.gc_Attachment_Category, false);
                                 caseReplyAsync.getAttRespList().add(srvCloudApiSrv.createAttachment(newAttachment));

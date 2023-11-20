@@ -347,7 +347,7 @@ public class ESSLocalController
                         if (caseForm.getAttachment().getBytes() != null)
                         {
                             // Create Attachment
-                            TY_Attachment newAttachment = new TY_Attachment(
+                            TY_Attachment newAttachment = new TY_Attachment(false,
                                     FilenameUtils.getName(caseForm.getAttachment().getOriginalFilename()),
                                     GC_Constants.gc_Attachment_Category, false);
                             attR = srvCloudApiSrv.createAttachment(newAttachment);

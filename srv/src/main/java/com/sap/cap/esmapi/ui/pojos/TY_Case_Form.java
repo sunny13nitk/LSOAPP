@@ -25,6 +25,7 @@ public class TY_Case_Form
     private boolean countryMandatory;
     private boolean langMandatory;
     private boolean employee;
+    private boolean external;
 
     @Override
     public String toString()

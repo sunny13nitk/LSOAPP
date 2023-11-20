@@ -196,7 +196,9 @@ public class EV_HDLR_CaseFormSubmit
                                                                                 // Create Note and Get Guid back
                                                                                 String noteId = srvCloudApiSrv
                                                                                                 .createNotes(new TY_NotesCreate(
-                                                                                                                false,
+                                                                                                                evCaseFormSubmit.getPayload()
+                                                                                                                                .getCaseForm()
+                                                                                                                                .isExternal(),
                                                                                                                 evCaseFormSubmit.getPayload()
                                                                                                                                 .getCaseForm()
                                                                                                                                 .getDescription(),
@@ -283,6 +285,13 @@ public class EV_HDLR_CaseFormSubmit
                                                                         // Set the Channel
                                                                         newCaseEntity4Customer.setOrigin(
                                                                                         GC_Constants.gc_SelfServiceChannel);
+
+                                                                        // Set the External User Flag - Pick Right
+                                                                        // Technical User in D/S API Call
+                                                                        newCaseEntity4Customer.setExternal(
+                                                                                        evCaseFormSubmit.getPayload()
+                                                                                                        .getCaseForm()
+                                                                                                        .isExternal());
 
                                                                         try
                                                                         {
@@ -420,7 +429,9 @@ public class EV_HDLR_CaseFormSubmit
                                                                                 // Create Note and Get Guid back
                                                                                 String noteId = srvCloudApiSrv
                                                                                                 .createNotes(new TY_NotesCreate(
-                                                                                                                false,
+                                                                                                                evCaseFormSubmit.getPayload()
+                                                                                                                                .getCaseForm()
+                                                                                                                                .isExternal(),
                                                                                                                 evCaseFormSubmit.getPayload()
                                                                                                                                 .getCaseForm()
                                                                                                                                 .getDescription(),

@@ -2015,7 +2015,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
         String empID = null;
         // Only Internal User(s) Allowed Login can Execute Employee Search
-        if (StringUtils.hasText(userId) && srvCloudUrls != null && userId.matches(rlConfig.getInternlUsersRegex()))
+        if (StringUtils.hasText(userId) && srvCloudUrls != null && userId.matches(rlConfig.getInternalUsersRegex()))
         {
             userId = '\'' + userId + '\''; // In Parmeter Form
             if (StringUtils.hasText(srvCloudUrls.getEmpById()))
@@ -3512,8 +3512,18 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             String casePOSTURL = getPOSTURL4BaseUrl(srvCloudUrls.getCasesUrl());
             if (StringUtils.hasText(casePOSTURL))
             {
-                String encoding = Base64.getEncoder()
-                        .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                String encoding = null;
+                if (caseEntity.isExternal())
+                {
+                    encoding = Base64.getEncoder().encodeToString(
+                            (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
+                }
+                else
+                {
+                    encoding = Base64.getEncoder()
+                            .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                }
                 HttpPost httpPost = new HttpPost(casePOSTURL);
                 httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
                 httpPost.addHeader("Content-Type", "application/json");
