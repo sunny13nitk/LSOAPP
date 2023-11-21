@@ -63,7 +63,7 @@ public class AppSecurityConfig
         .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
         // allowed
         .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
-        .antMatchers(HttpMethod.GET, "/static/**").permitAll()
+        .antMatchers(HttpMethod.GET, "/static/images/**").permitAll()
         // allowed
         .anyRequest().denyAll() // Deny any other endpoint access then listed above
         .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()

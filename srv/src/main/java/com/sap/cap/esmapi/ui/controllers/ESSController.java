@@ -313,7 +313,7 @@ public class ESSController
                             newCaseEntity.setDescription(new TY_Description_CaseCreate(noteId));
                         }
                     }
-
+ 
                     // Check if Attachment needs to be Created
                     if (caseForm.getAttachment() != null)
                     {
