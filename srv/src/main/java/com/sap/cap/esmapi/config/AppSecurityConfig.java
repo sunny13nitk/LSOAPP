@@ -43,17 +43,18 @@ public class AppSecurityConfig
     /*
      * ----------- Local Testing --------------------
      */
-    // return
-    // http.requestMatchers().antMatchers("/api/**").antMatchers("/esslocal/**").antMatchers("/poclocal/**").and()
-    // .csrf().disable() // don't insist on csrf tokens in put, post etc.
-    // .authorizeRequests().anyRequest().permitAll().and().build();
+
+    // http.authorizeRequests().antMatchers(HttpMethod.GET,
+    // "/static/**").permitAll();
+    // http.requestMatchers().antMatchers("/api/**").antMatchers("/esslocal/**").antMatchers("/poclocal/**").and().csrf()
+    // .disable() // don't insist on csrf tokens in put, post etc.
+    // .authorizeRequests().anyRequest().permitAll();
 
     /*
      * ----------- CF Deployment --------------------
      */
     // @formatter:off
 
-    http.authorizeRequests().antMatchers(HttpMethod.GET, "/js/**", "/css/**", "/img/**").permitAll();
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         // session is created by approuter
         .and().authorizeRequests() // authorize all requests
@@ -62,6 +63,7 @@ public class AppSecurityConfig
         .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
         // allowed
         .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
+        .antMatchers(HttpMethod.GET, "/static/**").permitAll()
         // allowed
         .anyRequest().denyAll() // Deny any other endpoint access then listed above
         .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
@@ -75,7 +77,7 @@ public class AppSecurityConfig
   @Bean
   public WebSecurityCustomizer webSecurityCustomizer() throws Exception
   {
-    return (web) -> web.ignoring().antMatchers("/images/**").antMatchers("/css/**");
+    return (web) -> web.ignoring().antMatchers("/static/**").antMatchers("/images/**").antMatchers("/css/**");
   }
 
   // /*
