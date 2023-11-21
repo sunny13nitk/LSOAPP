@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -51,6 +52,8 @@ public class AppSecurityConfig
      * ----------- CF Deployment --------------------
      */
     // @formatter:off
+
+    http.authorizeRequests().antMatchers(HttpMethod.GET, "/js/**", "/css/**", "/img/**").permitAll();
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         // session is created by approuter
         .and().authorizeRequests() // authorize all requests
