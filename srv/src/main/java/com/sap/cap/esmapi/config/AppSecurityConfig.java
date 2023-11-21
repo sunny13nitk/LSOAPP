@@ -9,9 +9,11 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.sap.cloud.security.xsuaa.XsuaaServiceConfiguration;
 import com.sap.cloud.security.xsuaa.extractor.IasXsuaaExchangeBroker;
@@ -65,6 +67,12 @@ public class AppSecurityConfig
 
     // return http.build();
 
+  }
+
+  @Bean
+  public WebSecurityCustomizer webSecurityCustomizer() throws Exception
+  {
+    return (web) -> web.ignoring().antMatchers("/images/**").antMatchers("/css/**");
   }
 
   // /*

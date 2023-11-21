@@ -81,8 +81,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@Primary
-@Profile(GC_Constants.gc_DEVProfile)
 public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 {
 
@@ -609,7 +607,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     {
 
                         String encoding = Base64.getEncoder().encodeToString(
-                                (srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                                (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
 
                         try
                         {
@@ -1062,8 +1060,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 String accPOSTURL = getPOSTURL4BaseUrl(srvCloudUrls.getCustomerUrl());
                 if (StringUtils.hasText(accPOSTURL))
                 {
-                    String encoding = Base64.getEncoder()
-                            .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                    String encoding = Base64.getEncoder().encodeToString(
+                            (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
                     HttpPost httpPost = new HttpPost(accPOSTURL);
                     httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
                     httpPost.addHeader("Content-Type", "application/json");
@@ -1180,7 +1178,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
         try
         {
-            if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword())
+            if (StringUtils.hasLength(srvCloudUrls.getUserNameExt())
+                    && StringUtils.hasLength(srvCloudUrls.getPasswordExt())
                     && StringUtils.hasLength(srvCloudUrls.getCaseTemplateUrl()))
             {
                 log.info("Url and Credentials Found!!");
@@ -1382,7 +1381,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
         try
         {
-            if (StringUtils.hasLength(srvCloudUrls.getUserName()) && StringUtils.hasLength(srvCloudUrls.getPassword())
+            if (StringUtils.hasLength(srvCloudUrls.getUserNameExt())
+                    && StringUtils.hasLength(srvCloudUrls.getPasswordExt())
                     && StringUtils.hasLength(srvCloudUrls.getCatgTreeUrl()))
             {
                 log.info("Url and Credentials Found!!");
@@ -1557,8 +1557,19 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             String notesPOSTURL = srvCloudUrls.getNotesUrl();
             if (StringUtils.hasText(notesPOSTURL))
             {
-                String encoding = Base64.getEncoder()
-                        .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                String encoding = null;
+                if (notes.isExternal())
+                {
+                    encoding = Base64.getEncoder().encodeToString(
+                            (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
+                }
+                else
+                {
+                    encoding = Base64.getEncoder()
+                            .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                }
+
                 HttpPost httpPost = new HttpPost(notesPOSTURL);
                 httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
                 httpPost.addHeader("Content-Type", "application/json");
@@ -1798,10 +1809,21 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             {
                 HttpClient httpclient = HttpClients.createDefault();
                 String docPOSTURL = srvCloudUrls.getDocSrvUrl();
+                String encoding = null;
+                if (attachment.isExternal())
+                {
+                    encoding = Base64.getEncoder().encodeToString(
+                            (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
+                }
+                else
+                {
+                    encoding = Base64.getEncoder()
+                            .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                }
 
                 // Call Attachment POST to generate the Document Store Url
-                String encoding = Base64.getEncoder()
-                        .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
                 HttpPost httpPost = new HttpPost(docPOSTURL);
                 httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
                 httpPost.addHeader("Content-Type", "application/json");
@@ -2477,8 +2499,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                 urlLink = srvCloudUrls.getVhlpUrl() + fieldName;
 
-                String encoding = Base64.getEncoder()
-                        .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                String encoding = Base64.getEncoder().encodeToString(
+                        (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
 
                 HttpGet httpGet = new HttpGet(urlLink);
 
@@ -2631,8 +2653,19 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                     if (StringUtils.hasText(urlLink))
                     {
-                        String encoding = Base64.getEncoder().encodeToString(
-                                (srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                        String encoding = null;
+
+                        if (userDetails.isExternal())
+                        {
+                            encoding = Base64.getEncoder().encodeToString(
+                                    (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
+                        }
+                        else
+                        {
+                            encoding = Base64.getEncoder().encodeToString(
+                                    (srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                        }
 
                         try
                         {
@@ -2960,8 +2993,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                     urlLink = srvCloudUrls.getCaseDetailsUrl() + caseId;
 
-                    String encoding = Base64.getEncoder()
-                            .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                    String encoding = Base64.getEncoder().encodeToString(
+                            (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
 
                     HttpGet httpGet = new HttpGet(urlLink);
 
@@ -3211,8 +3244,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                 urlLink = srvCloudUrls.getStatusSchemaUrl() + StatusSchema;
 
-                String encoding = Base64.getEncoder()
-                        .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                String encoding = Base64.getEncoder().encodeToString(
+                        (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
 
                 HttpGet httpGet = new HttpGet(urlLink);
 
@@ -3312,10 +3345,21 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                 String casePOSTURL = getPOSTURL4BaseUrl(srvCloudUrls.getCaseDetailsUrl());
                 if (StringUtils.hasText(casePOSTURL))
                 {
+                    String encoding = null;
                     casePOSTURL = casePOSTURL + patchInfo.getCaseGuid();
 
-                    String encoding = Base64.getEncoder()
-                            .encodeToString((srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+                    if (caseReply.isExternal())
+                    {
+                        encoding = Base64.getEncoder().encodeToString(
+                                (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
+                    }
+                    else
+                    {
+                        encoding = Base64.getEncoder().encodeToString(
+                                (srvCloudUrls.getUserName() + ":" + srvCloudUrls.getPassword()).getBytes());
+
+                    }
+
                     HttpPatch httpPatch = new HttpPatch(casePOSTURL);
                     httpPatch.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
                     httpPatch.addHeader("Content-Type", "application/json");

@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class TY_CaseEdit_Form
 {
     private TY_CaseDetails caseDetails;
+    private boolean external;
     private String reply;
     private MultipartFile attachment;
 }

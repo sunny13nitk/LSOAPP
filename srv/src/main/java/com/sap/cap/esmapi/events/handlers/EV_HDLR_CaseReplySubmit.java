@@ -155,8 +155,6 @@ public class EV_HDLR_CaseReplySubmit
                             }
 
                             // Check if Attachment needs to be Created
-
-                            // Check if Attachment needs to be Created
                             if (CollectionUtils.isNotEmpty(evCaseReply.getPayload().getAttRespList()))
                             {
                                 // Prepare POJOdetails for TY_Case_SrvCloud newCaseEntity
@@ -178,6 +176,9 @@ public class EV_HDLR_CaseReplySubmit
                                 caseReplyPayload.setAttachments(caseAttachmentsNew);
 
                             }
+
+                            // Pass the External User Flag for External User Logon
+                            caseReplyPayload.setExternal(evCaseReply.getPayload().getCaseReply().isExternal());
 
                             if (caseReplyPayload != null)
                             {

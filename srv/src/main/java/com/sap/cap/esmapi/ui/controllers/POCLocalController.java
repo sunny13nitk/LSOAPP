@@ -27,6 +27,7 @@ import com.sap.cap.esmapi.catg.srv.intf.IF_CatgSrv;
 import com.sap.cap.esmapi.events.event.EV_CaseFormSubmit;
 import com.sap.cap.esmapi.events.event.EV_CaseReplySubmit;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.ui.pojos.TY_CaseEditFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
@@ -248,7 +249,7 @@ public class POCLocalController
                 // Fire Case Submission Event - To be processed Asyncronously
 
                 TY_CaseFormAsync caseFormAsync = userSessSrv.getCurrentForm4Submission();
-                // External/Internal User Pass to Asynch Session as Session Scoped Service would
+                // External/Internal User Pass to Asynch Thread as Session Scoped Service would
                 // not be accessible in Asynch thread
                 caseFormAsync.getCaseForm().setExternal(userSessSrv.getUserDetails4mSession().isExternal());
                 EV_CaseFormSubmit eventCaseSubmit = new EV_CaseFormSubmit(this, caseFormAsync);
@@ -699,8 +700,12 @@ public class POCLocalController
             else
             {
                 // Fire Case Submission Event - To be processed Asyncronously
-                EV_CaseReplySubmit eventCaseReplySubmit = new EV_CaseReplySubmit(this,
-                        userSessSrv.getCurrentReplyForm4Submission());
+                TY_CaseEditFormAsync caseEditFormAsync = userSessSrv.getCurrentReplyForm4Submission();
+
+                // External/Internal User Pass to Asynch Thread as Session Scoped Service would
+                // not be accessible in Asynch thread
+                caseEditFormAsync.getCaseReply().setExternal(userSessSrv.getUserDetails4mSession().isExternal());
+                EV_CaseReplySubmit eventCaseReplySubmit = new EV_CaseReplySubmit(this, caseEditFormAsync);
                 applicationEventPublisher.publishEvent(eventCaseReplySubmit);
             }
 
