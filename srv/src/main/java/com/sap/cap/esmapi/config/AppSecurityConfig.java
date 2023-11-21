@@ -64,7 +64,6 @@ public class AppSecurityConfig
         // allowed
         .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
         .antMatchers(HttpMethod.GET, "/static/images/**").permitAll()
-        .antMatchers(HttpMethod.GET, "/images/**").permitAll()
         // allowed
         .anyRequest().denyAll() // Deny any other endpoint access then listed above
         .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
@@ -79,7 +78,7 @@ public class AppSecurityConfig
   public WebSecurityCustomizer webSecurityCustomizer() throws Exception
   {
     return (web) -> web.ignoring().antMatchers("/static/**").antMatchers("/images/**").antMatchers("/css/**");
-  } 
+  }
 
   // /*
   // ----------- CF Deployment --------------------
