@@ -53,8 +53,8 @@ public class AppSecurityConfig
     /*
      * ----------- CF Deployment --------------------
      */
-    // @formatter:off
 
+    // @formatter:off
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         // session is created by approuter
         .and().authorizeRequests() // authorize all requests
