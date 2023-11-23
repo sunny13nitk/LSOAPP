@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -212,7 +213,7 @@ public class CL_CatalogSrv implements IF_CatalogSrv
         TY_CatgDetails catgDetails = null;
 
         if (StringUtils.hasText(catId) && CollectionUtils.isNotEmpty(catgTmplCus.getCatgTemplates())
-        
+
                 && caseType != null)
         {
             TY_CatalogTree catgTree = this.getCaseCatgTree4LoB(caseType);
@@ -296,6 +297,16 @@ public class CL_CatalogSrv implements IF_CatalogSrv
                             if (caseCatgContainer == null)
                             {
                                 caseCatgContainer = new ArrayList<TY_CatalogTree>();
+                            }
+
+                            if (caseCFgO.get().getToplvlCatgOnly())
+                            {
+                                List<TY_CatalogItem> toplvlCatgs = caseCatgTree.getCategories().stream()
+                                        .filter(c -> c.getParentId() == null).collect(Collectors.toList());
+                                if (CollectionUtils.isNotEmpty(toplvlCatgs))
+                                {
+                                    caseCatgTree.setCategories(toplvlCatgs);
+                                }
                             }
                             this.caseCatgContainer.add(caseCatgTree);
                         }

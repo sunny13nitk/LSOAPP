@@ -26,5 +26,7 @@ public class TY_CatgCusItem
     private String statusSchema;
     @CsvBindByPosition(position = 5)
     private String replyNoteType;
+    @CsvBindByPosition(position = 6)
+    private Boolean toplvlCatgOnly;
 
 }

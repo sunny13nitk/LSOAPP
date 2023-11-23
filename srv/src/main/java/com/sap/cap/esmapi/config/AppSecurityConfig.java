@@ -30,11 +30,11 @@ import com.sap.cloud.security.xsuaa.tokenflows.XsuaaTokenFlows;
 public class AppSecurityConfig
 {
 
-  @Autowired
-  private XsuaaServiceConfiguration xsuaaServiceConfiguration;
+  // @Autowired
+  // private XsuaaServiceConfiguration xsuaaServiceConfiguration;
 
-  @Autowired
-  XsuaaTokenFlows xsuaaTokenFlows;
+  // @Autowired
+  // XsuaaTokenFlows xsuaaTokenFlows;
 
   @Bean
   public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception
@@ -44,31 +44,31 @@ public class AppSecurityConfig
      * ----------- Local Testing --------------------
      */
 
-    // http.authorizeRequests().antMatchers(HttpMethod.GET,
-    // "/static/**").permitAll();
-    // http.requestMatchers().antMatchers("/api/**").antMatchers("/esslocal/**").antMatchers("/poclocal/**").and().csrf()
-    // .disable() // don't insist on csrf tokens in put, post etc.
-    // .authorizeRequests().anyRequest().permitAll();
+    http.authorizeRequests().antMatchers(HttpMethod.GET, "/static/**").permitAll();
+    http.requestMatchers().antMatchers("/api/**").antMatchers("/esslocal/**").antMatchers("/poclocal/**").and().csrf()
+        .disable() // don't insist on csrf tokens in put, post etc.
+        .authorizeRequests().anyRequest().permitAll();
 
     /*
      * ----------- CF Deployment --------------------
      */
 
-    // @formatter:off
-    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        // session is created by approuter
-        .and().authorizeRequests() // authorize all requests
-        .antMatchers("/api/**").hasAuthority("Administrators") // Only Administrators
-        // Allowed
-        .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
-        // allowed
-        .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
-        .antMatchers(HttpMethod.GET, "/static/images/**").permitAll()
-        // allowed
-        .anyRequest().denyAll() // Deny any other endpoint access then listed above
-        .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
-        .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
-    // @formatter:on
+    // // @formatter:off
+    // http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    // // session is created by approuter
+    // .and().authorizeRequests() // authorize all requests
+    // .antMatchers("/api/**").hasAuthority("Administrators") // Only Administrators
+    // // Allowed
+    // .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
+    // // allowed
+    // .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
+    // .antMatchers(HttpMethod.GET, "/static/images/**").permitAll()
+    // // allowed
+    // .anyRequest().denyAll() // Deny any other endpoint access then listed above
+    // .and().oauth2ResourceServer().bearerTokenResolver(new
+    // IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
+    // .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
+    // // @formatter:on
 
     return http.build();
 
@@ -83,11 +83,12 @@ public class AppSecurityConfig
   // /*
   // ----------- CF Deployment --------------------
   // */
-  Converter<Jwt, AbstractAuthenticationToken> getJwtAuthoritiesConverter()
-  {
-    TokenAuthenticationConverter converter = new TokenAuthenticationConverter(xsuaaServiceConfiguration);
-    converter.setLocalScopeAsAuthorities(true);
-    return converter;
-  }
+  // Converter<Jwt, AbstractAuthenticationToken> getJwtAuthoritiesConverter()
+  // {
+  // TokenAuthenticationConverter converter = new
+  // TokenAuthenticationConverter(xsuaaServiceConfiguration);
+  // converter.setLocalScopeAsAuthorities(true);
+  // return converter;
+  // }
 
 }
