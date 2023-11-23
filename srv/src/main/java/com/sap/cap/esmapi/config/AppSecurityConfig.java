@@ -29,7 +29,7 @@ import com.sap.cloud.security.xsuaa.tokenflows.XsuaaTokenFlows;
 @EnableAsync
 public class AppSecurityConfig
 {
-
+ 
   @Autowired
   private XsuaaServiceConfiguration xsuaaServiceConfiguration;
 
