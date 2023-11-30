@@ -105,13 +105,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     private IF_StatusSrv statusSrv;
 
     @Autowired
-    private IF_AttachmentValdationSrv attValdSrv;
-
-    @Autowired
     private IF_SessAttachmentsService attSrv;
 
     // Properties
-
     private TY_UserSessionInfo userSessInfo;
 
     @Override
@@ -678,57 +674,64 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                     if (cusItemO.isPresent())
                     {
-                        long catLen = Arrays.stream(catalogSrv.getCatgHierarchyforCatId(
-                                userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc(),
-                                cusItemO.get().getCaseTypeEnum())).filter(Objects::nonNull).count();
-                        // Check that Category is not a level 1 - Base Category
-                        if (catLen <= 1)
+                        // Only Validate for Category Lower than level 1 if Set in Customization for
+                        // Multi level Categories in Case Type
+                        if (!cusItemO.get().getToplvlCatgOnly())
                         {
-                            // Extract Category Description
-                            TY_CatalogTree catgTree = catalogSrv.getCaseCatgTree4LoB(cusItemO.get().getCaseTypeEnum());
-                            if (catgTree != null)
+
+                            long catLen = Arrays.stream(catalogSrv.getCatgHierarchyforCatId(
+                                    userSessInfo.getCurrentForm4Submission().getCaseForm().getCatgDesc(),
+                                    cusItemO.get().getCaseTypeEnum())).filter(Objects::nonNull).count();
+                            // Check that Category is not a level 1 - Base Category
+                            if (catLen <= 1)
                             {
-                                if (CollectionUtils.isNotEmpty(catgTree.getCategories()))
+                                // Extract Category Description
+                                TY_CatalogTree catgTree = catalogSrv
+                                        .getCaseCatgTree4LoB(cusItemO.get().getCaseTypeEnum());
+                                if (catgTree != null)
                                 {
-
-                                    // Remove blank Categories from Catalog Tree Used for UI Presentation
-                                    catgTree.getCategories().removeIf(x -> x.getId() == null);
-                                    Optional<TY_CatalogItem> currCatgDetailsO = catgTree
-                                            .getCategories().stream().filter(f -> f.getId().equals(userSessInfo
-                                                    .getCurrentForm4Submission().getCaseForm().getCatgDesc()))
-                                            .findFirst();
-                                    if (currCatgDetailsO.isPresent())
+                                    if (CollectionUtils.isNotEmpty(catgTree.getCategories()))
                                     {
-                                        // Payload Error as Category level shuld be atleast 2
-                                        String msg = msgSrc.getMessage("ERR_CATG_LVL", new Object[]
-                                        { currCatgDetailsO.get().getName() }, Locale.ENGLISH);
-                                        log.error(msg); // System Log
 
-                                        // Logging Framework
-                                        TY_Message logMsg = new TY_Message(
-                                                userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
-                                                Timestamp.from(Instant.now()), EnumStatus.Error,
-                                                EnumMessageType.ERR_PAYLOAD,
-                                                userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), msg);
-                                        userSessInfo.getMessagesStack().add(logMsg);
+                                        // Remove blank Categories from Catalog Tree Used for UI Presentation
+                                        catgTree.getCategories().removeIf(x -> x.getId() == null);
+                                        Optional<TY_CatalogItem> currCatgDetailsO = catgTree
+                                                .getCategories().stream().filter(f -> f.getId().equals(userSessInfo
+                                                        .getCurrentForm4Submission().getCaseForm().getCatgDesc()))
+                                                .findFirst();
+                                        if (currCatgDetailsO.isPresent())
+                                        {
+                                            // Payload Error as Category level shuld be atleast 2
+                                            String msg = msgSrc.getMessage("ERR_CATG_LVL", new Object[]
+                                            { currCatgDetailsO.get().getName() }, Locale.ENGLISH);
+                                            log.error(msg); // System Log
 
-                                        // Instantiate and Fire the Event : Syncronous processing
-                                        EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
-                                        applicationEventPublisher.publishEvent(logMsgEvent);
+                                            // Logging Framework
+                                            TY_Message logMsg = new TY_Message(
+                                                    userSessInfo.getUserDetails().getUsAccEmpl().getUserId(),
+                                                    Timestamp.from(Instant.now()), EnumStatus.Error,
+                                                    EnumMessageType.ERR_PAYLOAD,
+                                                    userSessInfo.getUserDetails().getUsAccEmpl().getUserId(), msg);
+                                            userSessInfo.getMessagesStack().add(logMsg);
 
-                                        this.addFormErrors(msg);// For Form Display
+                                            // Instantiate and Fire the Event : Syncronous processing
+                                            EV_LogMessage logMsgEvent = new EV_LogMessage(this, logMsg);
+                                            applicationEventPublisher.publishEvent(logMsgEvent);
 
+                                            this.addFormErrors(msg);// For Form Display
+
+                                        }
+                                        // Refurbish Blank Category at Top for New Form - Session maintained
+                                        catgTree.getCategories().add(0, new TY_CatalogItem());
                                     }
-                                    // Refurbish Blank Category at Top for New Form - Session maintained
-                                    catgTree.getCategories().add(0, new TY_CatalogItem());
                                 }
+
+                                // Add to Display Messages : to be shown to User or Successful Submission
+                                isValid = false;
+
                             }
 
-                            // Add to Display Messages : to be shown to User or Successful Submission
-                            isValid = false;
-
                         }
-
                     }
 
                 }
