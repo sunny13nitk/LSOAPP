@@ -165,7 +165,7 @@ public class EV_HDLR_CaseFormSubmit
                                                                                                                                         catTreeSelCatg[1]));
                                                                                         newCaseEntity4Customer
                                                                                                         .setCategoryLevel2(
-                                                                                                                        new TY_CatgLvl1_CaseCreate(
+                                                                                                                         new TY_CatgLvl1_CaseCreate(
                                                                                                                                         catTreeSelCatg[0]));
                                                                                         break;
                                                                                 case 1:
