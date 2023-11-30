@@ -408,6 +408,7 @@ public class EV_HDLR_CaseFormSubmit
                                                                                                         .setCategoryLevel1(
                                                                                                                         new TY_CatgLvl1_CaseCreate(
                                                                                                                                         catTreeSelCatg[0]));
+                                                                                        break;
                                                                                 default:
 
                                                                                         handleCatgError(evCaseFormSubmit,
