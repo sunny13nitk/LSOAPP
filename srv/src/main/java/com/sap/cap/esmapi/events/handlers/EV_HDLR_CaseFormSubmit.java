@@ -413,6 +413,7 @@ public class EV_HDLR_CaseFormSubmit
 
                                                                                         handleCatgError(evCaseFormSubmit,
                                                                                                         cusItemO);
+                                                                                        break;                
 
                                                                                 }
                                                                         }
