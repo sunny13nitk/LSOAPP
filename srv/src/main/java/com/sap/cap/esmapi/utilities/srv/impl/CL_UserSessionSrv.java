@@ -845,7 +845,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
             Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, userName, userEmail,
                     srvCloudApiSrv.getAccountIdByUserEmail(userEmail), srvCloudApiSrv.getEmployeeIdByUserId(userId),
-                    false, false);
+                    false, true);
 
             /*
              * Test with New Customer
