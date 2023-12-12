@@ -29,7 +29,7 @@ import com.sap.cloud.security.xsuaa.tokenflows.XsuaaTokenFlows;
 @EnableAsync
 public class AppSecurityConfig
 {
- 
+
   @Autowired
   private XsuaaServiceConfiguration xsuaaServiceConfiguration;
 
@@ -62,10 +62,9 @@ public class AppSecurityConfig
         // Allowed
         .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
         // allowed
-        .antMatchers("/lso/**").permitAll()// Only Authenticated user(s) via IDP
-        .antMatchers(HttpMethod.GET, "/static/images/**").permitAll()
-        .antMatchers(HttpMethod.GET, "/static/css/**").permitAll()
-        .antMatchers(HttpMethod.GET, "/static/js/**").permitAll()
+        .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
+        .antMatchers(HttpMethod.GET, "/static/images/**").permitAll().antMatchers(HttpMethod.GET, "/static/css/**")
+        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll()
         // allowed
         .anyRequest().denyAll() // Deny any other endpoint access then listed above
         .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
@@ -79,7 +78,8 @@ public class AppSecurityConfig
   @Bean
   public WebSecurityCustomizer webSecurityCustomizer() throws Exception
   {
-    return (web) -> web.ignoring().antMatchers("/static/**").antMatchers("/images/**").antMatchers("/css/**");
+    return (web) -> web.ignoring().antMatchers("/static/**").antMatchers("/images/**").antMatchers("/css/**")
+        .antMatchers("/js/**");
   }
 
   // /*
