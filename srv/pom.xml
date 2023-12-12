@@ -153,6 +153,17 @@
     </dependencies>
 
     <build>
+    <resources>
+        <resource>
+            <directory>src/main/resources</directory>
+            <targetPath>static/</targetPath> <!-- Add this -->
+            <includes>
+                <include>css/*</include>
+                <include>images/*</include>
+                <include>js/*</include>
+            </includes>
+        </resource>
+    </resources>
         <finalName>${project.artifactId}</finalName>
         <plugins>
             <!-- SPRING BOOT PLUGIN -->

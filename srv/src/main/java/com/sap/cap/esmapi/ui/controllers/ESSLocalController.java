@@ -120,34 +120,6 @@ public class ESSLocalController
         return "essListViewLocal";
     }
 
-    private Ty_UserAccountEmployee getUserAccount()
-    {
-        return new Ty_UserAccountEmployee("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
-                "11eda929-5152-18be-afdb-81d9ac010a00", "11ed17c5-47d5-c4de-afdb-818bd8010a00", false, false);
-
-        // return new Ty_UserAccountContact("Dummy ESS2", "ESS Portal Test1",
-        // "testess2@gmail.com",
-        // "11edb2b5-5f45-64fe-afdb-81df97010a00", null);
-
-        // if(userSrv.getUserDetails4mSession() != null)
-        // {
-        // System.out.println("Account from Session");
-        // return new Ty_UserAccountContact("Dummy ESS5", "ESS Portal Test5",
-        // "testess5@gmail.com",
-        // userSrv.getUserDetails4mSession().getAccountId(),
-        // userSrv.getUserDetails4mSession().getContactId());
-
-        // }
-        // else
-        // {
-        // System.out.println("Account is New");
-        // return new Ty_UserAccountContact("Dummy ESS5", "ESS Portal Test5",
-        // "testess5@gmail.com",
-        // null, null);
-
-        // }
-    }
-
     @GetMapping("/createCase/{caseType}")
     public String showTxnDetails4Scrip(@PathVariable("caseType") EnumCaseTypes caseType, Model model) throws Exception
     {
@@ -415,6 +387,34 @@ public class ESSLocalController
 
         }
         return "redirect:/esslocal/";
+    }
+
+    private Ty_UserAccountEmployee getUserAccount()
+    {
+        return new Ty_UserAccountEmployee("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
+                "11eda929-5152-18be-afdb-81d9ac010a00", "11ed17c5-47d5-c4de-afdb-818bd8010a00", false, false);
+
+        // return new Ty_UserAccountContact("Dummy ESS2", "ESS Portal Test1",
+        // "testess2@gmail.com",
+        // "11edb2b5-5f45-64fe-afdb-81df97010a00", null);
+
+        // if(userSrv.getUserDetails4mSession() != null)
+        // {
+        // System.out.println("Account from Session");
+        // return new Ty_UserAccountContact("Dummy ESS5", "ESS Portal Test5",
+        // "testess5@gmail.com",
+        // userSrv.getUserDetails4mSession().getAccountId(),
+        // userSrv.getUserDetails4mSession().getContactId());
+
+        // }
+        // else
+        // {
+        // System.out.println("Account is New");
+        // return new Ty_UserAccountContact("Dummy ESS5", "ESS Portal Test5",
+        // "testess5@gmail.com",
+        // null, null);
+
+        // }
     }
 
     private List<String> validateCaseForm(TY_Case_Form caseForm)
