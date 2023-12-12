@@ -62,7 +62,7 @@ public class AppSecurityConfig
         // Allowed
         .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
         // allowed
-        .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
+        .antMatchers("/lso/**").permitAll()// Only Authenticated user(s) via IDP
         .antMatchers(HttpMethod.GET, "/static/images/**").permitAll()
         .antMatchers(HttpMethod.GET, "/static/css/**").permitAll()
         .antMatchers(HttpMethod.GET, "/static/js/**").permitAll()
