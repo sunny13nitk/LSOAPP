@@ -79,11 +79,9 @@ public class AppSecurityConfig
   @Bean
   public WebSecurityCustomizer webSecurityCustomizer() throws Exception
   {
-    // return (web) ->
-    // web.ignoring().antMatchers("/static/**").antMatchers("/images/**").antMatchers("/css/**")
-    // .antMatchers("/js/**");
+    return (web) -> web.ignoring().antMatchers("/static/**").antMatchers("/images/**").antMatchers("/css/**")
+        .antMatchers("/js/**");
 
-    return (web) -> web.ignoring().antMatchers("/static/**");
   }
 
   // /*
