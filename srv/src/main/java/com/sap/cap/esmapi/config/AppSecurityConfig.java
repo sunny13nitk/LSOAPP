@@ -23,7 +23,6 @@ import com.sap.cloud.security.xsuaa.tokenflows.XsuaaTokenFlows;
 
 @Configuration
 @EnableWebSecurity
-
 // @Order(1) // needs to have higher priority than CAP security config
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 @EnableAsync
@@ -60,8 +59,9 @@ public class AppSecurityConfig
         .and().authorizeRequests() // authorize all requests
         .antMatchers(HttpMethod.GET, "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
         .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll()
-        .antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/api/**").hasAuthority("Administrators") // Only
-                                                                                                                        // Administrators
+        .antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/api/**").hasAuthority("Administrators")
+        // Only
+        // Administrators
         // Allowed
         .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
         // allowed
@@ -79,8 +79,11 @@ public class AppSecurityConfig
   @Bean
   public WebSecurityCustomizer webSecurityCustomizer() throws Exception
   {
-    return (web) -> web.ignoring().antMatchers("/static/**").antMatchers("/images/**").antMatchers("/css/**")
-        .antMatchers("/js/**");
+    // return (web) ->
+    // web.ignoring().antMatchers("/static/**").antMatchers("/images/**").antMatchers("/css/**")
+    // .antMatchers("/js/**");
+
+    return (web) -> web.ignoring().antMatchers("/static/**");
   }
 
   // /*
