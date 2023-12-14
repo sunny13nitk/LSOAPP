@@ -222,6 +222,27 @@
 </head>
 
 <body>
+   <!-- <newlxp-header entrypoint="support"></newlxp-header>
+   <newlxp-announcements entrypoint="support"></newlxp-announcements> -->
+   <section class="customer-info-wrapper">
+      <span class="mif-contacts-dialer mif-10x fg-blue" style="padding: 18px; padding-right: 40px;"></span>
+      <div class="customer-info-text">
+         <p>Dear valued learner,</p>
+         <p>please note the following Information while contacting us:</p>
+         <ul>
+            <li><span>You can expect to receive a response from us within one business day.</span></li>
+            <li><span>Our service is available from Monday to Friday and in English only (submitting your query in a
+                  language other than English may impact the response time).</span></li>
+            <li><span>Please provide us with as much information as possible when entering your ticket e.g. your user ID
+                  (if applicable), screenshots of the issue, course code (if there is an issue with specific content),
+                  any reference numbers included in the error message / emails you have received etc., browser version,
+                  exact path to error / steps to reproduce in order for us to be able to reproduce the issue.</span>
+            </li>
+         </ul>
+         <p>Thank you</p>
+         <p>Your SAP Learning Support Team</p>
+      </div>
+   </section>
 
    <div class="frame" style="padding: 20px;  overflow: auto; background-color: #FFFFFF">
 
@@ -252,16 +273,12 @@
                   </div>
                </div>
             </div>
-
          </div>
-
-
       </div>
 
       <!-- Form Row - Begin  -->
 
       <div class="row flex-justify-center" th:if="${caseForm.getAccId() != null}">
-
 
          <!--Error Messages Row - Starts -->
 
@@ -272,7 +289,6 @@
                   data-title-caption="Case Form Validation Error(s)" data-collapsed="true" data-collapsible="true"
                   data-cls-panel="shadow-3" data-cls-title="bg-lightRed fg-white"
                   data-cls-content="bg-lightRed fg-white">
-
                   <div class="cell-11">
                      <table class="table  table compact">
                         <tbody>
@@ -282,18 +298,14 @@
                            </tr>
                         </tbody>
                      </table>
-
                   </div>
                </div>
-
-
             </div>
          </div>
 
          <!--Error Messages Row - Ends -->
 
          <!-- Form - Begin -->
-
 
          <div class="colspan-10 offset-1" style="margin-top: 5px">
             <div class="card">
@@ -303,16 +315,16 @@
                </h6>
                <form th:object="${caseForm}" enctype="multipart/form-data" th:action="@{/poclocal/saveCase}"
                   method="post">
-
-
                   <input type="hidden" th:field="*{accId}" />
                   <input type="hidden" th:field="*{caseTxnType}" />
                   <div class="colspan-9 offset-1" style="margin-top: 15px; margin-bottom: 10px;">
-                     <label>Subject </label> <input class="alert metro-input input-large" type="text" data-role="input"
+                     <label>Subject </label>
+                     <input class="alert metro-input input-large" type="text" data-role="input"
                         data-prepend="<span style = 'padding-top:7px' class='mif-event-available mif-3x'></span>"
                         title="" th:field="*{subject}" />
-                     <small class="text-muted">Enter
-                        Issue Main Description. </small>
+                     <small class="text-muted">
+                        Enter Issue Main Description.
+                     </small>
                   </div>
 
                   <div class="colspan-9 offset-1" style="margin-top: 5px; margin-bottom: 10px"
@@ -326,24 +338,20 @@
                            th:text="${catg.parentName != null} ? ${catg.parentName} + '>' +${catg.name}: ${catg.name}">
 
                         </option>
-
-
                      </select>
-                     <small class="text-muted">Select Service Category from dropdown and Hit Reload to Refresh Form for
-                        Chosen Category. </small>
+                     <small class="text-muted">
+                        Select Service Category from dropdown and Hit Reload to Refresh Form for Chosen Category.
+                     </small>
                      <span>
                         <button id="refresh" style="margin: 3px;" class="button secondary cycle outline" type="submit"
                            name="action" value="catgChange">
                            <span class="mif-replay"></span>
                         </button>
                      </span>
-
                   </div>
-
 
                   <div class="colspan-9 offset-1" style="margin-top: 35px; margin-bottom: 10px">
                      <label>Description</label>
-
                      <div th:if="${caseForm.template != null}" style="padding-top: 15px; padding-bottom: 20px;">
                         <!-- Panel for Template(s) -->
                         <div data-role="panel"
@@ -351,7 +359,6 @@
                            data-collapsed="false" data-collapsible="true" data-cls-panel="shadow-3"
                            data-cls-title="bg-lightGray fg-black" data-cls-content="bg-transparent fg-black">
                            <div th:utext="*{template}"></div>
-
                         </div>
                      </div>
 
@@ -374,10 +381,7 @@
 
                         <option th:each="countryI: ${LSO_Country}" th:value="${countryI.key}"
                            th:selected="${countryI.key}" th:text="${countryI.value}">
-
                         </option>
-
-
                      </select>
                   </div>
 
@@ -390,10 +394,7 @@
 
                         <option th:each="languageI: ${LSO_Language}" th:value="${languageI.key}"
                            th:selected="${languageI.key}" th:text="${languageI.value}">
-
                         </option>
-
-
                      </select>
                   </div>
 
@@ -449,58 +450,25 @@
                            </table>
                         </div>
                      </div>
-
-
-
                   </div>
 
-
-
-                  <div class="d-flex flex-row-r" style="margin-top: 30px; margin-bottom: 10px; margin-right: 20px;">
-                     <button class="button rounded " style="color: #004466; background: #00ffb3" data-role="hint"
-                        data-hint-position="top" data-cls-hint="fg-black" data-hint-text="Submit the Case" name="action"
-                        value="saveCase">
-                        <span class="mif-beenhere" style="margin-left: 0px"> </span> <span
-                           style="margin-left: 3px">Submit</span>
+                  <div class="case-form-footer-btn pb-4" style="margin-left: 500px; margin-top: 25px;">
+                     <button class="ds-button ds-button--primary" name="action" value="saveCase" role="button">
+                        Submit
                      </button>
-
-
-                     <a href="#" class="button rounded "
-                        style="color: #004466; background: #FF004C; margin-left: 10px; margin-right: 20px;"
-                        data-role="hint" th:href="@{/poclocal/}" role="button" data-hint-position="top"
-                        data-cls-hint="fg-black" data-hint-text="Cancel Case Submission.">
-                        <span class="mif-cancel" style="margin-left: 0px">
-                        </span>
-                        <span style="margin-left: 3px">Cancel
-                        </span>
+                     <a href="#" class="ds-button ds-button--secondary" th:href="@{/poclocal/}" role="button">
+                        Cancel
                      </a>
-
-
                   </div>
                </form>
             </div>
          </div>
-
-
-
-
-
-
-
-
       </div>
 
       <!-- Form Row - Ends -->
 
-
-
-
-
-
-
    </div>
-
-
+   <newlxp-footer></newlxp-footer>
 
    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
    <script th:inline="javascript">
@@ -514,6 +482,9 @@
 
    <!-- Metro 4 -->
    <script src="https://cdn.metroui.org.ua/v4.3.2/js/metro.min.js"></script>
+
+   <!-- Load Web Components -- START -->
+   <!-- <script type="text/javascript" th:src="@{/js/web_components_loading.js}"></script> -->
 </body>
 
 </html>

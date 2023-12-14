@@ -43,11 +43,10 @@ public class AppSecurityConfig
      * ----------- Local Testing --------------------
      */
 
-    http.authorizeRequests().antMatchers(HttpMethod.GET,
-    "/static/**").permitAll();
+    http.authorizeRequests().antMatchers(HttpMethod.GET, "/static/**").permitAll();
     http.requestMatchers().antMatchers("/api/**").antMatchers("/esslocal/**").antMatchers("/poclocal/**").and().csrf()
-    .disable() // don't insist on csrf tokens in put, post etc.
-    .authorizeRequests().anyRequest().permitAll();
+        .disable() // don't insist on csrf tokens in put, post etc.
+        .authorizeRequests().anyRequest().permitAll();
 
     /*
      * ----------- CF Deployment --------------------
@@ -55,26 +54,29 @@ public class AppSecurityConfig
 
     // @formatter:off
     // http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-    //     // session is created by approuter
-    //     .and().authorizeRequests() // authorize all requests
-    //     .antMatchers(HttpMethod.GET, "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
-    //     .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll()
-    //     .antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/api/**").hasAuthority("Administrators")
-    //     // Only
-    //     // Administrators
-    //     // Allowed
-    //     .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
-    //     // allowed
-    //     .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
-    //     // allowed
-    //     .anyRequest().denyAll() // Deny any other endpoint access then listed above
-    //     .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
-    //     .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
+    // // session is created by approuter
+    // .and().authorizeRequests() // authorize all requests
+    // .antMatchers(HttpMethod.GET,
+    // "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
+    // .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll()
+    // .antMatchers(HttpMethod.GET,
+    // "/static/js/**").permitAll().antMatchers("/api/**").hasAuthority("Administrators")
+    // // Only
+    // // Administrators
+    // // Allowed
+    // .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
+    // // allowed
+    // .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
+    // // allowed
+    // .anyRequest().denyAll() // Deny any other endpoint access then listed above
+    // .and().oauth2ResourceServer().bearerTokenResolver(new
+    // IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
+    // .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
     // @formatter:on
 
     return http.build();
 
-}
+  }
 
   @Bean
   public WebSecurityCustomizer webSecurityCustomizer() throws Exception
@@ -89,9 +91,10 @@ public class AppSecurityConfig
   // */
   // Converter<Jwt, AbstractAuthenticationToken> getJwtAuthoritiesConverter()
   // {
-  //   TokenAuthenticationConverter converter = new TokenAuthenticationConverter(xsuaaServiceConfiguration);
-  //   converter.setLocalScopeAsAuthorities(true);
-  //   return converter;
+  // TokenAuthenticationConverter converter = new
+  // TokenAuthenticationConverter(xsuaaServiceConfiguration);
+  // converter.setLocalScopeAsAuthorities(true);
+  // return converter;
   // }
 
 }

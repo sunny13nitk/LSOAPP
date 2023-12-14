@@ -154,7 +154,7 @@ public class LSOController
         }
 
         // # UI Test - #Delete
-        if (userInfo.getName().equals("I057386"))
+        if (userInfo.getId().equals("I057386"))
         {
             return lsoCaseListViewLXSS;
         }
