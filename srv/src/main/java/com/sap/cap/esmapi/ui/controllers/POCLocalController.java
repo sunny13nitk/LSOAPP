@@ -137,7 +137,7 @@ public class POCLocalController
 
         }
 
-        return "essListViewPOCLocal";
+        return "essListViewPOCLocalLXSS";
 
     }
 

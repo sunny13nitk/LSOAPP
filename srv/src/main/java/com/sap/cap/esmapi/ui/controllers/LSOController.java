@@ -85,6 +85,7 @@ public class LSOController
     private final String caseFormView = "caseFormLSO";
     private final String caseFormReply = "caseFormReplyLSO";
     private final String lsoCaseListView = "lsoCasesListView";
+    private final String lsoCaseListViewLXSS = "lsoCasesListViewLXSS";
     private final String caseFormReplyErrorRedirect = "redirect:/lso/errCaseReply/";
 
     @GetMapping("/")
@@ -150,6 +151,12 @@ public class LSOController
                 }
             }
 
+        }
+
+        // # UI Test - #Delete
+        if (userInfo.getName().equals("I057386"))
+        {
+            return lsoCaseListViewLXSS;
         }
         return lsoCaseListView;
 
