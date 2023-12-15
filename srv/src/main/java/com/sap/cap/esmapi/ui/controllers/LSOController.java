@@ -651,12 +651,7 @@ public class LSOController
             }
         }
 
-        // # UI Test - #Delete
-        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
-        {
-            return caseFormViewLXSS;
-        }
-        return caseFormView;
+        return caseFormViewLXSS;
     }
 
     @PostMapping(value = "/saveCaseReply", params = "action=saveCaseEdit")
