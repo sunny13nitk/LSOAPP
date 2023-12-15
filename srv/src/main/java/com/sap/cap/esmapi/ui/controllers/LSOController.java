@@ -78,7 +78,7 @@ public class LSOController
     private IF_SessAttachmentsService attSrv;
 
     @Autowired
-    private TY_RLConfig rlConfig;
+    private TY_RLConfig rlConfig; 
 
     private final String caseListVWRedirect = "redirect:/lso/";
     private final String caseFormErrorRedirect = "redirect:/lso/errForm/";
