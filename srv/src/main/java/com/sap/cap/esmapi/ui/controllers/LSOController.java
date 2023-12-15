@@ -83,6 +83,7 @@ public class LSOController
     private final String caseListVWRedirect = "redirect:/lso/";
     private final String caseFormErrorRedirect = "redirect:/lso/errForm/";
     private final String caseFormView = "caseFormLSO";
+    private final String caseFormViewLXSS = "caseFormLSOLXSS";
     private final String caseFormReply = "caseFormReplyLSO";
     private final String lsoCaseListView = "lsoCasesListView";
     private final String lsoCaseListViewLXSS = "lsoCasesListViewLXSS";
@@ -242,6 +243,11 @@ public class LSOController
 
         }
 
+         // # UI Test - #Delete
+        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
+        {
+            return caseFormViewLXSS;
+        }
         return viewCaseForm;
     }
 
