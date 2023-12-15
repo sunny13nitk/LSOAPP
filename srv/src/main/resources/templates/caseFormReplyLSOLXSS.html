@@ -548,13 +548,13 @@
 
                      <div th:if="*{caseDetails.statusTransitionCFG.transCfg.editAllowed == true}"
                         class="case-form-reply-buttons"
-                        style="margin-top: 30px; margin-bottom: 10px; margin-right: 20px;">
+                        style="margin-top: 30px; margin-bottom: 10px; margin-right: 20px; margin-left: 500px;">
                         <button class="ds-button ds-button--primary" data-hint-text="Submit Reply" name="action"
                            value="saveCaseEdit">
                            Reply
                         </button>
 
-                        <a href="#" class="ds-button ds-button--secondary" th:href="@{/poclocal/}" role="button"
+                        <a href="#" class="ds-button ds-button--secondary" th:href="@{/lso/}" role="button"
                            data-hint-text="Cancel Case Submission.">
                            Cancel
                         </a>

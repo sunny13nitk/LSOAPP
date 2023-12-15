@@ -155,20 +155,20 @@ public class LSOController
 
         }
 
-        // # UI Test - #Delete
-        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
-        {
-            return lsoCaseListViewLXSS;
-        }
-        log.info("UID Logged -  " + userInfo.getId());
-        return lsoCaseListView;
+        // // # UI Test - #Delete
+        // if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
+        // {
+        // return lsoCaseListViewLXSS;
+        // }
+        // log.info("UID Logged - " + userInfo.getId());
+        return lsoCaseListViewLXSS;
 
     }
 
     @GetMapping("/createCase/")
     public String showCaseAsyncForm(Model model)
     {
-        String viewCaseForm = caseFormView;
+        String viewCaseForm = caseFormViewLXSS;
 
         if ((StringUtils.hasText(userSessSrv.getUserDetails4mSession().getAccountId())
                 || StringUtils.hasText(userSessSrv.getUserDetails4mSession().getEmployeeId()))
@@ -244,11 +244,6 @@ public class LSOController
 
         }
 
-        // # UI Test - #Delete
-        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
-        {
-            return caseFormViewLXSS;
-        }
         return viewCaseForm;
     }
 
@@ -295,7 +290,7 @@ public class LSOController
     @PostMapping(value = "/saveCase", params = "action=upload")
     public String uploadAttachments(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
     {
-        String viewName = caseFormView;
+        String viewName = caseFormViewLXSS;
 
         List<String> attMsgs = Collections.emptyList();
 
@@ -374,12 +369,6 @@ public class LSOController
             }
 
             log.info("Processing of Case Attachment Upload Form - UI layer :Ends....");
-        }
-
-        // # UI Test - #Delete
-        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
-        {
-            return caseFormViewLXSS;
         }
 
         return viewName;
@@ -500,20 +489,14 @@ public class LSOController
 
         }
 
-        // # UI Test - #Delete
-        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
-        {
-            return caseFormViewLXSS;
-        }
-
-        return caseFormView;
+        return caseFormViewLXSS;
     }
 
     @PostMapping(value = "/saveCase", params = "action=catgChange")
     public String refreshCaseForm4Catg(@ModelAttribute("caseForm") TY_Case_Form caseForm, Model model)
     {
 
-        String viewCaseForm = caseFormView;
+        String viewCaseForm = caseFormViewLXSS;
         if (caseForm != null && userSessSrv != null)
         {
 
@@ -591,12 +574,6 @@ public class LSOController
 
             }
 
-        }
-
-        // # UI Test - #Delete
-        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
-        {
-            return caseFormViewLXSS;
         }
 
         return viewCaseForm;
@@ -771,12 +748,7 @@ public class LSOController
             }
         }
 
-        // # UI Test - #Delete
-        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
-        {
-            return caseFormReplyLXSS;
-        }
-        return caseFormReply;
+        return caseFormReplyLXSS;
     }
 
     @GetMapping("/caseReply/removeAttachment/{fileName}")
@@ -841,13 +813,8 @@ public class LSOController
                 model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
             }
         }
-        // # UI Test - #Delete
-        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
-        {
-            return caseFormReplyLXSS;
-        }
 
-        return caseFormReply;
+        return caseFormReplyLXSS;
 
     }
 
@@ -908,12 +875,8 @@ public class LSOController
                         Locale.ENGLISH));
             }
         }
-        // # UI Test - #Delete
-        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
-        {
-            return caseFormReplyLXSS;
-        }
-        return caseFormReply;
+
+        return caseFormReplyLXSS;
 
     }
 
@@ -961,13 +924,8 @@ public class LSOController
                 }
             }
         }
-        // # UI Test - #Delete
-        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
-        {
-            return caseFormReplyLXSS;
-        }
 
-        return caseFormReply;
+        return caseFormReplyLXSS;
     }
 
 }
