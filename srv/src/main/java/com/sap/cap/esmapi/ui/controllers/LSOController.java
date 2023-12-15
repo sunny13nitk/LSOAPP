@@ -78,7 +78,7 @@ public class LSOController
     private IF_SessAttachmentsService attSrv;
 
     @Autowired
-    private TY_RLConfig rlConfig; 
+    private TY_RLConfig rlConfig;
 
     private final String caseListVWRedirect = "redirect:/lso/";
     private final String caseFormErrorRedirect = "redirect:/lso/errForm/";
@@ -243,7 +243,7 @@ public class LSOController
 
         }
 
-         // # UI Test - #Delete
+        // # UI Test - #Delete
         if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
         {
             return caseFormViewLXSS;
@@ -375,6 +375,12 @@ public class LSOController
             log.info("Processing of Case Attachment Upload Form - UI layer :Ends....");
         }
 
+        // # UI Test - #Delete
+        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
+        {
+            return caseFormViewLXSS;
+        }
+
         return viewName;
 
     }
@@ -493,6 +499,12 @@ public class LSOController
 
         }
 
+        // # UI Test - #Delete
+        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
+        {
+            return caseFormViewLXSS;
+        }
+
         return caseFormView;
     }
 
@@ -580,6 +592,12 @@ public class LSOController
 
         }
 
+        // # UI Test - #Delete
+        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
+        {
+            return caseFormViewLXSS;
+        }
+
         return viewCaseForm;
 
     }
@@ -653,6 +671,12 @@ public class LSOController
                 }
 
             }
+        }
+
+        // # UI Test - #Delete
+        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
+        {
+            return caseFormViewLXSS;
         }
         return caseFormView;
     }
