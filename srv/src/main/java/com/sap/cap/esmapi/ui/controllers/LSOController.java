@@ -158,6 +158,7 @@ public class LSOController
         {
             return lsoCaseListViewLXSS;
         }
+        log.info("UID Logged -  " + userInfo.getId());
         return lsoCaseListView;
 
     }
