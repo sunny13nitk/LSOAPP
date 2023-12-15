@@ -85,6 +85,7 @@ public class LSOController
     private final String caseFormView = "caseFormLSO";
     private final String caseFormViewLXSS = "caseFormLSOLXSS";
     private final String caseFormReply = "caseFormReplyLSO";
+    private final String caseFormReplyLXSS = "caseFormReplyLSOLXSS";
     private final String lsoCaseListView = "lsoCasesListView";
     private final String lsoCaseListViewLXSS = "lsoCasesListViewLXSS";
     private final String caseFormReplyErrorRedirect = "redirect:/lso/errCaseReply/";
@@ -770,6 +771,11 @@ public class LSOController
             }
         }
 
+        // # UI Test - #Delete
+        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
+        {
+            return caseFormReplyLXSS;
+        }
         return caseFormReply;
     }
 
@@ -835,6 +841,11 @@ public class LSOController
                 model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
             }
         }
+        // # UI Test - #Delete
+        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
+        {
+            return caseFormReplyLXSS;
+        }
 
         return caseFormReply;
 
@@ -897,6 +908,11 @@ public class LSOController
                         Locale.ENGLISH));
             }
         }
+        // # UI Test - #Delete
+        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
+        {
+            return caseFormReplyLXSS;
+        }
         return caseFormReply;
 
     }
@@ -944,6 +960,11 @@ public class LSOController
                     return "error";
                 }
             }
+        }
+        // # UI Test - #Delete
+        if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
+        {
+            return caseFormReplyLXSS;
         }
 
         return caseFormReply;
