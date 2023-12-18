@@ -40,10 +40,11 @@ public class PropertyConfig
 	public TY_RLConfig RatelimitConfigLoad(@Value("${numFormSubms}") final int numFormSubms,
 			@Value("${intvSecs}") final long intvSecs, @Value("${allowedAttachments}") final String allowedAttachments,
 			@Value("${allowedSizeAttachmentMB}") final long allowedSizeAttachmentMB,
-			@Value("${internalUsers}") final String internalUsersRegex)
+			@Value("${internalUsers}") final String internalUsersRegex,
+			@Value("${techUserRegex}") final String techUserRegex)
 	{
 		TY_RLConfig rlConfig = new TY_RLConfig(numFormSubms, intvSecs, allowedAttachments, allowedSizeAttachmentMB,
-				internalUsersRegex);
+				internalUsersRegex, techUserRegex);
 		return rlConfig;
 	}
 

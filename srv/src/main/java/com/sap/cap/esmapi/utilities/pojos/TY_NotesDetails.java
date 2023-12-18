@@ -18,5 +18,6 @@ public class TY_NotesDetails
     private OffsetDateTime timestamp;
     private String createdByName;
     private String content;
+    private boolean agentNote;
 
 }

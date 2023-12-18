@@ -14,4 +14,5 @@ public class TY_RLConfig
     private String allowedAttachments;
     private long allowedSizeAttachmentMB;
     private String internalUsersRegex;
+    private String techUserRegex;
 }

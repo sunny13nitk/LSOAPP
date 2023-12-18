@@ -352,14 +352,26 @@
                         <!-- Top Row -->
 
                         <div class="row d-flex flex-justify-left">
-                            <div class="cell-2">
+                            <div class="cell-3">
 
-                                <h6 style="color: #54627B; margin: 10px; margin-top: 27px; vertical-align: bottom;">Case
-                                    ID :
+                                <div class="row d-flex flex-justify-left">
+                                    <h6 style="color: #54627B; margin: 10px; margin-top: 27px; vertical-align: bottom;">
+                                        Case
+                                        ID :
+                                        <span style="color: #B1365B; vertical-align: bottom;"
+                                            th:text="${caseEditForm.getCaseDetails().caseId}">
+                                        </span>
+                                    </h6>
+                                </div>
+
+                                <blockquote style="margin-left: 10px;">
                                     <span style="color: #B1365B; vertical-align: bottom;"
-                                        th:text="${caseEditForm.getCaseDetails().caseId}">
+                                        th:text="${caseEditForm.getCaseDetails().status}">
                                     </span>
-                                </h6>
+                                    <small>Current
+                                        <cite title="Status">Status</cite>
+                                    </small>
+                                </blockquote>
                             </div>
 
                             <div class="cell-8">
@@ -369,7 +381,7 @@
                             </div>
 
                             <!-- Customize Button - Col Start -->
-                            <div class="cell -2" style="margin-left: 10px; margin-top: 27px">
+                            <div class="cell -1" style="margin-left: 3px; margin-top: 27px">
                                 <a href="#" class="button primary rounded outline" th:href="@{/poclocal/}"
                                     role="button">
                                     <span class="mif-backward icon" style="margin-left: 0px"></span>
@@ -422,56 +434,131 @@
                             <div th:each="note,iterStat: *{caseDetails.notes}">
 
                                 <div style="margin-top: 10px;"></div>
-                                <div th:if="${note != null && iterStat.index == 0}" data-role="panel"
-                                    data-title-caption="Interaction" data-cls-panel="shadow-1"
-                                    data-title-icon="<span class='mif-apps'></span>" data-collapsed="false"
-                                    data-collapsible="true" data-cls-title="bg-lightGray fg-black"
-                                    data-cls-content="bg-transparent fg-black" class="colspan-9 offset-1">
+                                <!-- Top Most REply  -->
+                                <div th:if="${note != null && iterStat.index == 0}">
 
-                                    <div th:if="${note.content != null}">
-                                        <!-- <div class="row colspan-9 offset-1"> -->
-                                        <div>
+                                    <div th:if="${note.isAgentNote() == true}" data-role="panel"
+                                        data-title-caption="SAP Learning Support Team Response"
+                                        data-cls-panel="shadow-1" data-cls-title="bg-lightOlive fg-white"
+                                        data-title-icon="<span class='mif-clipboard'></span>" data-collapsed="false"
+                                        data-collapsible="true" data-cls-content="bg-transparent fg-black"
+                                        class="colspan-9 offset-1">
 
-                                            <h6 style="color: #325254" th:if="${note.createdByName != null}">
-                                                <span style="margin-left: 10px;" class="mif-user fg-blue"></span>
-                                                <span style="margin-left: 5px;"
-                                                    th:text="${#strings.arraySplit(note.createdByName,' ')[0]  + ' , SAP Learning Support Team' }"></span>
-                                                <span style="margin-left: 20px;" class="mif-alarm-on fg-blue"></span>
-                                                <span style="margin-left: 5px;"
-                                                    th:text="${#temporals.format(note.timestamp, 'yyyy-MM-dd HH:mm:ss')}"></span>
-                                            </h6>
+                                        <div th:if="${note.content != null}">
+                                            <!-- <div class="row colspan-9 offset-1"> -->
+                                            <div>
 
+                                                <h6 style="color: #325254" th:if="${note.createdByName != null}">
+                                                    <span style="margin-left: 10px;"
+                                                        class="mif-user-secret fg-olive"></span>
+                                                    <!-- <span style="margin-left: 5px;"
+                                                th:text="${#strings.arraySplit(note.createdByName,' ')[0]  + ' , SAP Learning Support Team' }"></span> -->
+                                                    <span style="margin-left: 5px; font-size: .90em"
+                                                        th:text="${#strings.arraySplit(note.createdByName,' ')[0] }"></span>
+                                                    <span style="margin-left: 20px;"
+                                                        class="mif-alarm-on fg-olive"></span>
+                                                    <span style="margin-left: 5px;font-size: .90em"
+                                                        th:text="${#temporals.format(note.timestamp, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                                                </h6>
+
+                                            </div>
+                                            <div style="font-size: 1.1em;" th:utext="${note.content}"></div>
+                                            <!-- </div> -->
                                         </div>
-                                        <div th:utext="${note.content}"></div>
-                                        <!-- </div> -->
+                                    </div>
+                                    <div th:if="${note.isAgentNote() != true}" data-role="panel"
+                                        data-title-caption="User Interaction" data-cls-panel="shadow-1"
+                                        data-cls-title="bg-lightGray fg-black"
+                                        data-title-icon="<span class='mif-apps'></span>" data-collapsed="false"
+                                        data-collapsible="true" data-cls-content="bg-transparent fg-black"
+                                        class="colspan-9 offset-1">
+
+                                        <div th:if="${note.content != null}">
+                                            <!-- <div class="row colspan-9 offset-1"> -->
+                                            <div>
+
+                                                <h6 style="color: #325254" th:if="${note.createdByName != null}">
+                                                    <span style="margin-left: 10px;" class="mif-user fg-blue"></span>
+                                                    <span style="margin-left: 5px; font-size: .90em"
+                                                        th:text="${#strings.arraySplit(note.createdByName,' ')[0] }"></span>
+                                                    <span style="margin-left: 20px;"
+                                                        class="mif-alarm-on fg-blue"></span>
+                                                    <span style="margin-left: 5px; font-size: .90em"
+                                                        th:text="${#temporals.format(note.timestamp, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                                                </h6>
+
+                                            </div>
+                                            <div style="font-size: 1.1em;" th:utext="${note.content}"></div>
+                                            <!-- </div> -->
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div th:if="${note != null && iterStat.index > 0}" data-role="panel"
-                                    data-title-caption="Interaction" data-cls-panel="shadow-1"
-                                    data-title-icon="<span class='mif-apps'></span>" data-collapsed="true"
-                                    data-collapsible="true" data-cls-title="bg-lightGray fg-black"
-                                    data-cls-content="bg-transparent fg-black" class="colspan-9 offset-1">
-                                    <div th:if="${note.content != null}">
-                                        <!-- <div class="row colspan-9 offset-1"> -->
-                                        <div>
 
-                                            <h6 style="color: #325254" th:if="${note.createdByName != null}">
-                                                <span style="margin-left: 10px;" class="mif-user fg-blue"></span>
-                                                <span style="margin-left: 5px;"
-                                                    th:text="${#strings.arraySplit(note.createdByName,' ')[0]  + ' , SAP Learning Support Team' }"></span>
-                                                <span style="margin-left: 20px;" class="mif-alarm-on fg-blue"></span>
-                                                <span style="margin-left: 5px;"
-                                                    th:text="${#temporals.format(note.timestamp, 'yyyy-MM-dd HH:mm:ss')}"></span>
-                                            </h6>
+                                <!-- REply By Agent -->
+                                <div th:if="${note != null && iterStat.index > 0}">
 
+                                    <div th:if="${note.isAgentNote() == true}" data-role="panel"
+                                        data-title-caption="SAP Learning Support Team Response"
+                                        data-cls-panel="shadow-1" data-cls-title="bg-lightOlive fg-white"
+                                        data-title-icon="<span class='mif-clipboard'></span>" data-collapsed="true"
+                                        data-collapsible="true" data-cls-content="bg-transparent fg-black"
+                                        class="colspan-9 offset-1">
+
+                                        <div th:if="${note.content != null}">
+                                            <!-- <div class="row colspan-9 offset-1"> -->
+                                            <div>
+
+                                                <h6 style="color: #325254" th:if="${note.createdByName != null}">
+                                                    <span style="margin-left: 10px;"
+                                                        class="mif-user-secret fg-olive"></span>
+                                                    <!-- <span style="margin-left: 5px;"
+                                            th:text="${#strings.arraySplit(note.createdByName,' ')[0]  + ' , SAP Learning Support Team' }"></span> -->
+                                                    <span style="margin-left: 5px; font-size: .90em"
+                                                        th:text="${#strings.arraySplit(note.createdByName,' ')[0] }"></span>
+                                                    <span style="margin-left: 20px;"
+                                                        class="mif-alarm-on fg-olive"></span>
+                                                    <span style="margin-left: 5px;font-size: .90em"
+                                                        th:text="${#temporals.format(note.timestamp, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                                                </h6>
+
+                                            </div>
+                                            <div style="font-size: 1.1em;" th:utext="${note.content}"></div>
+                                            <!-- </div> -->
                                         </div>
-                                        <div th:utext="${note.content}"></div>
-
-                                        <!-- </div> -->
-
                                     </div>
+                                    <div th:if="${note.isAgentNote() != true}" data-role="panel"
+                                        data-title-caption="User Interaction" data-cls-panel="shadow-1"
+                                        data-cls-title="bg-lightGray fg-black"
+                                        data-title-icon="<span class='mif-apps'></span>" data-collapsed="true"
+                                        data-collapsible="true" data-cls-content="bg-transparent fg-black"
+                                        class="colspan-9 offset-1">
+
+                                        <div th:if="${note.content != null}">
+                                            <!-- <div class="row colspan-9 offset-1"> -->
+                                            <div>
+
+                                                <h6 style="color: #325254" th:if="${note.createdByName != null}">
+                                                    <span style="margin-left: 10px;" class="mif-user fg-blue"></span>
+                                                    <span style="margin-left: 5px; font-size: .90em"
+                                                        th:text="${#strings.arraySplit(note.createdByName,' ')[0] }"></span>
+                                                    <span style="margin-left: 20px;"
+                                                        class="mif-alarm-on fg-blue"></span>
+                                                    <span style="margin-left: 5px;font-size: .90em"
+                                                        th:text="${#temporals.format(note.timestamp, 'yyyy-MM-dd HH:mm:ss')}"></span>
+                                                </h6>
+
+                                            </div>
+                                            <div style="font-size: 1.1em;" th:utext="${note.content}"></div>
+                                            <!-- </div> -->
+                                        </div>
+                                    </div>
+
+
                                 </div>
+
+                                <!-- REply By End User -->
+
                             </div>
 
                             <div th:if="*{caseDetails.statusTransitionCFG.transCfg.editAllowed == true}"
@@ -517,8 +604,8 @@
                                                                 data-hint-position="right" data-cls-hint="fg-black"
                                                                 data-hint-text="Remove Attachment">
                                                                 <span class="mif-bin icon"
-                                                                    style="margin-left: 0px"></span> <span
-                                                                    style="margin-left: 3px">Delete</span></a>
+                                                                    style="margin-left: 0px"></span>
+                                                                <span style="margin-left: 3px">Delete</span></a>
                                                         </td>
                                                     </tr>
                                                 </tbody>

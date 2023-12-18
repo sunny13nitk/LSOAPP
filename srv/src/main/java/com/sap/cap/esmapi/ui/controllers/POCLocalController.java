@@ -606,6 +606,7 @@ public class POCLocalController
 
                     // Attachment file Size
                     model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
+
                 }
 
             }
@@ -818,6 +819,7 @@ public class POCLocalController
 
                     // Attachment file Size
                     model.addAttribute("attSize", rlConfig.getAllowedSizeAttachmentMB());
+
                 }
 
             }

@@ -33,7 +33,7 @@ public class AppSecurityConfig
   private XsuaaServiceConfiguration xsuaaServiceConfiguration;
 
   @Autowired
-  XsuaaTokenFlows xsuaaTokenFlows; 
+  XsuaaTokenFlows xsuaaTokenFlows;
 
   @Bean
   public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception

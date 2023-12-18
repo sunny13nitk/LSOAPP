@@ -3058,6 +3058,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                 {
                                     String content = null, noteType = null, userCreate = null, timestamp = null,
                                             id = null, noteId = null;
+                                    boolean agentNote = false;
+
                                     OffsetDateTime odt = null;
 
                                     Iterator<Entry<String, JsonNode>> fields = arrayItem.fields();
@@ -3112,7 +3114,16 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         if (StringUtils.hasText(adminNode.get(caseFieldName).asText()))
                                                         {
                                                             userCreate = adminNode.get(caseFieldName).asText();
+                                                            if (StringUtils.hasText(rlConfig.getTechUserRegex()))
+                                                            {
+                                                                if (!userCreate.startsWith(rlConfig.getTechUserRegex()))
+                                                                {
+                                                                    agentNote = true;
+                                                                }
+
+                                                            }
                                                         }
+
                                                     }
 
                                                 }
@@ -3121,7 +3132,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                     }
                                     TY_NotesDetails newNote = new TY_NotesDetails(noteType, id, noteId, odt, userCreate,
-                                            content);
+                                            content, agentNote);
                                     caseDetails.getNotes().add(newNote);
 
                                 }
@@ -3138,6 +3149,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                 String content = null, noteType = null, userCreate = null, timestamp = null, id = null,
                                         noteId = null;
                                 OffsetDateTime odt = null;
+                                boolean agentNote = false;
                                 while (fieldNamesDesc.hasNext())
                                 {
                                     String descFieldName = fieldNamesDesc.next();
@@ -3191,6 +3203,10 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                     if (StringUtils.hasText(admEnt.get(admFieldName).asText()))
                                                     {
                                                         userCreate = admEnt.get(admFieldName).asText();
+                                                        if (!userCreate.startsWith(rlConfig.getTechUserRegex()))
+                                                        {
+                                                            agentNote = true;
+                                                        }
                                                     }
                                                 }
 
@@ -3201,7 +3217,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                 }
                                 TY_NotesDetails newNote = new TY_NotesDetails(noteType, id, noteId, odt, userCreate,
-                                        content);
+                                        content, agentNote);
                                 caseDetails.getNotes().add(newNote);
 
                             }
