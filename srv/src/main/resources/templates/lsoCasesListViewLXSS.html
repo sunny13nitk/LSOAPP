@@ -500,7 +500,7 @@
 
                      <th data-name="subject" data-cls-column="text-left">Issue Description</th>
 
-                     <th data-name="formattedDate" data-format="number" data-cls-column="text-left">
+                     <th data-name="createdOn" class="sortable-column pl-6">
                         Created On
                      </th>
 
@@ -515,12 +515,12 @@
                      <td th:text="${case.id}"></td>
                      <td th:text="${case.statusDesc}"></td>
                      <td th:text="${case.subject}"></td>
-                     <td th:text="${case.formattedDate}"></td>
+                     <td th:text="${#temporals.format(case.tsCreate, 'yyyy-MM-dd HH:mm:ss')}"></td>
                      <td>
                         <a href="#" class="" th:href="@{'/lso/caseDetails/' + ${case.guid}}" role="button"
                            data-role="hint" data-hint-position="right" data-cls-hint="fg-black"
-                           data-hint-text="Reply to Case">
-                           Reply
+                           data-hint-text="View Case Details">
+                           View
                         </a>
                      </td>
                </tbody>

@@ -418,14 +418,14 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                                 casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType,
                                                         caseTypeDescription, subject, status, accountId, contactId,
-                                                        createdOn, date, dateFormatted, origin));
+                                                        createdOn, date, dateFormatted, odt, origin));
 
                                             }
                                             else
                                             {
                                                 casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType,
                                                         caseTypeDescription, subject, status, accountId, contactId,
-                                                        createdOn, null, null, origin));
+                                                        createdOn, null, null, null, origin));
                                             }
 
                                         }
@@ -2399,14 +2399,14 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
                                                 casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType,
                                                         caseTypeDescription, subject, status, accountId, contactId,
-                                                        createdOn, date, dateFormatted, origin));
+                                                        createdOn, date, dateFormatted, odt, origin));
 
                                             }
                                             else
                                             {
                                                 casesESSList.add(new TY_CaseESS(caseguid, caseid, caseType,
                                                         caseTypeDescription, subject, status, accountId, contactId,
-                                                        createdOn, null, null, origin));
+                                                        createdOn, null, null, null, origin));
                                             }
 
                                         }
@@ -2919,14 +2919,14 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                             casesByCaseType.add(new TY_CaseESS(caseguid, caseid,
                                                                     caseTypeVar, caseTypeDescription, subject, status,
                                                                     accountId, employeeId, createdOn, date,
-                                                                    dateFormatted, origin));
+                                                                    dateFormatted, odt, origin));
 
                                                         }
                                                         else
                                                         {
                                                             casesByCaseType.add(new TY_CaseESS(caseguid, caseid,
                                                                     caseTypeVar, caseTypeDescription, subject, status,
-                                                                    accountId, employeeId, createdOn, null, null,
+                                                                    accountId, employeeId, createdOn, null, null, null,
                                                                     origin));
                                                         }
 

@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.utilities.pojos;
 
+import java.time.OffsetDateTime;
 import java.util.Date;
 
 import lombok.AllArgsConstructor;
@@ -24,5 +25,6 @@ public class TY_CaseESS
     private String createdOn;
     private Date creationDate;
     private String formattedDate;
+    private OffsetDateTime tsCreate;
     private String origin;
 }
