@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgRanks;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgRanksItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplates;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplatesCus;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
@@ -38,6 +40,7 @@ public class AppInitializrConfig
     private final String configCatgCountryMandatory = "/configCatg/Mandatory_Country_Catg.csv";
     private final String configCatgLanguageMandatory = "/configCatg/Mandatory_Language_Catg.csv";
     private final String configStatusTransition = "/configCatg/statusTransitions.csv";
+    private final String configCatgRanks = "/configCatg/catgRanks.csv";
 
     @Autowired
     private MessageSource msgSrc;
@@ -76,6 +79,42 @@ public class AppInitializrConfig
         }
 
         return caseCus;
+    }
+
+    @Bean
+    public TY_CatgRanks loadCatgRanks4mConfig()
+    {
+        TY_CatgRanks catgRanksCus = null;
+
+        try
+        {
+
+            ClassPathResource classPathResource = new ClassPathResource(configCatgRanks);
+            if (classPathResource != null)
+            {
+                Reader reader = new InputStreamReader(classPathResource.getInputStream());
+                if (reader != null)
+                {
+                    log.info("Resource Bound... ");
+                    List<TY_CatgRanksItem> configs = new CsvToBeanBuilder(reader).withSkipLines(1)
+                            .withType(TY_CatgRanksItem.class).build().parse();
+
+                    if (!CollectionUtils.isEmpty(configs))
+                    {
+                        log.info("Entries in Config. Found for Case Categories and Relative Ranks: " + configs.size());
+                        catgRanksCus = new TY_CatgRanks(configs);
+                    }
+                }
+            }
+
+        }
+        catch (Exception e)
+        {
+            throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASETYPE_CFG", new Object[]
+            { configPath, e.getLocalizedMessage() }, Locale.ENGLISH));
+        }
+
+        return catgRanksCus;
     }
 
     @Bean

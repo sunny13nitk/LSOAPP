@@ -12,23 +12,14 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TY_CatgCusItem
+public class TY_CatgRanksItem
 {
+
     @CsvBindByPosition(position = 0)
     private EnumCaseTypes caseTypeEnum;
     @CsvBindByPosition(position = 1)
-    private String caseType;
+    private String catg;
     @CsvBindByPosition(position = 2)
-    private String catgCsvPath;
-    @CsvBindByPosition(position = 3)
-    private String appNoteTypes;
-    @CsvBindByPosition(position = 4)
-    private String statusSchema;
-    @CsvBindByPosition(position = 5)
-    private String replyNoteType;
-    @CsvBindByPosition(position = 6)
-    private Boolean toplvlCatgOnly;
-     @CsvBindByPosition(position = 7)
-    private Boolean catgRankEnabled;
+    private int rank;
 
 }

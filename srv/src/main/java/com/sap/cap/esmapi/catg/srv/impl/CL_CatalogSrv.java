@@ -1,6 +1,7 @@
 package com.sap.cap.esmapi.catg.srv.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -19,6 +20,8 @@ import com.sap.cap.esmapi.catg.pojos.TY_CatalogTree;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgDetails;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgRanks;
+import com.sap.cap.esmapi.catg.pojos.TY_CatgRanksItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplates;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgTemplatesCus;
 import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
@@ -38,6 +41,9 @@ public class CL_CatalogSrv implements IF_CatalogSrv
 
     @Autowired
     private TY_CatgCus catgCus;
+
+    @Autowired
+    private TY_CatgRanks catgRanks;
 
     @Autowired
     private TY_CatgTemplatesCus catgTmplCus;
@@ -308,7 +314,16 @@ public class CL_CatalogSrv implements IF_CatalogSrv
                                     caseCatgTree.setCategories(toplvlCatgs);
                                 }
                             }
+
+                            // Categories Sort Enabled
+                            if (caseCFgO.get().getCatgRankEnabled())
+                            {
+                                List<TY_CatalogItem> catgItems = prepareRankedCatgTree(caseCatgTree, caseType);
+                                caseCatgTree.setCategories(catgItems);
+                            }
+
                             this.caseCatgContainer.add(caseCatgTree);
+
                         }
 
                     }
@@ -334,6 +349,60 @@ public class CL_CatalogSrv implements IF_CatalogSrv
             caseCatgTree.getCategories().add(0, new TY_CatalogItem());
         }
         return caseCatgTree;
+    }
+
+    private List<TY_CatalogItem> prepareRankedCatgTree(TY_CatalogTree caseCatgTree, EnumCaseTypes caseType)
+    {
+        List<TY_CatalogItem> catgsSorted = new ArrayList<TY_CatalogItem>();
+
+        if (catgRanks != null)
+        {
+            if (CollectionUtils.isNotEmpty(catgRanks.getCatgRankItems()))
+            {
+                // Get Categories for Current CaseType
+                List<TY_CatgRanksItem> currLoBCatgRanks = catgRanks.getCatgRankItems().stream()
+                        .filter(c -> c.getCaseTypeEnum().equals(caseType)).collect(Collectors.toList());
+
+                if (CollectionUtils.isNotEmpty(currLoBCatgRanks))
+                {
+                    // Sort by Rank
+                    currLoBCatgRanks.sort(Comparator.comparing(TY_CatgRanksItem::getRank));
+
+                    // Get List of Categories from Catg tree Excluding the TopN
+                    List<TY_CatalogItem> catgsExclTopN = new ArrayList<TY_CatalogItem>();
+                    catgsExclTopN.addAll(caseCatgTree.getCategories());
+
+                    catgsExclTopN.removeIf(topN -> currLoBCatgRanks.stream()
+                            .anyMatch(cCatg -> cCatg.getCatg().equals(topN.getName())));
+
+                    // Prepare the new List
+                    for (TY_CatgRanksItem catgRank : currLoBCatgRanks)
+                    {
+                        Optional<TY_CatalogItem> catgItemO = caseCatgTree.getCategories().stream()
+                                .filter(c -> c.getName().equals(catgRank.getCatg())).findFirst();
+                        if (catgItemO.isPresent())
+                        {
+                            catgsSorted.add(catgItemO.get());
+                        }
+
+                    }
+
+                    // Append TopN Excluded Categories to Sorted List
+                    if (CollectionUtils.isNotEmpty(catgsExclTopN))
+                    {
+                        catgsSorted.addAll(catgsExclTopN);
+                    }
+
+                }
+                else
+                {
+                    catgsSorted = caseCatgTree.getCategories();
+                }
+
+            }
+        }
+
+        return catgsSorted;
     }
 
 }
