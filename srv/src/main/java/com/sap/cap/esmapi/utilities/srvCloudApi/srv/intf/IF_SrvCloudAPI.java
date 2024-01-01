@@ -21,6 +21,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_Case_Customer_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_Employee_SrvCloud;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud_Reply;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
+import com.sap.cap.esmapi.utilities.pojos.TY_PreviousAttachments;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
 
@@ -83,5 +84,7 @@ public interface IF_SrvCloudAPI
 
         public boolean updateCasewithReply(TY_CasePatchInfo patchInfo, TY_Case_SrvCloud_Reply caseReply)
                         throws EX_ESMAPI, IOException;
+
+        public List<TY_PreviousAttachments> getAttachments4Case(String caseGuid) throws EX_ESMAPI, IOException;
 
 }

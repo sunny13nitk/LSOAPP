@@ -32,14 +32,16 @@ public class SrvCloudPropsDev
             @Value("${statusCfgUrl}") final String statusCfgUrl, @Value("${accByEmail}") final String accByEmailUrl,
             @Value("${conByEmail}") final String conByEmailUrl, @Value("${empById}") final String empByIdUrl,
             @Value("${casesByAcc}") final String casesByAccUrl, @Value("${casesByEmpl}") final String casesByEmplUrl,
-            @Value("${customerurl}") final String customerUrl
+            @Value("${customerurl}") final String customerUrl, @Value("${prevAtt}") final String prevAtt,
+            @Value("${dlAtt}") final String dlAtt
 
     )
 
     {
         TY_SrvCloudUrls srvClUrls = new TY_SrvCloudUrls(userName, password, userNameExt, passwordExt, casesUrl, cpUrl,
                 acUrl, notesUrl, topN, caseTemplateUrl, catgTreeUrl, docSrvUrl, emplSrvUrl, vhlpUrl, caseDetailsUrl,
-                statusCfgUrl, accByEmailUrl, conByEmailUrl, empByIdUrl, casesByAccUrl, casesByEmplUrl, customerUrl);
+                statusCfgUrl, accByEmailUrl, conByEmailUrl, empByIdUrl, casesByAccUrl, casesByEmplUrl, customerUrl,
+                prevAtt, dlAtt);
 
         return srvClUrls;
     }

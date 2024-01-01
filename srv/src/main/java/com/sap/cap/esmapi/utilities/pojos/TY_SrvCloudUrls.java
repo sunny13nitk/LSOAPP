@@ -34,6 +34,7 @@ public class TY_SrvCloudUrls
     private String casesByAcc;
     private String casesByEmpl;
     private String customerUrl;
-    
+    private String prevAtt;
+    private String dlAtt;
 
 }

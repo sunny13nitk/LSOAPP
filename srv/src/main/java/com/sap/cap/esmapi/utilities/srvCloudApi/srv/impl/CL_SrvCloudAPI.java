@@ -39,8 +39,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -70,6 +68,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CustomerCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_DefaultComm;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesDetails;
+import com.sap.cap.esmapi.utilities.pojos.TY_PreviousAttachments;
 import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
@@ -3691,6 +3690,222 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         }
 
         return caseId;
+    }
+
+    @Override
+    public List<TY_PreviousAttachments> getAttachments4Case(String caseGuid) throws EX_ESMAPI, IOException
+    {
+        List<TY_PreviousAttachments> prevAtt = null;
+
+        JsonNode jsonNode = null;
+        HttpResponse response = null;
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+
+        if (StringUtils.hasText(caseGuid) && StringUtils.hasText(srvCloudUrls.getPrevAtt())
+                && StringUtils.hasText(srvCloudUrls.getDlAtt()))
+
+        {
+            log.info("Fetching Attachments for Case GUID : " + caseGuid);
+
+            String urlLink = StringsUtility.replaceURLwithParams(srvCloudUrls.getPrevAtt(), new String[]
+            { caseGuid }, GC_Constants.gc_UrlReplParam);
+
+            if (StringUtils.hasText(urlLink))
+            {
+
+                String encoding = Base64.getEncoder().encodeToString(
+                        (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
+
+                try
+                {
+
+                    URL url = new URL(urlLink);
+                    URI uri = new URI(url.getProtocol(), url.getUserInfo(), IDN.toASCII(url.getHost()), url.getPort(),
+                            url.getPath(), url.getQuery(), url.getRef());
+                    String correctEncodedURL = uri.toASCIIString();
+
+                    HttpGet httpGet = new HttpGet(correctEncodedURL);
+                    httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                    httpGet.addHeader("accept", "application/json");
+                    // Fire the Url
+                    response = httpClient.execute(httpGet);
+
+                    // verify the valid error code first
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    if (statusCode == HttpStatus.SC_OK)
+                    {
+
+                        HttpEntity entity = response.getEntity();
+                        String apiOutput = EntityUtils.toString(entity);
+
+                        ObjectMapper mapper = new ObjectMapper();
+                        jsonNode = mapper.readTree(apiOutput);
+                        if (jsonNode != null)
+                        {
+
+                            JsonNode rootNode = jsonNode.path("value");
+                            if (rootNode != null && rootNode.size() > 0)
+                            {
+                                log.info("Attachments Bound for Case Guid - " + caseGuid);
+                                prevAtt = new ArrayList<TY_PreviousAttachments>();
+
+                                Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
+                                while (payloadItr.hasNext())
+                                {
+                                    // log.info("Payload Iterator Bound");
+                                    Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                                    String payloadFieldName = payloadEnt.getKey();
+                                    // log.info("Payload Field Scanned: " + payloadFieldName);
+
+                                    if (payloadFieldName.equals("value"))
+                                    {
+                                        Iterator<JsonNode> attItr = payloadEnt.getValue().elements();
+                                        // log.info("Cases Iterator Bound");
+                                        while (attItr.hasNext())
+                                        {
+
+                                            JsonNode attEnt = attItr.next();
+                                            if (attEnt != null)
+                                            {
+                                                boolean byTechnicalUser = false;
+                                                long fileSize = 0;
+                                                String id = null, title = null, createdByName = null, createdOn = null,
+                                                        dateFormatted = null, urlAtt = null;
+
+                                                // log.info("Cases Entity Bound - Reading Case...");
+                                                Iterator<String> fieldNames = attEnt.fieldNames();
+                                                while (fieldNames.hasNext())
+                                                {
+                                                    String attFieldName = fieldNames.next();
+                                                    // log.info("Case Entity Field Scanned: " + caseFieldName);
+                                                    if (attFieldName.equals("id"))
+                                                    {
+
+                                                        if (StringUtils.hasText(attEnt.get(attFieldName).asText()))
+                                                        {
+                                                            id = attEnt.get(attFieldName).asText();
+                                                        }
+                                                    }
+
+                                                    if (attFieldName.equals("title"))
+                                                    {
+                                                        // log.info("Case Id Added : " +
+                                                        // caseEnt.get(caseFieldName).asText());
+                                                        if (StringUtils.hasText(attEnt.get(attFieldName).asText()))
+                                                        {
+                                                            title = attEnt.get(attFieldName).asText();
+                                                        }
+                                                    }
+
+                                                    if (attFieldName.equals("fileSize"))
+                                                    {
+                                                        // log.info("Case Type Added : " +
+                                                        // caseEnt.get(caseFieldName).asText());
+                                                        if (StringUtils.hasText(attEnt.get(attFieldName).asText()))
+                                                        {
+                                                            fileSize = attEnt.get(attFieldName).asLong()
+                                                                    / (1024 * 1024);
+                                                        }
+                                                    }
+
+                                                    if (attFieldName.equals("adminData"))
+                                                    {
+                                                        // log.info("Inside Admin Data: " );
+
+                                                        JsonNode admEnt = attEnt.path("adminData");
+                                                        if (admEnt != null)
+                                                        {
+                                                            // log.info("AdminData Node Bound");
+
+                                                            Iterator<String> fieldNamesAdm = admEnt.fieldNames();
+                                                            while (fieldNamesAdm.hasNext())
+                                                            {
+                                                                String admFieldName = fieldNamesAdm.next();
+                                                                if (admFieldName.equals("createdOn"))
+                                                                {
+
+                                                                    createdOn = admEnt.get(admFieldName).asText();
+
+                                                                    // Parse the date-time string into OffsetDateTime
+                                                                    OffsetDateTime odt = OffsetDateTime
+                                                                            .parse(createdOn);
+                                                                    // Convert OffsetDateTime into Instant
+                                                                    Instant instant = odt.toInstant();
+                                                                    // If at all, you need java.util.Date
+                                                                    Date date = Date.from(instant);
+
+                                                                    SimpleDateFormat sdf = new SimpleDateFormat(
+                                                                            "dd/M/yyyy");
+                                                                    dateFormatted = sdf.format(date);
+                                                                }
+
+                                                                if (admFieldName.equals("createdByName"))
+                                                                {
+                                                                    createdByName = admEnt.get(admFieldName).asText();
+                                                                    if (StringUtils
+                                                                            .hasText(rlConfig.getTechUserRegex()))
+                                                                    {
+                                                                        if (createdByName.startsWith(
+                                                                                rlConfig.getTechUserRegex()))
+                                                                        {
+                                                                            byTechnicalUser = true;
+                                                                        }
+
+                                                                    }
+                                                                }
+                                                            }
+
+                                                        }
+                                                    }
+
+                                                }
+
+                                                if (StringUtils.hasText(id) && StringUtils.hasText(title)
+                                                        && fileSize > 0)
+                                                {
+                                                    prevAtt.add(new TY_PreviousAttachments(id, title, fileSize,
+                                                            createdByName, dateFormatted, byTechnicalUser, null));
+
+                                                }
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                }
+                            }
+
+                        }
+
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_DET_FETCH", new Object[]
+                    { caseGuid, e.getMessage() }, Locale.ENGLISH));
+
+                }
+                finally
+                {
+                    httpClient.close();
+                }
+
+                if (CollectionUtils.isNotEmpty(prevAtt))
+                {
+                    for (TY_PreviousAttachments attDet : prevAtt)
+                    {
+                        // Get Attachment GUID and Generate S3 Link for D/l
+
+                        // update attDet
+                    }
+                }
+            }
+        }
+
+        return prevAtt;
     }
 
     private String getPOSTURL4BaseUrl(String urlBase)
