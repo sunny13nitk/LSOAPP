@@ -155,12 +155,6 @@ public class LSOController
 
         }
 
-        // // # UI Test - #Delete
-        // if (userSessSrv.getUserDetails4mSession().getUserId().equals("I057386"))
-        // {
-        // return lsoCaseListViewLXSS;
-        // }
-        // log.info("UID Logged - " + userInfo.getId());
         return lsoCaseListViewLXSS;
 
     }
