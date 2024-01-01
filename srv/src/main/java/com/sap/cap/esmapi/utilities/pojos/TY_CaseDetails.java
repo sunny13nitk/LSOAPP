@@ -23,6 +23,8 @@ public class TY_CaseDetails
 
     private List<TY_NotesDetails> notes;
 
+    private List<TY_PreviousAttachments> prevAttachments;
+
     private TY_PortalStatusTransICode statusTransitionCFG;
 
 }
