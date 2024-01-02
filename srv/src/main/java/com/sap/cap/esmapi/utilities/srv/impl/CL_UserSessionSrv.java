@@ -1136,7 +1136,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                             }
 
-                            if (attFetchSrv != null)
+                            if (attFetchSrv != null && rlConfig.isAllowPrevAttDL())
                             {
                                 List<TY_PreviousAttachments> prevAtt = attFetchSrv
                                         .getAttachments4CaseByCaseGuid(caseID);

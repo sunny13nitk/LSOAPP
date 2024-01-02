@@ -15,4 +15,5 @@ public class TY_RLConfig
     private long allowedSizeAttachmentMB;
     private String internalUsersRegex;
     private String techUserRegex;
+    private boolean allowPrevAttDL;
 }

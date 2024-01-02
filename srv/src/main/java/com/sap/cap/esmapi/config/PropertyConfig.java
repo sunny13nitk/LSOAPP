@@ -41,10 +41,11 @@ public class PropertyConfig
 			@Value("${intvSecs}") final long intvSecs, @Value("${allowedAttachments}") final String allowedAttachments,
 			@Value("${allowedSizeAttachmentMB}") final long allowedSizeAttachmentMB,
 			@Value("${internalUsers}") final String internalUsersRegex,
-			@Value("${techUserRegex}") final String techUserRegex)
+			@Value("${techUserRegex}") final String techUserRegex,
+			@Value("${allowPrevAttDL}") final boolean allowPrevAttDL)
 	{
 		TY_RLConfig rlConfig = new TY_RLConfig(numFormSubms, intvSecs, allowedAttachments, allowedSizeAttachmentMB,
-				internalUsersRegex, techUserRegex);
+				internalUsersRegex, techUserRegex, allowPrevAttDL);
 		return rlConfig;
 	}
 
