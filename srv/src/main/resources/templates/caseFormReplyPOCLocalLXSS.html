@@ -614,6 +614,52 @@
                                     </div>
                                 </div>
 
+                                <div th:if="${not #lists.isEmpty({caseEditForm.getCaseDetails().prevAttachments})}"
+                                    class="colspan-9 offset-0"
+                                    style="margin-top: 15px; margin-bottom: 10px; color: #007db8;">
+                                    <label>Previous Attachment(s) </label>
+
+                                    <table class="table  table-border compact striped">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align: center;">File Name</th>
+                                                <th style="text-align: center;">File Size(KB)</th>
+                                                <th style="text-align: center;">Uploaded On</th>
+                                                <th style="text-align: center;">Uploaded By</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="file : ${caseEditForm.getCaseDetails().prevAttachments}">
+
+                                                <td style="text-align: left" th:text="${file.title}"></td>
+                                                <td style="text-align: center" th:text="${file.fileSizeinKB}"></td>
+                                                <td style="text-align: center" th:text="${file.createdOn}"></td>
+
+                                                <td style="text-align: center" th:if="${file.byTechnicalUser} == true ">
+                                                    <span class=" tally info">User</span>
+                                                </td>
+
+                                                <td style="text-align: center" th:if="${file.byTechnicalUser} != true ">
+                                                    <span class=" tally success">Support Team</span>
+                                                </td>
+
+                                                <td style="text-align: center">
+                                                    <a href="#" class="button primary mini rounded outline"
+                                                        th:href="${file.url}" role="button" data-role="hint"
+                                                        data-hint-position="right" data-cls-hint="fg-black"
+                                                        data-hint-text="Download File">
+                                                        <span class="mif-file-download icon"
+                                                            style="margin-left: 0px"></span>
+                                                        <span style="margin-left: 3px">Download</span></a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+
                                 <div th:if="*{caseDetails.statusTransitionCFG.transCfg.editAllowed == true}"
                                     class="case-form-reply-buttons"
                                     style="margin-top: 30px; margin-bottom: 10px; margin-right: 20px;">

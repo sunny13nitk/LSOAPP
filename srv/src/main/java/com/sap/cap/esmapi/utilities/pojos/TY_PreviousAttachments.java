@@ -11,7 +11,7 @@ public class TY_PreviousAttachments
 {
     private String id;
     private String title;
-    private double fileSize;
+    private long fileSizeinKB;
     private String createdByName;
     private String createdOn;
     private boolean byTechnicalUser;

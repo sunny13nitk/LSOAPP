@@ -46,6 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
@@ -3700,6 +3701,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         JsonNode jsonNode = null;
         HttpResponse response = null;
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        final String urlAttrib = "url";
 
         if (StringUtils.hasText(caseGuid) && StringUtils.hasText(srvCloudUrls.getPrevAtt())
                 && StringUtils.hasText(srvCloudUrls.getDlAtt()))
@@ -3746,7 +3748,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                             JsonNode rootNode = jsonNode.path("value");
                             if (rootNode != null && rootNode.size() > 0)
                             {
-                                log.info("Attachments Bound for Case Guid - " + caseGuid);
+                                log.info("Attachments Bound for Case Guid - " + caseGuid + " : " + rootNode.size());
                                 prevAtt = new ArrayList<TY_PreviousAttachments>();
 
                                 Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
@@ -3803,8 +3805,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         // caseEnt.get(caseFieldName).asText());
                                                         if (StringUtils.hasText(attEnt.get(attFieldName).asText()))
                                                         {
-                                                            fileSize = attEnt.get(attFieldName).asLong()
-                                                                    / (1024 * 1024);
+                                                            fileSize = attEnt.get(attFieldName).asLong() / (1024);
                                                         }
                                                     }
 
@@ -3898,8 +3899,81 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                     for (TY_PreviousAttachments attDet : prevAtt)
                     {
                         // Get Attachment GUID and Generate S3 Link for D/l
+                        httpClient = HttpClientBuilder.create().build();
+                        urlLink = StringsUtility.replaceURLwithParams(srvCloudUrls.getDlAtt(), new String[]
+                        { attDet.getId() }, GC_Constants.gc_UrlReplParam);
 
-                        // update attDet
+                        if (StringUtils.hasText(urlLink))
+                        {
+
+                            encoding = Base64.getEncoder().encodeToString(
+                                    (srvCloudUrls.getUserNameExt() + ":" + srvCloudUrls.getPasswordExt()).getBytes());
+
+                            try
+                            {
+
+                                URL url = new URL(urlLink);
+                                URI uri = new URI(url.getProtocol(), url.getUserInfo(), IDN.toASCII(url.getHost()),
+                                        url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+                                String correctEncodedURL = uri.toASCIIString();
+
+                                HttpGet httpGet = new HttpGet(correctEncodedURL);
+                                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                                httpGet.addHeader("accept", "application/json");
+                                // Fire the Url
+                                response = httpClient.execute(httpGet);
+
+                                // verify the valid error code first
+                                int statusCode = response.getStatusLine().getStatusCode();
+                                if (statusCode == HttpStatus.SC_OK)
+                                {
+                                    // update attDet
+                                    HttpEntity entity = response.getEntity();
+                                    String apiOutput = EntityUtils.toString(entity);
+
+                                    ObjectMapper mapper = new ObjectMapper();
+                                    jsonNode = mapper.readTree(apiOutput);
+                                    if (jsonNode != null)
+                                    {
+
+                                        Iterator<Map.Entry<String, JsonNode>> payloadItr = jsonNode.fields();
+                                        while (payloadItr.hasNext())
+                                        {
+                                            // log.info("Payload Iterator Bound");
+                                            Map.Entry<String, JsonNode> payloadEnt = payloadItr.next();
+                                            String payloadFieldName = payloadEnt.getKey();
+                                            // log.info("Payload Field Scanned: " + payloadFieldName);
+
+                                            if (payloadFieldName.equals("value"))
+                                            {
+                                                JsonNode contentNode = payloadEnt.getValue();
+                                                if (contentNode != null)
+                                                {
+                                                    String attDLUrl = contentNode.get(urlAttrib).asText();
+                                                    if (StringUtils.hasText(attDLUrl))
+                                                    {
+                                                        attDet.setUrl(attDLUrl);
+                                                    }
+
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+
+                            catch (Exception e)
+                            {
+                                throw new EX_ESMAPI(msgSrc.getMessage("ERR_CASE_DET_FETCH", new Object[]
+                                { caseGuid, e.getMessage() }, Locale.ENGLISH));
+
+                            }
+                            finally
+                            {
+                                httpClient.close();
+                            }
+                        }
                     }
                 }
             }

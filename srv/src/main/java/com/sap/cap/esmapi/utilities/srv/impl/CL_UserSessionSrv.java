@@ -48,12 +48,13 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesDetails;
+import com.sap.cap.esmapi.utilities.pojos.TY_PreviousAttachments;
 import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_SessionAttachment;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserSessionInfo;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
-import com.sap.cap.esmapi.utilities.srv.intf.IF_AttachmentValdationSrv;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_AttachmentsFetchSrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_SessAttachmentsService;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
@@ -106,6 +107,9 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
     @Autowired
     private IF_SessAttachmentsService attSrv;
+
+    @Autowired
+    private IF_AttachmentsFetchSrv attFetchSrv;
 
     // Properties
     private TY_UserSessionInfo userSessInfo;
@@ -1132,6 +1136,15 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                             }
 
+                            if (attFetchSrv != null)
+                            {
+                                List<TY_PreviousAttachments> prevAtt = attFetchSrv
+                                        .getAttachments4CaseByCaseGuid(caseID);
+                                if (CollectionUtils.isNotEmpty(prevAtt))
+                                {
+                                    caseDetails.setPrevAttachments(prevAtt);
+                                }
+                            }
                             caseEditForm.setCaseDetails(caseDetails);
 
                             caseEditForm.getCaseDetails().setStatusTransitionCFG(
