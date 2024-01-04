@@ -187,15 +187,22 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         if (!token.getLogonName().matches(rlConfig.getInternalUsersRegex()))
                         {
                             usAccConEmpl.setExternal(true);
+                            log.info("User Marked as External User!");
+                        }
+                        else
+                        {
+                            log.info("User Marked as Internal User!");
                         }
                     }
 
                     usAccConEmpl.setUserEmail(token.getEmail());
+                    log.info("Scanning Account for Email Address : " + usAccConEmpl.getUserEmail());
                     usAccConEmpl.setAccountId(srvCloudApiSrv.getAccountIdByUserEmail(usAccConEmpl.getUserEmail()));
 
                     // Only seek Employee If Account/Contact not Found
                     if (!StringUtils.hasText(usAccConEmpl.getAccountId()))
                     {
+                        log.info("No Account Identified for Logged in User Email : " + usAccConEmpl.getUserEmail());
                         // If not an External Employee - Only then Seek Employee
                         if (!usAccConEmpl.isExternal())
                         {
@@ -207,12 +214,14 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                             }
                             else
                             {
+                                userDetails.setUsAccEmpl(usAccConEmpl);
                                 // Go For Individual Customer Creation with the User Details
                                 newAccountID = this.createAccount();
                             }
                         }
                         else // External User - Customer Not Found - Direct Customer Creation
                         {
+                            userDetails.setUsAccEmpl(usAccConEmpl);
                             // Go For Individual Customer Creation with the User Details
                             newAccountID = this.createAccount();
                         }
@@ -473,14 +482,17 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     @Override
     public String createAccount() throws EX_ESMAPI
     {
+        log.info("Inside Account Creation Routine...");
         String accountId = null;
         // Only if no Account or Employee Identified in Current Session
         // No Account Determined
         if (!StringUtils.hasText(userSessInfo.getUserDetails().getUsAccEmpl().getAccountId()))
         {
+            log.info("No Account Identified....");
             // No Employee determined
             if (!StringUtils.hasText(userSessInfo.getUserDetails().getUsAccEmpl().getEmployeeId()))
             {
+                log.info("No Employee Identified....");
                 // Create new Individual Customer Account with User Credentials
                 // User Email and UserName Bound
                 if (StringUtils.hasText(userSessInfo.getUserDetails().getUsAccEmpl().getUserEmail())
