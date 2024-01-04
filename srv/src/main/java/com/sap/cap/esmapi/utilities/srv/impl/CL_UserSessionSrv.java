@@ -215,6 +215,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                             else
                             {
                                 userDetails.setUsAccEmpl(usAccConEmpl);
+                                userSessInfo.setUserDetails(userDetails); // Set in Session
                                 // Go For Individual Customer Creation with the User Details
                                 newAccountID = this.createAccount();
                             }
@@ -222,6 +223,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         else // External User - Customer Not Found - Direct Customer Creation
                         {
                             userDetails.setUsAccEmpl(usAccConEmpl);
+                            userSessInfo.setUserDetails(userDetails); // Set in Session
                             // Go For Individual Customer Creation with the User Details
                             newAccountID = this.createAccount();
                         }
