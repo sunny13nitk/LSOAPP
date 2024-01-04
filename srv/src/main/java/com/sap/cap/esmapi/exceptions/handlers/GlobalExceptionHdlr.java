@@ -36,7 +36,8 @@ public class GlobalExceptionHdlr
 	{
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName("error");
-		System.out.println(ex.getLocalizedMessage());
+		log.error(ex.getLocalizedMessage());
+		log.error(ex.getStackTrace().toString());
 		mv.addObject("formError", ex.getLocalizedMessage());
 		return mv;
 	}

@@ -162,6 +162,22 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     userDetails.setAuthenticated(true);
                     userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
                     Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee();
+
+                    if (StringUtils.hasText(token.getLogonName()) && StringUtils.hasText(token.getGivenName())
+                            && StringUtils.hasText(token.getFamilyName()) && StringUtils.hasText(token.getEmail()))
+                    {
+                        log.info("Logged In User via Token : " + token.getLogonName());
+                        log.info("User Name : " + token.getGivenName() + " " + token.getFamilyName());
+                        log.info("User Email : " + token.getEmail());
+
+                    }
+                    else
+                    {
+                        log.info("Token Does not contain Complete Information");
+                        log.info(token.getLogonName() + " : " + token.getFamilyName() + token.getGivenName() + "Email: "
+                                + token.getEmail());
+                    }
+
                     usAccConEmpl.setUserId(token.getLogonName());
                     usAccConEmpl.setUserName(token.getGivenName() + " " + token.getFamilyName());
 

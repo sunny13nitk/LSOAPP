@@ -1042,7 +1042,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
         // User Email and UserName Bound
         if (StringUtils.hasText(userEmail) && StringUtils.hasText(userName))
         {
-            String[] names = userName.split(" ");
+            log.info("Creating Account for UserName : " + userName + "with Email : " + userEmail);
+            String[] names = userName.split("\\s+");
             if (names.length > 1)
             {
                 newAccount = new TY_CustomerCreate(names[0], names[1], GC_Constants.gc_roleCustomer,
@@ -1056,6 +1057,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 
             if (newAccount != null)
             {
+
                 HttpClient httpclient = HttpClients.createDefault();
                 String accPOSTURL = getPOSTURL4BaseUrl(srvCloudUrls.getCustomerUrl());
                 if (StringUtils.hasText(accPOSTURL))
