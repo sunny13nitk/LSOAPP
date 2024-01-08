@@ -13,11 +13,11 @@
   "scopes": [
     {
       "name": "SVC_ESM_EMPLOYEE_LSO",
-      "description": "LSO Employees (I/D/C Users)"
+      "description": "LSO Employees - I/D/C Users"
     },
     {
       "name": "SVC_ESM_CONTRACTOR_LSO",
-      "description": "LSO Externals (P/S Users)"
+      "description": "LSO Externals - P/S Users"
     }
   ],
   "attributes": [],
