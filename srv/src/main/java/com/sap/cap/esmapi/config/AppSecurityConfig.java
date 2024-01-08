@@ -70,11 +70,7 @@ public class AppSecurityConfig
         .and().authorizeRequests() // authorize all requests
         .antMatchers(HttpMethod.GET, "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
         .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll().antMatchers("/web-components.js/**")
-        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/api/**")
-        .hasAuthority("Administrators")
-        // Only
-        // Administrators
-        // Allowed
+        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll()
         .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
         // allowed
         // Only Authorized User(s) having External or Internal Role(s) for LSO
@@ -104,11 +100,7 @@ public class AppSecurityConfig
         .and().authorizeRequests() // authorize all requests
         .antMatchers(HttpMethod.GET, "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
         .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll().antMatchers("/web-components.js/**")
-        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/api/**")
-        .hasAuthority("Administrators")
-        // Only
-        // Administrators
-        // Allowed
+        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll()
         .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
         // allowed
         .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
