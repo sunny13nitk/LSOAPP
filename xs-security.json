@@ -42,14 +42,14 @@
   "role-collections": [
     {
       "name": "SVC_ESM_EMPLOYEE_LSO",
-      "description": "LSO Employees (I/D/C Users) Role Collection",
+      "description": "LSO Employees - I/D/C Users Role Collection",
       "role-template-references": [
         "SVC_ESM_EMPLOYEE_LSO"
       ]
     },
     {
       "name": "SVC_ESM_CONTRACTOR_LSO",
-      "description": "LSO Externals (P/S Users) Role Collection",
+      "description": "LSO Externals - P/S Users Role Collection",
       "role-template-references": [
         "SVC_ESM_CONTRACTOR_LSO"
       ]
