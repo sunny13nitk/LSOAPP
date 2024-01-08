@@ -12,11 +12,11 @@
   "tenant-mode": "dedicated",
   "scopes": [
     {
-      "name": "SVCESMEMPLOYEELSO",
+      "name": "$XSAPPNAME.SVC_ESM_EMPLOYEE_LSO",
       "description": "LSO Employees"
     },
     {
-      "name": "SVCESMCONTRACTORLSO",
+      "name": "$XSAPPNAME.SVC_ESM_CONTRACTOR_LSO",
       "description": "LSO Externals"
     }
   ],
@@ -26,7 +26,7 @@
       "name": "SVC_ESM_EMPLOYEE_LSO",
       "description": "generated",
       "scope-references": [
-        "SVCESMEMPLOYEELSO"
+        "$XSAPPNAME.SVC_ESM_EMPLOYEE_LSO"
       ],
       "attribute-references": []
     },
@@ -34,7 +34,7 @@
       "name": "SVC_ESM_CONTRACTOR_LSO",
       "description": "generated",
       "scope-references": [
-        "SVCESMCONTRACTORLSO"
+        "$XSAPPNAME.SVC_ESM_CONTRACTOR_LSO"
       ],
       "attribute-references": []
     }
