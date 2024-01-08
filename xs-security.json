@@ -12,11 +12,11 @@
   "tenant-mode": "dedicated",
   "scopes": [
     {
-      "name": "SVC_ESM_EMPLOYEE_LSO",
+      "name": "SVCESMEMPLOYEELSO",
       "description": "LSO Employees"
     },
     {
-      "name": "SVC_ESM_CONTRACTOR_LSO",
+      "name": "SVCESMCONTRACTORLSO",
       "description": "LSO Externals"
     }
   ],
@@ -26,7 +26,7 @@
       "name": "SVC_ESM_EMPLOYEE_LSO",
       "description": "generated",
       "scope-references": [
-        "SVC_ESM_EMPLOYEE_LSO"
+        "SVCESMEMPLOYEELSO"
       ],
       "attribute-references": []
     },
@@ -34,7 +34,7 @@
       "name": "SVC_ESM_CONTRACTOR_LSO",
       "description": "generated",
       "scope-references": [
-        "SVC_ESM_CONTRACTOR_LSO"
+        "SVCESMCONTRACTORLSO"
       ],
       "attribute-references": []
     }
