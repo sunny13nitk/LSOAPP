@@ -4,36 +4,54 @@
     "credential-types": [
       "instance-secret",
       "binding-secret"
-    ], 
-    "redirect-uris": 
-    [
-       "https://*.cfapps.eu10-004.hana.ondemand.com/**"
+    ],
+    "redirect-uris": [
+      "https://*.cfapps.eu10-004.hana.ondemand.com/**"
     ]
   },
   "tenant-mode": "dedicated",
   "scopes": [
     {
-      "name": "$XSAPPNAME.Administrators",
-      "description": "Administrators"
+      "name": "SVC_ESM_EMPLOYEE_LSO",
+      "description": "LSO Employees (I/D/C Users)"
+    },
+    {
+      "name": "SVC_ESM_CONTRACTOR_LSO",
+      "description": "LSO Externals (P/S Users)"
     }
   ],
   "attributes": [],
   "role-templates": [
     {
-      "name": "Administrators",
+      "name": "SVC_ESM_EMPLOYEE_LSO",
       "description": "generated",
       "scope-references": [
-        "$XSAPPNAME.Administrators"
+        "SVC_ESM_EMPLOYEE_LSO"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "SVC_ESM_CONTRACTOR_LSO",
+      "description": "generated",
+      "scope-references": [
+        "SVC_ESM_CONTRACTOR_LSO"
       ],
       "attribute-references": []
     }
   ],
   "role-collections": [
     {
-      "name": "ESMAPI Administrators",
-      "description": "ESMAPI Administrators",
+      "name": "SVC_ESM_EMPLOYEE_LSO",
+      "description": "LSO Employees (I/D/C Users) Role Collection",
       "role-template-references": [
-        "$XSAPPNAME.Administrators"
+        "SVC_ESM_EMPLOYEE_LSO"
+      ]
+    },
+    {
+      "name": "SVC_ESM_CONTRACTOR_LSO",
+      "description": "LSO Externals (P/S Users) Role Collection",
+      "role-template-references": [
+        "SVC_ESM_CONTRACTOR_LSO"
       ]
     }
   ]

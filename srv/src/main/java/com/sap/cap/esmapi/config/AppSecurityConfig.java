@@ -3,6 +3,7 @@ package com.sap.cap.esmapi.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -16,6 +17,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cloud.security.xsuaa.XsuaaServiceConfiguration;
 import com.sap.cloud.security.xsuaa.extractor.IasXsuaaExchangeBroker;
 import com.sap.cloud.security.xsuaa.token.TokenAuthenticationConverter;
@@ -36,6 +38,7 @@ public class AppSecurityConfig
   XsuaaTokenFlows xsuaaTokenFlows;
 
   @Bean
+  @Profile(GC_Constants.gc_DEVProfile)
   public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception
   {
 
@@ -43,11 +46,53 @@ public class AppSecurityConfig
      * ----------- Local Testing --------------------
      */
 
-    // http.authorizeRequests().antMatchers(HttpMethod.GET,
-    // "/static/**").permitAll();
-    // http.requestMatchers().antMatchers("/api/**").antMatchers("/esslocal/**").antMatchers("/poclocal/**").and().csrf()
-    // .disable() // don't insist on csrf tokens in put, post etc.
-    // .authorizeRequests().anyRequest().permitAll();
+    http.authorizeRequests().antMatchers(HttpMethod.GET, "/static/**").permitAll();
+    http.requestMatchers().antMatchers("/api/**").antMatchers("/esslocal/**").antMatchers("/poclocal/**").and().csrf()
+        .disable() // don't insist on csrf tokens in put, post etc.
+        .authorizeRequests().anyRequest().permitAll();
+    return http.build();
+
+  }
+
+  @Bean
+  @Profile(
+  { GC_Constants.gc_PRODProfile })
+  public SecurityFilterChain appFilterChainforTestProd(HttpSecurity http) throws Exception
+  {
+
+    /*
+     * ----------- CF Deployment --------------------
+     */
+
+    // @formatter:off
+    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        // session is created by approuter
+        .and().authorizeRequests() // authorize all requests
+        .antMatchers(HttpMethod.GET, "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
+        .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll().antMatchers("/web-components.js/**")
+        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/api/**")
+        .hasAuthority("Administrators")
+        // Only
+        // Administrators
+        // Allowed
+        .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
+        // allowed
+        // Only Authorized User(s) having External or Internal Role(s) for LSO
+        .antMatchers("/lso/**").hasAnyAuthority(GC_Constants.gc_role_employee_lso, GC_Constants.gc_role_contractor_lso)
+        // allowed
+        .anyRequest().denyAll() // Deny any other endpoint access then listed above
+        .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
+        .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
+    // @formatter:on
+
+    return http.build();
+
+  }
+
+  @Bean
+  @Profile(GC_Constants.gc_TESTProfile)
+  public SecurityFilterChain appFilterChainforTest(HttpSecurity http) throws Exception
+  {
 
     /*
      * ----------- CF Deployment --------------------
