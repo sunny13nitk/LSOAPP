@@ -58,8 +58,9 @@ public class AppSecurityConfig
         // session is created by approuter
         .and().authorizeRequests() // authorize all requests
         .antMatchers(HttpMethod.GET, "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
-        .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll()
-        .antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/api/**").hasAuthority("Administrators")
+        .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll().antMatchers("/web-components.js/**")
+        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/api/**")
+        .hasAuthority("Administrators")
         // Only
         // Administrators
         // Allowed

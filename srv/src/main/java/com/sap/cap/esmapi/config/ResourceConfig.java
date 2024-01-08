@@ -9,7 +9,8 @@ public class ResourceConfig implements WebMvcConfigurer
 {
 
     private static final String[] CLASSPATH_RESOURCE_LOCATIONS =
-    { "classpath:/META-INF/resources/", "classpath:/resources/", "classpath:/static/", "classpath:/resources/static/" };
+    { "classpath:/META-INF/resources/", "classpath:/resources/", "classpath:/static/", "classpath:/resources/static/",
+            "classpath:/web-components.js" };
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry)
