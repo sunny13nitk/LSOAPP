@@ -38,7 +38,6 @@ public class AppSecurityConfig
   XsuaaTokenFlows xsuaaTokenFlows;
 
   @Bean
-  @Profile(GC_Constants.gc_DEVProfile)
   public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception
   {
 
@@ -60,9 +59,9 @@ public class AppSecurityConfig
   public SecurityFilterChain appFilterChainforTestProd(HttpSecurity http) throws Exception
   {
 
-    /*
-     * ----------- CF Deployment --------------------
-     */
+    // /*
+    // * ----------- CF Deployment --------------------
+    // */
 
     // @formatter:off
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -70,9 +69,7 @@ public class AppSecurityConfig
         .and().authorizeRequests() // authorize all requests
         .antMatchers(HttpMethod.GET, "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
         .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll().antMatchers("/web-components.js/**")
-        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll()
-        .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
-        // allowed
+        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/ess/**").authenticated() // Only
         // Only Authorized User(s) having External or Internal Role(s) for LSO
         .antMatchers("/lso/**").hasAnyAuthority(GC_Constants.gc_role_employee_lso, GC_Constants.gc_role_contractor_lso)
         // allowed
@@ -90,9 +87,9 @@ public class AppSecurityConfig
   public SecurityFilterChain appFilterChainforTest(HttpSecurity http) throws Exception
   {
 
-    /*
-     * ----------- CF Deployment --------------------
-     */
+    // /*
+    // * ----------- CF Deployment --------------------
+    // */
 
     // @formatter:off
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -100,11 +97,8 @@ public class AppSecurityConfig
         .and().authorizeRequests() // authorize all requests
         .antMatchers(HttpMethod.GET, "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
         .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll().antMatchers("/web-components.js/**")
-        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll()
-        .antMatchers("/ess/**").authenticated() // Only Authenticated user(s) via IDP
-        // allowed
+        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/ess/**").authenticated() // Only
         .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
-        // allowed
         .anyRequest().denyAll() // Deny any other endpoint access then listed above
         .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
         .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
