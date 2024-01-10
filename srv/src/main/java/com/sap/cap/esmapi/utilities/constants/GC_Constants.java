@@ -42,4 +42,6 @@ public class GC_Constants
 
     public static final String gc_role_contractor_lso = "SVC_ESM_CONTRACTOR_LSO"; // P/S User(s)
 
+    public static final String gc_AttachmentTypeInternal = "ZINT"; // Internal Attachment Type
+
 }

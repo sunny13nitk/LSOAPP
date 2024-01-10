@@ -3774,7 +3774,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                 boolean byTechnicalUser = false;
                                                 long fileSize = 0;
                                                 String id = null, title = null, createdByName = null, createdOn = null,
-                                                        dateFormatted = null, urlAtt = null;
+                                                        dateFormatted = null, urlAtt = null, type = null;
 
                                                 // log.info("Cases Entity Bound - Reading Case...");
                                                 Iterator<String> fieldNames = attEnt.fieldNames();
@@ -3798,6 +3798,16 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                         if (StringUtils.hasText(attEnt.get(attFieldName).asText()))
                                                         {
                                                             title = attEnt.get(attFieldName).asText();
+                                                        }
+                                                    }
+
+                                                    if (attFieldName.equals("type"))
+                                                    {
+                                                        // log.info("Case Type Added : " +
+                                                        // caseEnt.get(caseFieldName).asText());
+                                                        if (StringUtils.hasText(attEnt.get(attFieldName).asText()))
+                                                        {
+                                                            type = attEnt.get(attFieldName).asText();
                                                         }
                                                     }
 
@@ -3866,8 +3876,20 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
                                                 if (StringUtils.hasText(id) && StringUtils.hasText(title)
                                                         && fileSize > 0)
                                                 {
-                                                    prevAtt.add(new TY_PreviousAttachments(id, title, fileSize,
-                                                            createdByName, dateFormatted, byTechnicalUser, null));
+                                                    if (type == null)
+                                                    {
+                                                        prevAtt.add(new TY_PreviousAttachments(id, title, fileSize,
+                                                                createdByName, dateFormatted, byTechnicalUser, null));
+                                                    }
+                                                    else if (StringUtils.hasText(type))
+                                                    {
+                                                        if (!type.equals(GC_Constants.gc_AttachmentTypeInternal))
+                                                        {
+                                                            prevAtt.add(new TY_PreviousAttachments(id, title, fileSize,
+                                                                    createdByName, dateFormatted, byTechnicalUser,
+                                                                    null));
+                                                        }
+                                                    }
 
                                                 }
 
