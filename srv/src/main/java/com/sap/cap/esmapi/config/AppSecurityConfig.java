@@ -98,7 +98,7 @@ public class AppSecurityConfig
         .antMatchers(HttpMethod.GET, "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
         .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll().antMatchers("/web-components.js/**")
         .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/ess/**").authenticated() // Only
-        .antMatchers("/lso/**").authenticated() // Only Authenticated user(s) via IDP
+        .antMatchers("/lso/**").hasAnyAuthority(GC_Constants.gc_role_employee_lso, GC_Constants.gc_role_contractor_lso)
         .anyRequest().denyAll() // Deny any other endpoint access then listed above
         .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
         .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
