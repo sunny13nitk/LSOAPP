@@ -4,8 +4,6 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cds/cds4j-api/1.34.2/cds4j-api-1.34.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cds/cds-services-impl/1.30.2/cds-services-impl-1.30.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/environment/servicebinding/api/java-access-api/0.5.2/java-access-api-0.5.2.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/environment/servicebinding/api/java-core-api/0.5.2/java-core-api-0.5.2.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/commons/commons-csv/1.9.0/commons-csv-1.9.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cds/cds-feature-jdbc/1.30.2/cds-feature-jdbc-1.30.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cds/cds4j-runtime/1.34.2/cds4j-runtime-1.34.2.jar" enabled="true" runInBatchMode="false"/>
@@ -35,10 +33,6 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/mt/cds-mtx/1.21.5/cds-mtx-1.21.5.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/cloudplatform-connectivity/4.3.0/cloudplatform-connectivity-4.3.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/slf4j/jcl-over-slf4j/1.7.36/jcl-over-slf4j-1.7.36.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/io/vavr/vavr/0.10.4/vavr-0.10.4.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/io/vavr/vavr-match/0.10.4/vavr-match-0.10.4.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/mikesamuel/json-sanitizer/1.2.3/json-sanitizer-1.2.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cds/repackaged/odata-v4-lib/1.30.2/odata-v4-lib-1.30.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/dataformat/jackson-dataformat-xml/2.13.4/jackson-dataformat-xml-2.13.4.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/codehaus/woodstox/stax2-api/4.2.1/stax2-api-4.2.1.jar" enabled="true" runInBatchMode="false"/>
@@ -60,7 +54,6 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/instancemanager/util/2.0.28/util-2.0.28.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/instancemanager/client-api/2.0.28/client-api-2.0.28.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cds/cds-integration-cloud-sdk/1.30.2/cds-integration-cloud-sdk-1.30.2.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/frameworks/resilience4j/4.3.0/resilience4j-4.3.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cds/cds-feature-cloudfoundry/1.30.2/cds-feature-cloudfoundry-1.30.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/environment/servicebinding/java-sap-vcap-services/0.5.2/java-sap-vcap-services-0.5.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cds/cds-feature-xsuaa/1.30.2/cds-feature-xsuaa-1.30.2.jar" enabled="true" runInBatchMode="false"/>
@@ -99,24 +92,28 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/com/h2database/h2/2.1.214/h2-2.1.214.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cds/cds-feature-hana/1.30.2/cds-feature-hana-1.30.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/db/jdbc/ngdbc/2.14.10/ngdbc-2.14.10.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/scp-cf/5.1.0/scp-cf-5.1.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/sdk-core/5.1.0/sdk-core-5.1.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/connectivity-destination-service/5.1.0/connectivity-destination-service-5.1.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/connectivity-apache-httpclient4/5.1.0/connectivity-apache-httpclient4-5.1.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/bouncycastle/bcprov-jdk18on/1.76/bcprov-jdk18on-1.76.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/bouncycastle/bcpkix-jdk18on/1.76/bcpkix-jdk18on-1.76.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/bouncycastle/bcutil-jdk18on/1.76/bcutil-jdk18on-1.76.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/scp-cf/4.3.0/scp-cf-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/auditlog-scp-cf/4.3.0/auditlog-scp-cf-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/cloudplatform-core/4.3.0/cloudplatform-core-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/auditlog/4.3.0/auditlog-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/slf4j/jcl-over-slf4j/1.7.36/jcl-over-slf4j-1.7.36.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/vavr/vavr/0.10.4/vavr-0.10.4.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/io/vavr/vavr-match/0.10.4/vavr-match-0.10.4.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/caching/4.3.0/caching-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/security/4.3.0/security-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/tenant/4.3.0/tenant-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/cloudplatform-core-scp-cf/4.3.0/cloudplatform-core-scp-cf-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/environment/servicebinding/java-sap-service-operator/0.5.1/java-sap-service-operator-0.5.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/environment/servicebinding/api/java-consumption-api/0.5.1/java-consumption-api-0.5.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/environment/servicebinding/api/java-core-api/0.5.1/java-core-api-0.5.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/google/code/gson/gson/2.9.1/gson-2.9.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/auth0/java-jwt/4.4.0/java-jwt-4.4.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/environment/servicebinding/api/java-consumption-api/0.10.1/java-consumption-api-0.10.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/connectivity-oauth/5.1.0/connectivity-oauth-5.1.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/security/java-security/3.3.1/java-security-3.3.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/cloudplatform-core/5.1.0/cloudplatform-core-5.1.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/servlet-jakarta/5.1.0/servlet-jakarta-5.1.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/tenant/5.1.0/tenant-5.1.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/security/5.1.0/security-5.1.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/resilience/5.1.0/resilience-5.1.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/resilience4j/5.1.0/resilience4j-5.1.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/mikesamuel/json-sanitizer/1.2.3/json-sanitizer-1.2.3.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/auth0/java-jwt/4.2.1/java-jwt-4.2.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/cloudplatform-connectivity-scp-cf/4.3.0/cloudplatform-connectivity-scp-cf-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/cloudplatform-connectivity-scp/4.3.0/cloudplatform-connectivity-scp-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/resilience/4.3.0/resilience-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/frameworks/resilience4j/4.3.0/resilience4j-4.3.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/io/github/resilience4j/resilience4j-circuitbreaker/1.7.1/resilience4j-circuitbreaker-1.7.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/io/github/resilience4j/resilience4j-core/1.7.1/resilience4j-core-1.7.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/io/github/resilience4j/resilience4j-bulkhead/1.7.1/resilience4j-bulkhead-1.7.1.jar" enabled="true" runInBatchMode="false"/>
@@ -124,15 +121,17 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/io/github/resilience4j/resilience4j-retry/1.7.1/resilience4j-retry-1.7.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/io/github/resilience4j/resilience4j-ratelimiter/1.7.1/resilience4j-ratelimiter-1.7.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/javax/cache/cache-api/1.1.1/cache-api-1.1.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/caching/5.1.0/caching-5.1.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/security/java-api/2.13.4/java-api-2.13.4.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/security-scp-cf/4.3.0/security-scp-cf-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/security/java-security/2.13.4/java-security-2.13.4.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/security/env/2.13.4/env-2.13.4.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/servlet/4.3.0/servlet-4.3.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/sdk/cloudplatform/tenant-scp-cf/4.3.0/tenant-scp-cf-4.3.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/security/xsuaa/xsuaa-spring-boot-starter/2.13.5/xsuaa-spring-boot-starter-2.13.5.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/security/xsuaa/spring-xsuaa/2.13.5/spring-xsuaa-2.13.5.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/logging/log4j/log4j-to-slf4j/2.17.2/log4j-to-slf4j-2.17.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/logging/log4j/log4j-api/2.17.2/log4j-api-2.17.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/security/xsuaa/api/2.13.5/api-2.13.5.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/security/java-api/2.13.5/java-api-2.13.5.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/security/env/2.13.5/env-2.13.5.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/com/sap/cloud/environment/servicebinding/java-sap-service-operator/0.5.2/java-sap-service-operator-0.5.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/security/spring-security-oauth2-jose/5.7.5/spring-security-oauth2-jose-5.7.5.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/security/spring-security-oauth2-core/5.7.5/spring-security-oauth2-core-5.7.5.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/nimbusds/nimbus-jose-jwt/9.22/nimbus-jose-jwt-9.22.jar" enabled="true" runInBatchMode="false"/>
