@@ -17,7 +17,7 @@ public class SrvCloudUrlsSuffix
 
     @Bean
     @Autowired // For PropertySourcesPlaceholderConfigurer
-    public TY_SrvCloudUrlsSuffix SrvCloudUrls(@Value("${casesurl}") final String casesUrl,
+    public TY_SrvCloudUrlsSuffix SrvCloudUrlsSuffixVals(@Value("${casesurl}") final String casesUrl,
             @Value("${cpurl}") final String cpUrl, @Value("${accountsurl}") final String acUrl,
             @Value("${notesurl}") final String notesUrl, @Value("${topN}") final String topN,
             @Value("${caseTemplateUrl}") final String caseTemplateUrl,
