@@ -93,7 +93,7 @@
         <dependency>
             <groupId>com.sap.cloud.sdk.cloudplatform</groupId>
             <artifactId>scp-cf</artifactId>
-            <version>5.1.0</version>
+            <version>4.3.0</version>
         </dependency>
 
         <dependency>
