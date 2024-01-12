@@ -16,4 +16,5 @@ public class TY_RLConfig
     private String internalUsersRegex;
     private String techUserRegex;
     private boolean allowPrevAttDL;
+    private boolean enableDestinationCheck;
 }
