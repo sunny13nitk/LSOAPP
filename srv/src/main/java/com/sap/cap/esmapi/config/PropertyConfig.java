@@ -43,7 +43,7 @@ public class PropertyConfig
 			@Value("${internalUsers}") final String internalUsersRegex,
 			@Value("${techUserRegex}") final String techUserRegex,
 			@Value("${allowPrevAttDL}") final boolean allowPrevAttDL,
-			@Value("${allowPrevAttDL}") final boolean enableDestinationCheck)
+			@Value("${enableDestinationCheck}") final boolean enableDestinationCheck)
 	{
 		TY_RLConfig rlConfig = new TY_RLConfig(numFormSubms, intvSecs, allowedAttachments, allowedSizeAttachmentMB,
 				internalUsersRegex, techUserRegex, allowPrevAttDL, enableDestinationCheck);
