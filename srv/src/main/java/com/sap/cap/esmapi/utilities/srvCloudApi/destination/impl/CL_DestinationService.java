@@ -59,9 +59,11 @@ public class CL_DestinationService implements IF_DestinationService
     {
         try
         {
+            log.info("Scanning for Destination : " + destinationName);
             Destination dest = DestinationAccessor.getDestination(destinationName);
             if (dest != null)
             {
+                log.info("Destination Bound via Destination Accessor.");
                 destinationProps.setBaseUrl(dest.get("Url").toString());
                 destinationProps.setPropU(dest.get("User").toString());
                 destinationProps.setPropP(dest.get("Password").toString());
@@ -69,7 +71,7 @@ public class CL_DestinationService implements IF_DestinationService
         }
         catch (DestinationAccessException e)
         {
-            log.error(destinationName);
+            log.error("Error Accessing Destination : " + e.getLocalizedMessage());
             String msg = msgSrc.getMessage("ERR_DESTINATION_ACCESS", new Object[]
             { destinationName, e.getLocalizedMessage() }, Locale.ENGLISH);
             if (logSrv != null)
