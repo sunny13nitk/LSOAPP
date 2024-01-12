@@ -44,4 +44,6 @@ public class GC_Constants
 
     public static final String gc_AttachmentTypeInternal = "ZINT"; // Internal Attachment Type
 
+    public static final String gc_Dest_SrvCloud_Internals = "iESM-destination-services";// srvcloud-dest";
+
 }

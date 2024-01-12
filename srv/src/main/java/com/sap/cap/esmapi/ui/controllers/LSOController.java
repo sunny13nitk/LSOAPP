@@ -32,6 +32,7 @@ import com.sap.cap.esmapi.ui.pojos.TY_CaseEditFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseEdit_Form;
 import com.sap.cap.esmapi.ui.pojos.TY_CaseFormAsync;
 import com.sap.cap.esmapi.ui.pojos.TY_Case_Form;
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
@@ -39,6 +40,8 @@ import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_SessAttachmentsService;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
+import com.sap.cap.esmapi.utilities.srvCloudApi.destination.intf.IF_DestinationService;
+import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_DestinationProps;
 import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpLOBUIModelSrv;
 import com.sap.cds.services.request.UserInfo;
 import com.sap.cloud.security.xsuaa.token.Token;
@@ -80,6 +83,9 @@ public class LSOController
     @Autowired
     private TY_RLConfig rlConfig;
 
+    @Autowired
+    private IF_DestinationService destSrv;
+
     private final String caseListVWRedirect = "redirect:/lso/";
     private final String caseFormErrorRedirect = "redirect:/lso/errForm/";
     private final String caseFormView = "caseFormLSO";
@@ -99,6 +105,18 @@ public class LSOController
             // Only Authenticated user via IDP
             if (userInfo.isAuthenticated())
             {
+
+                // #TEST - Destination Service check - Start
+                if (destSrv != null)
+                {
+                    log.info("# DEST - Destination Service Bound");
+
+                    TY_DestinationProps props = destSrv
+                            .getDestinationDetails4Destination(GC_Constants.gc_Dest_SrvCloud_Internals);
+                    log.info("#DEST - Details : " + props.toString());
+                }
+                // #TEST - Destination Service check - Start
+
 
                 // #AUTH checks to be done later after role collection(s) are published in
                 // CL_UserSessionSrv
