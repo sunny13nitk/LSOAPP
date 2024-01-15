@@ -96,11 +96,6 @@
             <version>4.5.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.sap.cloud.sdk.cloudplatform</groupId>
-            <artifactId>connectivity-destination-service</artifactId>
-            <version>5.1.0</version>
-        </dependency>
 
         <dependency>
             <groupId>com.sap.cloud.security.xsuaa</groupId>
