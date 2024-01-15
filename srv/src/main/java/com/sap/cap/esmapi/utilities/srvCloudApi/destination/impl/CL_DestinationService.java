@@ -65,6 +65,12 @@ public class CL_DestinationService implements IF_DestinationService
             if (dest != null)
             {
                 log.info("Destination Bound via Destination Accessor.");
+                log.info("Logging Destination Details .... Begin....");
+                log.info(dest.toString());
+                log.info("Logging Destination Details .... End....");
+
+                // Initializing Destination
+                destinationProps = new TY_DestinationProps();
                 destinationProps.setBaseUrl(dest.get("Url").toString());
                 destinationProps.setPropU(dest.get("User").toString());
                 destinationProps.setPropP(dest.get("Password").toString());
