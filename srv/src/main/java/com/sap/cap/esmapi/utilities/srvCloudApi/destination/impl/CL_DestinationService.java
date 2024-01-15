@@ -74,6 +74,7 @@ public class CL_DestinationService implements IF_DestinationService
                 destinationProps.setBaseUrl(dest.get("Url").toString());
                 destinationProps.setPropU(dest.get("User").toString());
                 destinationProps.setPropP(dest.get("Password").toString());
+                log.info(destinationProps.toString());
             }
         }
         catch (DestinationAccessException e)
