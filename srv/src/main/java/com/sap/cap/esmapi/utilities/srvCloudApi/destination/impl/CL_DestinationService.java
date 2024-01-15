@@ -2,8 +2,10 @@ package com.sap.cap.esmapi.utilities.srvCloudApi.destination.impl;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Locale;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -19,6 +21,8 @@ import com.sap.cap.esmapi.utilities.srvCloudApi.destination.intf.IF_DestinationS
 import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_DestinationProps;
 import com.sap.cloud.sdk.cloudplatform.connectivity.Destination;
 import com.sap.cloud.sdk.cloudplatform.connectivity.DestinationAccessor;
+import com.sap.cloud.sdk.cloudplatform.connectivity.DestinationProperties;
+import com.sap.cloud.sdk.cloudplatform.connectivity.DestinationService;
 import com.sap.cloud.sdk.cloudplatform.connectivity.exception.DestinationAccessException;
 
 import lombok.RequiredArgsConstructor;
@@ -59,15 +63,34 @@ public class CL_DestinationService implements IF_DestinationService
     {
         try
         {
-            log.info("Scanning for Destination : " + destinationName);
-            Destination dest = DestinationAccessor.getDestination(destinationName);
-            if (dest != null)
+
+            log.info("Scanning all Destinations for Test ...");
+            DestinationService service = new DestinationService();
+
+            if (service != null)
             {
-                log.info("Destination Bound via Destination Accessor.");
-                destinationProps.setBaseUrl(dest.get("Url").toString());
-                destinationProps.setPropU(dest.get("User").toString());
-                destinationProps.setPropP(dest.get("Password").toString());
+                log.info("Destination Service Instantiated");
+
+                Collection<DestinationProperties> allDestinationProperties = service.getAllDestinationProperties();
+                if (CollectionUtils.isNotEmpty(allDestinationProperties))
+                {
+                    for (DestinationProperties destinationProperties : allDestinationProperties)
+                    {
+                        log.info(destinationProperties.toString());
+                    }
+
+                }
             }
+
+            // log.info("Scanning for Destination : " + destinationName);
+            // Destination dest = DestinationAccessor.getDestination(destinationName);
+            // if (dest != null)
+            // {
+            // log.info("Destination Bound via Destination Accessor.");
+            // destinationProps.setBaseUrl(dest.get("Url").toString());
+            // destinationProps.setPropU(dest.get("User").toString());
+            // destinationProps.setPropP(dest.get("Password").toString());
+            // }
         }
         catch (DestinationAccessException e)
         {
