@@ -68,7 +68,7 @@ public class CL_DestinationService implements IF_DestinationService
                 for (String prop : dest.getPropertyNames())
                 {
                     log.info("Property Name :  " + prop);
-                    log.info("Property Value : " + dest.get(prop));
+                    log.info("Property Value : " + dest.get(prop).get());
                 }
 
                 log.info("Destination Bound via Destination Accessor.");
