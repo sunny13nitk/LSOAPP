@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class TY_DestinationProps
 {
     private String baseUrl;
-    private String propU;
-    private String propP;
+    private String authToken;
+
 }

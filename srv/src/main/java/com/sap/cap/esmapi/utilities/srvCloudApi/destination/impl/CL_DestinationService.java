@@ -40,8 +40,9 @@ public class CL_DestinationService implements IF_DestinationService
     private TY_DestinationProps destinationProps;
 
     private static final String prop_URL = "URL";
-    private static final String prop_Name = "Name";
-    private static final String prop_pwd = "Password";
+    private static final String prop_Token = "authTokens";
+    private static final String cons_value = ", value=";
+    private static final String cons_bracketClose = "\\)";
 
     @Override
     public TY_DestinationProps getDestinationDetails4Destination(String destinationName) throws EX_ESMAPI
@@ -70,30 +71,22 @@ public class CL_DestinationService implements IF_DestinationService
             {
 
                 log.info("Destination Bound via Destination Accessor.");
-                log.info("Logging Destination Details .... Begin....");
-                log.info(dest.toString());
-                log.info("Logging Destination Details .... End....");
 
                 destinationProps = new TY_DestinationProps();
 
                 for (String prop : dest.getPropertyNames())
                 {
-                    log.info("Property Name :  " + prop);
-                    log.info("Property Value : " + dest.get(prop).get());
+
                     if (prop.equals(prop_URL))
                     {
                         destinationProps.setBaseUrl(dest.get(prop).get().toString());
                     }
 
-                    if (prop.equals(prop_Name))
+                    if (prop.equals(prop_Token))
                     {
-                        destinationProps.setPropU(dest.get(prop).get().toString());
+                        destinationProps.setAuthToken(parseToken(dest.get(prop).get().toString()));
                     }
 
-                    if (prop.equals(prop_pwd))
-                    {
-                        destinationProps.setPropP(dest.get(prop).get().toString());
-                    }
                 }
 
             }
@@ -112,6 +105,30 @@ public class CL_DestinationService implements IF_DestinationService
             }
 
         }
+    }
+
+    private String parseToken(String authToken)
+    {
+        String token = null;
+
+        if (StringUtils.hasText(authToken))
+        {
+            String[] tokens = authToken.split(cons_value);
+            if (tokens.length > 0)
+            {
+                String tokenval = tokens[tokens.length -1];
+                if (StringUtils.hasText(tokenval))
+                {
+                    String[] tokenAuth = tokenval.split(cons_bracketClose);
+                    if(tokenAuth.length > 0)
+                    {
+                        token = tokenAuth[0];
+                    }
+                }
+            }
+        }
+
+        return token;
     }
 
 }
