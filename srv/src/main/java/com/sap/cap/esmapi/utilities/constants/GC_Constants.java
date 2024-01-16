@@ -44,6 +44,10 @@ public class GC_Constants
 
     public static final String gc_AttachmentTypeInternal = "ZINT"; // Internal Attachment Type
 
-    public static final String gc_Dest_SrvCloud_Internals = "NSD_SCD_BTPEXT";// "srvcloud-dest-internal";
+    public static final String gc_Dest_SrvCloud_Internals = "BTP_SVC_INT";// Service Cloud Destination for Internal
+                                                                          // (I/D/C) Users
+
+    public static final String gc_Dest_SrvCloud_Externals = "BTP_SVC_EXT";// Service Cloud Destination for External
+                                                                          // (P/S) Users
 
 }
