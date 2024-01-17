@@ -31,11 +31,11 @@ import com.sap.cloud.security.xsuaa.tokenflows.XsuaaTokenFlows;
 public class AppSecurityConfig
 {
 
-  // @Autowired
-  // private XsuaaServiceConfiguration xsuaaServiceConfiguration;
+  @Autowired
+  private XsuaaServiceConfiguration xsuaaServiceConfiguration;
 
-  // @Autowired
-  // XsuaaTokenFlows xsuaaTokenFlows;
+  @Autowired
+  XsuaaTokenFlows xsuaaTokenFlows;
 
   @Bean
   public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception
@@ -53,33 +53,31 @@ public class AppSecurityConfig
 
   }
 
-  
+  @Bean
+  @Profile(GC_Constants.gc_TESTProfile)
+  public SecurityFilterChain appFilterChainforTest(HttpSecurity http) throws Exception
+  {
 
-  // @Bean
-  // @Profile(GC_Constants.gc_DEVProfile)
-  // public SecurityFilterChain appFilterChainforTest(HttpSecurity http) throws Exception
-  // {
+    // /*
+    // * ----------- CF Deployment --------------------
+    // */
 
-  //   // /*
-  //   // * ----------- CF Deployment --------------------
-  //   // */
+    // @formatter:off
+    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        // session is created by approuter
+        .and().authorizeRequests() // authorize all requests
+        .antMatchers(HttpMethod.GET, "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
+        .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll().antMatchers("/web-components.js/**")
+        .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/ess/**").authenticated() // Only
+        .antMatchers("/lso/**").hasAnyAuthority(GC_Constants.gc_role_employee_lso, GC_Constants.gc_role_contractor_lso)
+        .anyRequest().denyAll() // Deny any other endpoint access then listed above
+        .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
+        .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
+    // @formatter:on
 
-  //   // @formatter:off
-  //   http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-  //       // session is created by approuter
-  //       .and().authorizeRequests() // authorize all requests
-  //       .antMatchers(HttpMethod.GET, "/static/**").permitAll().antMatchers(HttpMethod.GET, "/static/images/**")
-  //       .permitAll().antMatchers(HttpMethod.GET, "/static/css/**").permitAll().antMatchers("/web-components.js/**")
-  //       .permitAll().antMatchers(HttpMethod.GET, "/static/js/**").permitAll().antMatchers("/ess/**").authenticated() // Only
-  //       .antMatchers("/lso/**").hasAnyAuthority(GC_Constants.gc_role_employee_lso, GC_Constants.gc_role_contractor_lso)
-  //       .anyRequest().denyAll() // Deny any other endpoint access then listed above
-  //       .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
-  //       .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
-  //   // @formatter:on
+    return http.build();
 
-  //   return http.build();
-
-  // }
+  }
 
   @Bean
   public WebSecurityCustomizer webSecurityCustomizer() throws Exception
@@ -92,11 +90,11 @@ public class AppSecurityConfig
   // /*
   // ----------- CF Deployment --------------------
   // */
-  // Converter<Jwt, AbstractAuthenticationToken> getJwtAuthoritiesConverter()
-  // {
-  //   TokenAuthenticationConverter converter = new TokenAuthenticationConverter(xsuaaServiceConfiguration);
-  //   converter.setLocalScopeAsAuthorities(true);
-  //   return converter;
-  // }
+  Converter<Jwt, AbstractAuthenticationToken> getJwtAuthoritiesConverter()
+  {
+    TokenAuthenticationConverter converter = new TokenAuthenticationConverter(xsuaaServiceConfiguration);
+    converter.setLocalScopeAsAuthorities(true);
+    return converter;
+  }
 
 }
