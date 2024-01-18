@@ -392,7 +392,7 @@ public class ESSLocalController
     private Ty_UserAccountEmployee getUserAccount()
     {
         return new Ty_UserAccountEmployee("I057386", "Sunny Bhardwaj", "sunny.bhardwaj@sap.com",
-                "11eda929-5152-18be-afdb-81d9ac010a00", "11ed17c5-47d5-c4de-afdb-818bd8010a00", false, false);
+                "11eda929-5152-18be-afdb-81d9ac010a00", "11ed17c5-47d5-c4de-afdb-818bd8010a00", false, false, null);
 
         // return new Ty_UserAccountContact("Dummy ESS2", "ESS Portal Test1",
         // "testess2@gmail.com",

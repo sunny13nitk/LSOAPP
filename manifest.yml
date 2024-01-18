@@ -1,7 +1,7 @@
 applications:
 - name: esmapi
   instances: 1
-  memory: 896M
+  memory: 1024M
   routes:
     - route: esmapi.cfapps.eu10-004.hana.ondemand.com
   path: srv/target/esmapi-exec.jar

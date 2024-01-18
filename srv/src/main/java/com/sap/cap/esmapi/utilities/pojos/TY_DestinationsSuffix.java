@@ -31,5 +31,7 @@ public class TY_DestinationsSuffix
     private String customerUrlPathString;
     private String prevAttPathString;
     private String dlAttPathString;
+    private String destInternal;
+    private String destExternal;
 
 }

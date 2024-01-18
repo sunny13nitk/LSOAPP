@@ -5,5 +5,5 @@ import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_Destination
 
 public interface IF_DestinationService
 {
-    public TY_DestinationProps getDestinationDetails4Destination(String destinationName) throws EX_ESMAPI;
+    public TY_DestinationProps getDestinationDetails4User(String DestinationName) throws EX_ESMAPI;
 }

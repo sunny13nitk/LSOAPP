@@ -36,7 +36,8 @@ public class DestinationsSuffixes
             @Value("${casesByEmplPathString}") final String casesByEmplUrlPathString,
             @Value("${customerurlPathString}") final String customerUrlPathString,
             @Value("${prevAttPathString}") final String prevAttPathString,
-            @Value("${dlAttPathString}") final String dlAttPathString
+            @Value("${dlAttPathString}") final String dlAttPathString,
+            @Value("${destInternal}") final String destInternal, @Value("${destExternal}") final String destExternal
 
     )
 
@@ -46,7 +47,7 @@ public class DestinationsSuffixes
                 docSrvUrlPathString, emplSrvUrlPathString, vhlpUrlPathString, caseDetailsUrlPathString,
                 statusCfgUrlPathString, accByEmailUrlPathString, conByEmailUrlPathString, empByIdUrlPathString,
                 casesByAccUrlPathString, casesByEmplUrlPathString, customerUrlPathString, prevAttPathString,
-                dlAttPathString);
+                dlAttPathString, destInternal, destExternal);
 
         return destinationsSuffixes;
     }

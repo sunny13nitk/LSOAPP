@@ -18,14 +18,14 @@ public class Ty_UserAccountEmployee
     private String employeeId;
     private boolean employee;
     private boolean external;
+    private String destination;
+
     @Override
     public String toString()
     {
-        return "Ty_UserAccountContactEmployee [userId=" + userId + ", userName=" + userName + ", userEmail=" + userEmail
+        return "Ty_UserAccountEmployee [userId=" + userId + ", userName=" + userName + ", userEmail=" + userEmail
                 + ", accountId=" + accountId + ", employeeId=" + employeeId + ", employee=" + employee + ", external="
-                + external + "]";
+                + external + ", destination=" + destination + "]";
     }
-
-    
 
 }

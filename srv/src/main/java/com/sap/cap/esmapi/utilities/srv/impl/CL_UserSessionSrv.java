@@ -46,6 +46,7 @@ import com.sap.cap.esmapi.utilities.enums.EnumMessageType;
 import com.sap.cap.esmapi.utilities.enums.EnumStatus;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
+import com.sap.cap.esmapi.utilities.pojos.TY_DestinationsSuffix;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_PreviousAttachments;
@@ -57,6 +58,7 @@ import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_AttachmentsFetchSrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_SessAttachmentsService;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
+import com.sap.cap.esmapi.utilities.srvCloudApi.destination.intf.IF_DestinationService;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
 import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpLOBUIModelSrv;
@@ -110,6 +112,12 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
     @Autowired
     private IF_AttachmentsFetchSrv attFetchSrv;
+
+    @Autowired
+    private TY_DestinationsSuffix dS;
+
+    @Autowired
+    private IF_DestinationService destSrv;
 
     // Properties
     private TY_UserSessionInfo userSessInfo;
@@ -187,11 +195,45 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         if (!token.getLogonName().matches(rlConfig.getInternalUsersRegex()))
                         {
                             usAccConEmpl.setExternal(true);
+                            if (dS != null)
+                            {
+                                if (StringUtils.hasText(dS.getDestExternal()))
+                                {
+                                    usAccConEmpl.setDestination(dS.getDestExternal());
+                                }
+                            }
+                            usAccConEmpl.setDestination(newAccountID);
                             log.info("User Marked as External User!");
                         }
                         else
                         {
+                            if (dS != null)
+                            {
+                                if (StringUtils.hasText(dS.getDestInternal()))
+                                {
+                                    usAccConEmpl.setDestination(dS.getDestInternal());
+                                }
+                            }
                             log.info("User Marked as Internal User!");
+                        }
+
+                        // Initialize Destination Service
+                        if (rlConfig.isEnableDestinationCheck())
+                        {
+                            try
+                            {
+                                if (destSrv.getDestinationDetails4User(usAccConEmpl.getDestination()) != null)
+                                {
+                                    log.info("Destination connection established successfully for -  "
+                                            + usAccConEmpl.getDestination());
+                                }
+                            }
+                            catch (EX_ESMAPI e)
+                            {
+                                handleDestinationLoadError(usAccConEmpl.getUserName(), usAccConEmpl.getDestination(),
+                                        e.getLocalizedMessage());
+                            }
+
                         }
                     }
 
@@ -882,7 +924,7 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
             Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, userName, userEmail,
                     srvCloudApiSrv.getAccountIdByUserEmail(userEmail), srvCloudApiSrv.getEmployeeIdByUserId(userId),
-                    false, true);
+                    false, true, null);
 
             /*
              * Test with New Customer
@@ -1540,6 +1582,18 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         EV_LogMessage logMsgEvent = new EV_LogMessage((Object) caseFormAsync.getSubmGuid(), logMsg);
         applicationEventPublisher.publishEvent(logMsgEvent);
 
+        // Should be handled Centrally via Aspect
+        throw new EX_ESMAPI(msg);
+    }
+
+    private void handleDestinationLoadError(String userName, String destName, String msg)
+    {
+        if (hanaLogSrv != null)
+        {
+            hanaLogSrv.createLog(new TY_Message(userName, Timestamp.from(Instant.now()), EnumStatus.Error,
+                    EnumMessageType.ERR_SRVCLOUDAPI, destName, msg));
+
+        }
         // Should be handled Centrally via Aspect
         throw new EX_ESMAPI(msg);
     }

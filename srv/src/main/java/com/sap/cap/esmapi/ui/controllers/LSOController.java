@@ -106,21 +106,6 @@ public class LSOController
             if (userInfo.isAuthenticated())
             {
 
-                // #TEST - Destination Service check - Start
-                if (destSrv != null && rlConfig != null)
-                {
-                    if (rlConfig.isEnableDestinationCheck())
-                    {
-
-                        log.info("# DEST - Destination Service Bound");
-
-                        TY_DestinationProps props = destSrv
-                                .getDestinationDetails4Destination(GC_Constants.gc_Dest_SrvCloud_Internals);
-                        log.info("#DEST - Details : " + props.toString());
-                    }
-                }
-                // #TEST - Destination Service check - Start
-
                 // #AUTH checks to be done later after role collection(s) are published in
                 // CL_UserSessionSrv
                 TY_UserESS userDetails = new TY_UserESS();

@@ -54,7 +54,7 @@ public class AppSecurityConfig
   }
 
   @Bean
-  @Profile(GC_Constants.gc_TESTProfile)
+  @Profile(GC_Constants.gc_BTPProfile)
   public SecurityFilterChain appFilterChainforTest(HttpSecurity http) throws Exception
   {
 

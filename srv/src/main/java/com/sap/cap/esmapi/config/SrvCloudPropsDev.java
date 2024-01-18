@@ -12,14 +12,14 @@ import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 
 @Configuration
-@Profile(GC_Constants.gc_DEVProfile)
+@Profile(GC_Constants.gc_BTPProfile)
 @PropertySources(
-{ @PropertySource("classpath:srvcloudurls-dev.properties") })
+{ @PropertySource("classpath:srvcloudurls-btp.properties") })
 public class SrvCloudPropsDev
 {
     @Bean
     @Autowired // For PropertySourcesPlaceholderConfigurer
-    @Profile(GC_Constants.gc_DEVProfile)
+    @Profile(GC_Constants.gc_BTPProfile)
     public TY_SrvCloudUrls SrvCloudUrls(@Value("${username}") final String userName,
             @Value("${password}") final String password, @Value("${usernameext}") final String userNameExt,
             @Value("${passwordext}") final String passwordExt, @Value("${casesurl}") final String casesUrl,
