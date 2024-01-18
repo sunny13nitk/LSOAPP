@@ -49,6 +49,12 @@
       "target": "/web-components.js",
       "destination": "common_navigation_resources",
       "authenticationType": "none"
+    },
+    {
+      "source": "^/login(.*)",
+      "target": "/login$1",
+      "destination": "token-destination",
+      "authenticationType": "xsuaa"
     }
   ]
 }
