@@ -14,18 +14,21 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.TY_TopSkipRelay;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 
 @Service
 @Scope("prototype")
+@Profile(GC_Constants.gc_TESTProfile)
 public class CL_APISrv implements IF_APISrv
 {
 

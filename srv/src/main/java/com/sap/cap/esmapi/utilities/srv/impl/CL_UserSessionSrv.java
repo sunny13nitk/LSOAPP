@@ -872,19 +872,19 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             /*
              * Test with Existing Employee
              */
-            // String userEmail = "sunny.bhardwaj@sap.com";
-            // String userId = "I057386";
-            // String userName = "Sunny Bhardwaj";
+            String userEmail = "sunny.bhardwaj@sap.com";
+            String userId = "I057386";
+            String userName = "Sunny Bhardwaj";
 
-            // userDetails.setAuthenticated(true);
-            // //
-            // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
+            userDetails.setAuthenticated(true);
+            //
+            userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
 
-            // Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId,
-            // userName, userEmail,
-            // srvCloudApiSrv.getAccountIdByUserEmail(userEmail),
-            // srvCloudApiSrv.getEmployeeIdByUserId(userId),
-            // true, false);
+            Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId,
+            userName, userEmail,
+            srvCloudApiSrv.getAccountIdByUserEmail(userEmail),
+            srvCloudApiSrv.getEmployeeIdByUserId(userId),
+            true, false,null);
 
             /*
              * Test with Existing Employee
@@ -914,17 +914,17 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             /*
              * Test with New Customer
              */
-            String userEmail = "ptripathi@gmail.com";
-            String userId = "SGJ456K";
-            String userName = "Pankaj Tripathi";
+            // String userEmail = "ptripathi@gmail.com";
+            // String userId = "SGJ456K";
+            // String userName = "Pankaj Tripathi";
 
-            userDetails.setAuthenticated(true);
-            //
-            userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
+            // userDetails.setAuthenticated(true);
+            // //
+            // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
 
-            Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, userName, userEmail,
-                    srvCloudApiSrv.getAccountIdByUserEmail(userEmail), srvCloudApiSrv.getEmployeeIdByUserId(userId),
-                    false, true, null);
+            // Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, userName, userEmail,
+            //         srvCloudApiSrv.getAccountIdByUserEmail(userEmail), srvCloudApiSrv.getEmployeeIdByUserId(userId),
+            //         false, true, null);
 
             /*
              * Test with New Customer

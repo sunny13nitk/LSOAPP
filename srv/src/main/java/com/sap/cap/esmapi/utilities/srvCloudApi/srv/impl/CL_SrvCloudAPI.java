@@ -39,6 +39,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -81,6 +82,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@Profile(GC_Constants.gc_TESTProfile)
 public class CL_SrvCloudAPI implements IF_SrvCloudAPI
 {
 
