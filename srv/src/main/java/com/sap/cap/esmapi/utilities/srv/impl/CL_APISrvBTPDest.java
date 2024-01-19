@@ -1,7 +1,6 @@
 package com.sap.cap.esmapi.utilities.srv.impl;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
