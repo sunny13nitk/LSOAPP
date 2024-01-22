@@ -8,6 +8,7 @@ public class CL_URLUtility
 {
 
     private static final String cons_pathSlash = "\\/";
+    private static final int cons_limit = 2;
 
     public static String getUrl4DestinationAPI(String destinationAPI, String destUrlPrefix) throws EX_ESMAPI
     {
@@ -15,7 +16,7 @@ public class CL_URLUtility
         if (StringUtils.hasText(destUrlPrefix) && StringUtils.hasText(destinationAPI))
         {
             url = new String();
-            String[] destAPIParts = destinationAPI.split(cons_pathSlash);
+            String[] destAPIParts = destinationAPI.split(cons_pathSlash, cons_limit);
             if (destAPIParts.length > 0)
             {
                 url += destUrlPrefix + destAPIParts[destAPIParts.length - 1];
