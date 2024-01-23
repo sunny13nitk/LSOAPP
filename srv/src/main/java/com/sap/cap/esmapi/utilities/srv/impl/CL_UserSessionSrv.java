@@ -867,7 +867,6 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         {
 
             TY_UserDetails userDetails = new TY_UserDetails();
-            // String userEmail = "rsharma@gmail.com";
 
             /*
              * Test with Existing Employee
@@ -879,12 +878,6 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             userDetails.setAuthenticated(true);
             //
             userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
-
-            Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId,
-            userName, userEmail,
-            srvCloudApiSrv.getAccountIdByUserEmail(userEmail),
-            srvCloudApiSrv.getEmployeeIdByUserId(userId),
-            true, false,null);
 
             /*
              * Test with Existing Employee
@@ -922,23 +915,50 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             // //
             // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
 
-            // Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, userName, userEmail,
-            //         srvCloudApiSrv.getAccountIdByUserEmail(userEmail), srvCloudApiSrv.getEmployeeIdByUserId(userId),
-            //         false, true, null);
+            // Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId,
+            // userName, userEmail,
+            // srvCloudApiSrv.getAccountIdByUserEmail(userEmail),
+            // srvCloudApiSrv.getEmployeeIdByUserId(userId),
+            // false, true, null);
 
             /*
              * Test with New Customer
              */
 
+            Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee();
+            usAccConEmpl.setUserId(userId);
+            usAccConEmpl.setUserName(userName);
+            usAccConEmpl.setUserEmail(userEmail);
+
             if (StringUtils.hasText(userId))
             {
+                // If External User
                 if (!userId.matches(rlConfig.getInternalUsersRegex()))
                 {
                     usAccConEmpl.setExternal(true);
+                    // Seek the Account for External
+                    String accountID = srvCloudApiSrv.getAccountIdByUserEmail(usAccConEmpl.getUserEmail());
+                    if (StringUtils.hasText(accountID))
+                    {
+                        // If Account Found - Set It
+                        usAccConEmpl.setAccountId(accountID);
+                    }
                 }
+                else // For Internal Users
+                {
+                    // Seek an Employee
+                    String empID = srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId());
+                    if (StringUtils.hasText(empID))
+                    {
+                        usAccConEmpl.setEmployee(true);
+                        usAccConEmpl.setEmployeeId(empID);
+                    }
+                }
+
             }
-            userDetails.setUsAccEmpl(usAccConEmpl);
+
             userSessInfo.setUserDetails(userDetails); // Set in Session
+            userSessInfo.getUserDetails().setUsAccEmpl(usAccConEmpl); //Set in Session
 
             if (userSessInfo.getUserDetails().getUsAccEmpl() != null)
             {
