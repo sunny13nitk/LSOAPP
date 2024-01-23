@@ -16,11 +16,12 @@ public class CL_URLUtility
         if (StringUtils.hasText(destUrlPrefix) && StringUtils.hasText(destinationAPI))
         {
             url = new String();
-            String[] destAPIParts = destinationAPI.split(cons_pathSlash, cons_limit);
-            if (destAPIParts.length > 0)
-            {
-                url += destUrlPrefix + destAPIParts[destAPIParts.length - 1];
-            }
+            url += destUrlPrefix + destinationAPI;
+            // String[] destAPIParts = destinationAPI.split(cons_pathSlash, cons_limit);
+            // if (destAPIParts.length > 0)
+            // {
+            // url += destUrlPrefix + destAPIParts[destAPIParts.length - 1];
+            // }
         }
 
         return url;
