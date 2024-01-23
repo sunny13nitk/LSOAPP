@@ -41,6 +41,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_Description_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cds.services.request.UserInfo;
 import com.sap.cloud.security.xsuaa.token.Token;
@@ -80,6 +81,9 @@ public class ESSController
 
     @Autowired
     private IF_SrvCloudAPI srvCloudApiSrv;
+
+    @Autowired
+    private IF_UserSessionSrv userSessionSrv;
 
     private static final String VW_ESSListView = "essListView";
     private static final String VW_Error = "error";
@@ -306,14 +310,15 @@ public class ESSController
                     if (StringUtils.hasText(caseForm.getDescription()))
                     {
                         // Create Note and Get Guid back
-                        String noteId = srvCloudApiSrv
-                                .createNotes(new TY_NotesCreate(false, caseForm.getDescription(), null));
+                        String noteId = srvCloudApiSrv.createNotes(
+                                new TY_NotesCreate(false, caseForm.getDescription(), null),
+                                userSessionSrv.getDestinationDetails4mUserSession());
                         if (StringUtils.hasText(noteId))
                         {
                             newCaseEntity.setDescription(new TY_Description_CaseCreate(noteId));
                         }
                     }
- 
+
                     // Check if Attachment needs to be Created
                     if (caseForm.getAttachment() != null)
                     {
@@ -325,7 +330,8 @@ public class ESSController
                                 TY_Attachment newAttachment = new TY_Attachment(false,
                                         FilenameUtils.getName(caseForm.getAttachment().getOriginalFilename()),
                                         GC_Constants.gc_Attachment_Category, false);
-                                attR = srvCloudApiSrv.createAttachment(newAttachment);
+                                attR = srvCloudApiSrv.createAttachment(newAttachment,
+                                        userSessionSrv.getDestinationDetails4mUserSession());
                                 if (attR != null)
                                 {
                                     if (StringUtils.hasText(attR.getId()) && StringUtils.hasText(attR.getUploadUrl()))
@@ -334,7 +340,8 @@ public class ESSController
                                                 + attR.getUploadUrl());
 
                                         if (srvCloudApiSrv.persistAttachment(attR.getUploadUrl(),
-                                                caseForm.getAttachment()))
+                                                caseForm.getAttachment(),
+                                                userSessionSrv.getDestinationDetails4mUserSession()))
                                         {
                                             log.info("Attachment with id : " + attR.getId()
                                                     + " Persisted in Document Container..");
@@ -372,7 +379,8 @@ public class ESSController
                     // Case Payload is now Ready: Post and get the Case ID back
                     try
                     {
-                        String caseID = srvCloudApiSrv.createCase(newCaseEntity);
+                        String caseID = srvCloudApiSrv.createCase(newCaseEntity,
+                                userSessionSrv.getDestinationDetails4mUserSession());
                         if (StringUtils.hasText(caseID))
                         {
                             System.out.println("Case ID : " + caseID + " created..");

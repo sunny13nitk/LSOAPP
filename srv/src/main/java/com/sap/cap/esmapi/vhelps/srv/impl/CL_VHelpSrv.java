@@ -15,6 +15,7 @@ import org.springframework.web.context.annotation.SessionScope;
 
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cap.esmapi.vhelps.cus.TY_Cus_VHelpsLOB;
 import com.sap.cap.esmapi.vhelps.cus.TY_FieldProperties;
@@ -40,6 +41,9 @@ public class CL_VHelpSrv implements IF_VHelpSrv
 
     @Autowired
     private MessageSource msgSrc;
+
+    @Autowired
+    private IF_UserSessionSrv userSessionSrv;
 
     private List<TY_LOBVHlpPool> vhlpPool;
 
@@ -112,7 +116,8 @@ public class CL_VHelpSrv implements IF_VHelpSrv
         {
             try
             {
-                vhlpDDLB = srvCloudApiSrv.getVHelpDDLB4Field(fieldName);
+                vhlpDDLB = srvCloudApiSrv.getVHelpDDLB4Field(fieldName,
+                        userSessionSrv.getDestinationDetails4mUserSession());
                 if (CollectionUtils.isNotEmpty(vhlpDDLB))
                 {
                     vhlpPool = new ArrayList<TY_LOBVHlpPool>();
@@ -154,7 +159,8 @@ public class CL_VHelpSrv implements IF_VHelpSrv
                     // Fetch from Srv Cloud and Maintain in session
                     try
                     {
-                        vhlpDDLB = srvCloudApiSrv.getVHelpDDLB4Field(fieldName);
+                        vhlpDDLB = srvCloudApiSrv.getVHelpDDLB4Field(fieldName,
+                                userSessionSrv.getDestinationDetails4mUserSession());
                         if (CollectionUtils.isNotEmpty(vhlpDDLB))
                         {
                             // Get the LOB Vhelp

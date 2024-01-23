@@ -9,7 +9,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -75,7 +74,6 @@ import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.destination.URLUtility.CL_URLUtility;
-import com.sap.cap.esmapi.utilities.srvCloudApi.destination.intf.IF_DestinationService;
 import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_DestinationProps;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
@@ -104,76 +102,70 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     @Autowired
     private MessageSource msgSrc;
 
-    @Autowired
-    private IF_DestinationService destSrv;
-
     @Override
-    public JsonNode getAllCases() throws IOException
+    public JsonNode getAllCases(TY_DestinationProps desProps) throws IOException
     {
         JsonNode jsonNode = null;
-        if (destSrv != null)
+
+        if (desProps != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
-            if (desProps != null)
+            HttpResponse response = null;
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            String url = null;
+
+            try
             {
-                HttpResponse response = null;
-                CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-                String url = null;
-
-                try
+                if (StringUtils.hasLength(dS.getCasesPathString()) && StringUtils.hasText(desProps.getAuthToken()))
                 {
-                    if (StringUtils.hasLength(dS.getCasesPathString()) && StringUtils.hasText(desProps.getAuthToken()))
+                    log.info("Invoking Cases API : " + dS.getCasesPathString());
+                    url = CL_URLUtility.getUrl4DestinationAPI(dS.getCasesPathString(), desProps.getBaseUrl());
+
+                    long numCases = apiSrv.getNumberofEntitiesByUrl(url);
+                    if (numCases > 0)
                     {
-                        log.info("Invoking Cases API : " + dS.getCasesPathString());
-                        url = CL_URLUtility.getUrl4DestinationAPI(dS.getCasesPathString(), desProps.getBaseUrl());
+                        url = url + dS.getTopSuffixPathString() + GC_Constants.equalsString + numCases;
 
-                        long numCases = apiSrv.getNumberofEntitiesByUrl(url);
-                        if (numCases > 0)
+                        HttpGet httpGet = new HttpGet(url);
+                        httpGet.setHeader(HttpHeaders.AUTHORIZATION, desProps.getAuthToken());
+                        httpGet.addHeader("accept", "application/json");
+
+                        try
                         {
-                            url = url + dS.getTopSuffixPathString() + GC_Constants.equalsString + numCases;
+                            // Fire the Url
+                            response = httpClient.execute(httpGet);
 
-                            HttpGet httpGet = new HttpGet(url);
-                            httpGet.setHeader(HttpHeaders.AUTHORIZATION, desProps.getAuthToken());
-                            httpGet.addHeader("accept", "application/json");
-
-                            try
+                            // verify the valid error code first
+                            int statusCode = response.getStatusLine().getStatusCode();
+                            if (statusCode != HttpStatus.SC_OK)
                             {
-                                // Fire the Url
-                                response = httpClient.execute(httpGet);
-
-                                // verify the valid error code first
-                                int statusCode = response.getStatusLine().getStatusCode();
-                                if (statusCode != HttpStatus.SC_OK)
-                                {
-                                    throw new RuntimeException("Failed with HTTP error code : " + statusCode);
-                                }
-
-                                // Try and Get Entity from Response
-                                HttpEntity entity = response.getEntity();
-                                String apiOutput = EntityUtils.toString(entity);
-                                // Lets see what we got from API
-                                // Log.info(apiOutput);
-
-                                // Conerting to JSON
-                                ObjectMapper mapper = new ObjectMapper();
-                                jsonNode = mapper.readTree(apiOutput);
-
-                            }
-                            catch (IOException e)
-                            {
-
-                                e.printStackTrace();
+                                throw new RuntimeException("Failed with HTTP error code : " + statusCode);
                             }
 
+                            // Try and Get Entity from Response
+                            HttpEntity entity = response.getEntity();
+                            String apiOutput = EntityUtils.toString(entity);
+                            // Lets see what we got from API
+                            // Log.info(apiOutput);
+
+                            // Conerting to JSON
+                            ObjectMapper mapper = new ObjectMapper();
+                            jsonNode = mapper.readTree(apiOutput);
+
+                        }
+                        catch (IOException e)
+                        {
+
+                            e.printStackTrace();
                         }
 
                     }
 
                 }
-                finally
-                {
-                    httpClient.close();
-                }
+
+            }
+            finally
+            {
+                httpClient.close();
             }
         }
 
@@ -182,7 +174,7 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CaseESS> getCases4User(String accountIdUser) throws IOException
+    public List<TY_CaseESS> getCases4User(String accountIdUser, TY_DestinationProps desProps) throws IOException
     {
         List<TY_CaseESS> casesESSList = null;
 
@@ -196,7 +188,7 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
             }
             else
             {
-                JsonNode jsonNode = getAllCases();
+                JsonNode jsonNode = getAllCases(desProps);
 
                 if (jsonNode != null)
                 {
@@ -500,14 +492,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CaseGuidId> getCaseGuidIdList()
+    public List<TY_CaseGuidId> getCaseGuidIdList(TY_DestinationProps desProps)
     {
         List<TY_CaseGuidId> casesGuidIdsList = null;
 
         try
         {
 
-            JsonNode jsonNode = getAllCases();
+            JsonNode jsonNode = getAllCases(desProps);
 
             if (jsonNode != null)
             {
@@ -591,20 +583,16 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public Long getNumberofCases() throws IOException
+    public Long getNumberofCases(TY_DestinationProps desProps) throws IOException
     {
         long numCases = 0;
-        if (destSrv != null)
+
+        if (desProps != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
-            if (desProps != null)
-            {
 
-                String url = null;
-                url = CL_URLUtility.getUrl4DestinationAPI(dS.getCasesPathString(), desProps.getBaseUrl());
-                numCases = apiSrv.getNumberofEntitiesByUrl(url);
-
-            }
+            String url = null;
+            url = CL_URLUtility.getUrl4DestinationAPI(dS.getCasesPathString(), desProps.getBaseUrl());
+            numCases = apiSrv.getNumberofEntitiesByUrl(url);
 
         }
 
@@ -612,13 +600,13 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public String getAccountIdByUserEmail(String userEmail) throws EX_ESMAPI
+    public String getAccountIdByUserEmail(String userEmail, TY_DestinationProps desProps) throws EX_ESMAPI
     {
         String accountID = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
 
@@ -746,13 +734,13 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public JsonNode getAllAccounts() throws IOException
+    public JsonNode getAllAccounts(TY_DestinationProps desProps) throws IOException
     {
         JsonNode jsonNode = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
 
@@ -823,13 +811,13 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public JsonNode getAllEmployees() throws IOException
+    public JsonNode getAllEmployees(TY_DestinationProps desProps) throws IOException
     {
         JsonNode jsonNode = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -901,13 +889,13 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public JsonNode getAllContacts() throws IOException
+    public JsonNode getAllContacts(TY_DestinationProps desProps) throws IOException
     {
         JsonNode jsonNode = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -979,14 +967,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public String getContactPersonIdByUserEmail(String userEmail) throws EX_ESMAPI
+    public String getContactPersonIdByUserEmail(String userEmail, TY_DestinationProps desProps) throws EX_ESMAPI
     {
 
         String contactID = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -1117,13 +1105,13 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public String createAccount(String userEmail, String userName) throws EX_ESMAPI
+    public String createAccount(String userEmail, String userName, TY_DestinationProps desProps) throws EX_ESMAPI
     {
         String accountId = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -1268,13 +1256,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType) throws EX_ESMAPI, IOException
+    public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         TY_CaseCatalogCustomizing caseCus = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -1482,13 +1471,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CatalogItem> getActiveCaseCategoriesByCatalogId(String catalogID) throws EX_ESMAPI, IOException
+    public List<TY_CatalogItem> getActiveCaseCategoriesByCatalogId(String catalogID, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         List<TY_CatalogItem> catgTree = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -1668,12 +1658,12 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public String createNotes(TY_NotesCreate notes) throws EX_ESMAPI
+    public String createNotes(TY_NotesCreate notes, TY_DestinationProps desProps) throws EX_ESMAPI
     {
         String noteId = null;
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -1798,13 +1788,13 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public String createCase(TY_Case_Customer_SrvCloud caseEntity) throws EX_ESMAPI
+    public String createCase(TY_Case_Customer_SrvCloud caseEntity, TY_DestinationProps desProps) throws EX_ESMAPI
     {
         String caseId = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -1934,13 +1924,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public TY_AttachmentResponse createAttachment(TY_Attachment attachment) throws EX_ESMAPI
+    public TY_AttachmentResponse createAttachment(TY_Attachment attachment, TY_DestinationProps desProps)
+            throws EX_ESMAPI
     {
         TY_AttachmentResponse attR = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -2095,7 +2086,8 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public boolean persistAttachment(String url, MultipartFile file) throws EX_ESMAPI, IOException
+    public boolean persistAttachment(String url, MultipartFile file, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         boolean isPersisted = false;
         if (StringUtils.hasText(url))
@@ -2135,7 +2127,8 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public boolean persistAttachment(String url, String fileName, byte[] blob) throws EX_ESMAPI, IOException
+    public boolean persistAttachment(String url, String fileName, byte[] blob, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         boolean isPersisted = false;
         if (StringUtils.hasText(url))
@@ -2175,14 +2168,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public String getEmployeeIdByUserId(String userId) throws EX_ESMAPI
+    public String getEmployeeIdByUserId(String userId, TY_DestinationProps desProps) throws EX_ESMAPI
     {
 
         String empID = null;
 
-        if (destSrv != null && dS != null) 
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -2316,7 +2309,8 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails) throws IOException
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails, TY_DestinationProps desProps)
+            throws IOException
     {
         List<TY_CaseESS> casesESSList = null;
 
@@ -2327,7 +2321,7 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
             if (StringUtils.hasText(userDetails.getAccountId()) || StringUtils.hasText(userDetails.getEmployeeId()))
             {
 
-                JsonNode jsonNode = getAllCases();
+                JsonNode jsonNode = getAllCases(desProps);
 
                 if (jsonNode != null)
                 {
@@ -2644,13 +2638,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_KeyValue> getVHelpDDLB4Field(String fieldName) throws EX_ESMAPI, IOException
+    public List<TY_KeyValue> getVHelpDDLB4Field(String fieldName, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         List<TY_KeyValue> vhlbDDLB = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -2780,14 +2775,15 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails, EnumCaseTypes caseType) throws IOException
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails, EnumCaseTypes caseType,
+            TY_DestinationProps desProps) throws IOException
     {
 
         List<TY_CaseESS> casesByCaseType = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -3178,13 +3174,13 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public TY_CaseDetails getCaseDetails4Case(String caseId) throws EX_ESMAPI, IOException
+    public TY_CaseDetails getCaseDetails4Case(String caseId, TY_DestinationProps desProps) throws EX_ESMAPI, IOException
     {
         TY_CaseDetails caseDetails = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -3468,13 +3464,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_StatusCfgItem> getStatusCfg4StatusSchema(String StatusSchema) throws EX_ESMAPI, IOException
+    public List<TY_StatusCfgItem> getStatusCfg4StatusSchema(String StatusSchema, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         List<TY_StatusCfgItem> userStatusAssignments = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -3585,14 +3582,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public boolean updateCasewithReply(TY_CasePatchInfo patchInfo, TY_Case_SrvCloud_Reply caseReply)
-            throws EX_ESMAPI, IOException
+    public boolean updateCasewithReply(TY_CasePatchInfo patchInfo, TY_Case_SrvCloud_Reply caseReply,
+            TY_DestinationProps desProps) throws EX_ESMAPI, IOException
     {
         boolean caseUpdated = false;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -3677,13 +3674,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public String createCase4Employee(TY_Case_Employee_SrvCloud caseEntity) throws EX_ESMAPI
+    public String createCase4Employee(TY_Case_Employee_SrvCloud caseEntity, TY_DestinationProps desProps)
+            throws EX_ESMAPI
     {
         String caseId = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -3813,13 +3811,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public String createCase4Customer(TY_Case_Customer_SrvCloud caseEntity) throws EX_ESMAPI
+    public String createCase4Customer(TY_Case_Customer_SrvCloud caseEntity, TY_DestinationProps desProps)
+            throws EX_ESMAPI
     {
         String caseId = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
@@ -3950,13 +3949,14 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_PreviousAttachments> getAttachments4Case(String caseGuid) throws EX_ESMAPI, IOException
+    public List<TY_PreviousAttachments> getAttachments4Case(String caseGuid, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         List<TY_PreviousAttachments> prevAtt = null;
 
-        if (destSrv != null && dS != null)
+        if (dS != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))

@@ -47,7 +47,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.sap.cap.esmapi.catg.pojos.TY_CatalogItem;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCus;
 import com.sap.cap.esmapi.catg.pojos.TY_CatgCusItem;
@@ -75,6 +74,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_RLConfig;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
+import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_DestinationProps;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
 
@@ -102,7 +102,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     private MessageSource msgSrc;
 
     @Override
-    public JsonNode getAllCases() throws IOException
+    public JsonNode getAllCases(TY_DestinationProps desProps) throws IOException
     {
         JsonNode jsonNode = null;
         HttpResponse response = null;
@@ -172,7 +172,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CaseESS> getCases4User(String accountIdUser) throws IOException
+    public List<TY_CaseESS> getCases4User(String accountIdUser, TY_DestinationProps desProps) throws IOException
     {
         List<TY_CaseESS> casesESSList = null;
 
@@ -186,7 +186,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             }
             else
             {
-                JsonNode jsonNode = getAllCases();
+                JsonNode jsonNode = getAllCases(desProps);
 
                 if (jsonNode != null)
                 {
@@ -490,14 +490,14 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CaseGuidId> getCaseGuidIdList()
+    public List<TY_CaseGuidId> getCaseGuidIdList(TY_DestinationProps desProps)
     {
         List<TY_CaseGuidId> casesGuidIdsList = null;
 
         try
         {
 
-            JsonNode jsonNode = getAllCases();
+            JsonNode jsonNode = getAllCases(desProps);
 
             if (jsonNode != null)
             {
@@ -581,13 +581,13 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public Long getNumberofCases() throws IOException
+    public Long getNumberofCases(TY_DestinationProps desProps) throws IOException
     {
         return apiSrv.getNumberofEntitiesByUrl(srvCloudUrls.getCasesUrl());
     }
 
     @Override
-    public String getAccountIdByUserEmail(String userEmail) throws EX_ESMAPI
+    public String getAccountIdByUserEmail(String userEmail, TY_DestinationProps desProps) throws EX_ESMAPI
     {
 
         JsonNode jsonNode = null;
@@ -711,7 +711,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public JsonNode getAllAccounts() throws IOException
+    public JsonNode getAllAccounts(TY_DestinationProps desProps) throws IOException
     {
         JsonNode jsonNode = null;
         HttpResponse response = null;
@@ -778,7 +778,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public JsonNode getAllEmployees() throws IOException
+    public JsonNode getAllEmployees(TY_DestinationProps desProps) throws IOException
     {
         JsonNode jsonNode = null;
         HttpResponse response = null;
@@ -845,7 +845,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public JsonNode getAllContacts() throws IOException
+    public JsonNode getAllContacts(TY_DestinationProps desProps) throws IOException
     {
         JsonNode jsonNode = null;
         HttpResponse response = null;
@@ -912,7 +912,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public String getContactPersonIdByUserEmail(String userEmail) throws EX_ESMAPI
+    public String getContactPersonIdByUserEmail(String userEmail, TY_DestinationProps desProps) throws EX_ESMAPI
     {
 
         JsonNode jsonNode = null;
@@ -1037,7 +1037,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public String createAccount(String userEmail, String userName) throws EX_ESMAPI
+    public String createAccount(String userEmail, String userName, TY_DestinationProps desProps) throws EX_ESMAPI
     {
         String accountId = null;
         TY_CustomerCreate newAccount;
@@ -1172,7 +1172,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType) throws EX_ESMAPI, IOException
+    public TY_CaseCatalogCustomizing getActiveCaseTemplateConfig4CaseType(String caseType, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         TY_CaseCatalogCustomizing caseCus = null;
         JsonNode jsonNode = null;
@@ -1375,7 +1376,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CatalogItem> getActiveCaseCategoriesByCatalogId(String catalogID) throws EX_ESMAPI, IOException
+    public List<TY_CatalogItem> getActiveCaseCategoriesByCatalogId(String catalogID, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         List<TY_CatalogItem> catgTree = null;
         JsonNode jsonNode = null;
@@ -1551,7 +1553,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public String createNotes(TY_NotesCreate notes) throws EX_ESMAPI
+    public String createNotes(TY_NotesCreate notes, TY_DestinationProps desProps) throws EX_ESMAPI
     {
         String noteId = null;
 
@@ -1679,7 +1681,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public String createCase(TY_Case_Customer_SrvCloud caseEntity) throws EX_ESMAPI
+    public String createCase(TY_Case_Customer_SrvCloud caseEntity, TY_DestinationProps desProps) throws EX_ESMAPI
     {
         String caseId = null;
 
@@ -1801,7 +1803,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public TY_AttachmentResponse createAttachment(TY_Attachment attachment) throws EX_ESMAPI
+    public TY_AttachmentResponse createAttachment(TY_Attachment attachment, TY_DestinationProps desProps)
+            throws EX_ESMAPI
     {
         TY_AttachmentResponse attR = null;
 
@@ -1954,7 +1957,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public boolean persistAttachment(String url, MultipartFile file) throws EX_ESMAPI, IOException
+    public boolean persistAttachment(String url, MultipartFile file, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         boolean isPersisted = false;
         if (StringUtils.hasText(url))
@@ -1994,7 +1998,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public boolean persistAttachment(String url, String fileName, byte[] blob) throws EX_ESMAPI, IOException
+    public boolean persistAttachment(String url, String fileName, byte[] blob, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         boolean isPersisted = false;
         if (StringUtils.hasText(url))
@@ -2034,7 +2039,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public String getEmployeeIdByUserId(String userId) throws EX_ESMAPI
+    public String getEmployeeIdByUserId(String userId, TY_DestinationProps desProps) throws EX_ESMAPI
     {
         JsonNode jsonNode = null;
         HttpResponse response = null;
@@ -2158,7 +2163,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails) throws IOException
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails, TY_DestinationProps desProps)
+            throws IOException
     {
         List<TY_CaseESS> casesESSList = null;
 
@@ -2169,7 +2175,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
             if (StringUtils.hasText(userDetails.getAccountId()) || StringUtils.hasText(userDetails.getEmployeeId()))
             {
 
-                JsonNode jsonNode = getAllCases();
+                JsonNode jsonNode = getAllCases(desProps);
 
                 if (jsonNode != null)
                 {
@@ -2486,7 +2492,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_KeyValue> getVHelpDDLB4Field(String fieldName) throws EX_ESMAPI, IOException
+    public List<TY_KeyValue> getVHelpDDLB4Field(String fieldName, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         List<TY_KeyValue> vhlbDDLB = null;
 
@@ -2612,7 +2619,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails, EnumCaseTypes caseType) throws IOException
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails, EnumCaseTypes caseType,
+            TY_DestinationProps desProps) throws IOException
     {
 
         List<TY_CaseESS> casesByCaseType = null;
@@ -2979,7 +2987,7 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public TY_CaseDetails getCaseDetails4Case(String caseId) throws EX_ESMAPI, IOException
+    public TY_CaseDetails getCaseDetails4Case(String caseId, TY_DestinationProps desProps) throws EX_ESMAPI, IOException
     {
         TY_CaseDetails caseDetails = null;
         if (StringUtils.hasText(caseId))
@@ -3247,7 +3255,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_StatusCfgItem> getStatusCfg4StatusSchema(String StatusSchema) throws EX_ESMAPI, IOException
+    public List<TY_StatusCfgItem> getStatusCfg4StatusSchema(String StatusSchema, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         List<TY_StatusCfgItem> userStatusAssignments = null;
         if (StringUtils.hasText(StatusSchema) && StringUtils.hasText(srvCloudUrls.getStatusSchemaUrl()))
@@ -3353,8 +3362,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public boolean updateCasewithReply(TY_CasePatchInfo patchInfo, TY_Case_SrvCloud_Reply caseReply)
-            throws EX_ESMAPI, IOException
+    public boolean updateCasewithReply(TY_CasePatchInfo patchInfo, TY_Case_SrvCloud_Reply caseReply,
+            TY_DestinationProps desProps) throws EX_ESMAPI, IOException
     {
         boolean caseUpdated = false;
         if (caseReply != null && patchInfo != null)
@@ -3444,7 +3453,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public String createCase4Employee(TY_Case_Employee_SrvCloud caseEntity) throws EX_ESMAPI
+    public String createCase4Employee(TY_Case_Employee_SrvCloud caseEntity, TY_DestinationProps desProps)
+            throws EX_ESMAPI
     {
         String caseId = null;
 
@@ -3566,7 +3576,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public String createCase4Customer(TY_Case_Customer_SrvCloud caseEntity) throws EX_ESMAPI
+    public String createCase4Customer(TY_Case_Customer_SrvCloud caseEntity, TY_DestinationProps desProps)
+            throws EX_ESMAPI
     {
         String caseId = null;
 
@@ -3698,7 +3709,8 @@ public class CL_SrvCloudAPI implements IF_SrvCloudAPI
     }
 
     @Override
-    public List<TY_PreviousAttachments> getAttachments4Case(String caseGuid) throws EX_ESMAPI, IOException
+    public List<TY_PreviousAttachments> getAttachments4Case(String caseGuid, TY_DestinationProps desProps)
+            throws EX_ESMAPI, IOException
     {
         List<TY_PreviousAttachments> prevAtt = null;
 

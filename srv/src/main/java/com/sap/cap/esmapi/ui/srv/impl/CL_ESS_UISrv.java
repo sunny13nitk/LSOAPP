@@ -13,6 +13,7 @@ import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class CL_ESS_UISrv implements IF_ESS_UISrv
 {
     @Autowired
     private IF_SrvCloudAPI srvCloudApiSrv;
+
+    @Autowired
+    private IF_UserSessionSrv userSessionSrv;
 
     @Override
     public TY_ESS_Stats getStatsForUserCases(List<TY_CaseESS> cases4User) throws EX_ESMAPI
@@ -105,14 +109,13 @@ public class CL_ESS_UISrv implements IF_ESS_UISrv
     @Override
     public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails) throws IOException
     {
-        return srvCloudApiSrv.getCases4User(userDetails);
+        return srvCloudApiSrv.getCases4User(userDetails, userSessionSrv.getDestinationDetails4mUserSession());
     }
 
     @Override
-    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails, EnumCaseTypes caseType)
-            throws IOException
+    public List<TY_CaseESS> getCases4User(Ty_UserAccountEmployee userDetails, EnumCaseTypes caseType) throws IOException
     {
-        return srvCloudApiSrv.getCases4User(userDetails, caseType);
+        return srvCloudApiSrv.getCases4User(userDetails, caseType, userSessionSrv.getDestinationDetails4mUserSession());
     }
 
 }

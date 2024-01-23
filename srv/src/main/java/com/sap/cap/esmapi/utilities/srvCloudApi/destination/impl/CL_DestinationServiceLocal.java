@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@SessionScope
 @RequiredArgsConstructor
 @Slf4j
 @Profile(GC_Constants.gc_LocalProfile)

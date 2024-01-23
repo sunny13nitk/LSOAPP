@@ -276,7 +276,8 @@ public class LSOController
                 // External/Internal User Pass to Asynch Thread as Session Scoped Service would
                 // not be accessible in Asynch thread
                 caseFormAsync.getCaseForm().setExternal(userSessSrv.getUserDetails4mSession().isExternal());
-                EV_CaseFormSubmit eventCaseSubmit = new EV_CaseFormSubmit(this, caseFormAsync);
+                EV_CaseFormSubmit eventCaseSubmit = new EV_CaseFormSubmit(this, caseFormAsync,
+                        userSessSrv.getDestinationDetails4mUserSession());
                 applicationEventPublisher.publishEvent(eventCaseSubmit);
             }
 
@@ -679,7 +680,8 @@ public class LSOController
                 // External/Internal User Pass to Asynch Thread as Session Scoped Service would
                 // not be accessible in Asynch thread
                 caseEditFormAsync.getCaseReply().setExternal(userSessSrv.getUserDetails4mSession().isExternal());
-                EV_CaseReplySubmit eventCaseReplySubmit = new EV_CaseReplySubmit(this, caseEditFormAsync);
+                EV_CaseReplySubmit eventCaseReplySubmit = new EV_CaseReplySubmit(this, caseEditFormAsync,
+                        userSessSrv.getDestinationDetails4mUserSession());
                 applicationEventPublisher.publishEvent(eventCaseReplySubmit);
             }
 
