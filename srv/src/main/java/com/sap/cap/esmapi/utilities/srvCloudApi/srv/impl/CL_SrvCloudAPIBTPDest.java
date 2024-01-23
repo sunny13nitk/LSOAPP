@@ -2180,7 +2180,7 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
 
         String empID = null;
 
-        if (destSrv != null && dS != null)
+        if (destSrv != null && dS != null) 
         {
             TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
             if (desProps != null)

@@ -34,7 +34,7 @@ public class CL_DestinationServiceLocal implements IF_DestinationService
     public TY_DestinationProps getDestinationDetails4User(String DestinationName) throws EX_ESMAPI
     {
         log.info("Destination loaded for Local Testing");
-        this.destinationProps = new TY_DestinationProps("https://my1000101.de1.test.crm.cloud.sap/sap/c4c/api/v1/",
+        this.destinationProps = new TY_DestinationProps("https://my1000101.de1.test.crm.cloud.sap/",
                 "Basic TlNEX1NDRF9JTlQ6UEV4c1NZZmlUNWQza0UrYmJodCRCQkIh");
         return this.destinationProps;
     }
