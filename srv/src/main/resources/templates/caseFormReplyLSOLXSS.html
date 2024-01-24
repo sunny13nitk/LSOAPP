@@ -643,9 +643,10 @@
                                     </td>
 
                                     <td style="text-align: center">
-                                       <a href="#" class="button primary mini rounded outline" th:href="${file.url}"
-                                          role="button" data-role="hint" data-hint-position="right"
-                                          data-cls-hint="fg-black" data-hint-text="Download File">
+                                       <a th:if="${file.url} != null" class=" button primary mini rounded outline"
+                                          th:href="${file.url}" role="button" data-role="hint"
+                                          data-hint-position="right" data-cls-hint="fg-black"
+                                          data-hint-text="Download File" target="_blank">
                                           <span class="mif-file-download icon" style="margin-left: 0px"></span>
                                           <span style="margin-left: 3px">Download</span></a>
                                     </td>
