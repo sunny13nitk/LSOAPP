@@ -56,11 +56,12 @@ public class EV_HDLR_CaseReplySubmit
 
     @Async
     @EventListener
-    public void handleCaseReplySubmission(EV_CaseReplySubmit evCaseReply, TY_DestinationProps desProps)
+    public void handleCaseReplySubmission(EV_CaseReplySubmit evCaseReply)
     {
         if (evCaseReply != null && config != null)
         {
-            if (evCaseReply.getPayload().isValid() && CollectionUtils.isNotEmpty(config.getCustomizations()))
+            if (evCaseReply.getPayload().isValid() && CollectionUtils.isNotEmpty(config.getCustomizations())
+                    && evCaseReply.getPayload().getDesProps() != null)
             {
 
                 // prepare the Payload for PATCH operation for the case
@@ -68,6 +69,7 @@ public class EV_HDLR_CaseReplySubmit
                 // Case Reply Form Attached
                 if (evCaseReply.getPayload().getCaseReply() != null)
                 {
+                    TY_DestinationProps desProps = evCaseReply.getPayload().getDesProps();
                     // Case GUID , Type and ETag Bound
                     if (StringUtils.hasText(evCaseReply.getPayload().getCaseReply().getCaseDetails().getCaseGuid())
                             && StringUtils.hasText(evCaseReply.getPayload().getCaseReply().getCaseDetails().getETag())

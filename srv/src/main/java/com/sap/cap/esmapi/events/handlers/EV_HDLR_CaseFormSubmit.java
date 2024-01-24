@@ -59,14 +59,16 @@ public class EV_HDLR_CaseFormSubmit
 
         @Async
         @EventListener
-        public void handleCaseFormSubmission(EV_CaseFormSubmit evCaseFormSubmit, TY_DestinationProps desProps)
+        public void handleCaseFormSubmission(EV_CaseFormSubmit evCaseFormSubmit)
         {
 
                 TY_Case_Customer_SrvCloud newCaseEntity4Customer;
                 TY_Case_Employee_SrvCloud newCaseEntity4Employee;
 
-                if (evCaseFormSubmit != null && catgCusSrv != null)
+                if (evCaseFormSubmit != null && catgCusSrv != null
+                                && evCaseFormSubmit.getPayload().getDesProps() != null)
                 {
+                        TY_DestinationProps desProps = evCaseFormSubmit.getPayload().getDesProps();
                         log.info("Inside Case Form Asyncronous Submit Event Processing---- for Case Submission ID: "
                                         + evCaseFormSubmit.getPayload().getSubmGuid());
 
