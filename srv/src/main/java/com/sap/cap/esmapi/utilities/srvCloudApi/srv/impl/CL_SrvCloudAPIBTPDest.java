@@ -4198,9 +4198,8 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
                                 {
                                     // Get Attachment GUID and Generate S3 Link for D/l
                                     httpClient = HttpClientBuilder.create().build();
-                                    urlLink = StringsUtility.replaceURLwithParams(dS.getPrevAttPathString(),
-                                            new String[]
-                                            { attDet.getId() }, GC_Constants.gc_UrlReplParam);
+                                    urlLink = StringsUtility.replaceURLwithParams(dS.getDlAttPathString(), new String[]
+                                    { attDet.getId() }, GC_Constants.gc_UrlReplParam);
 
                                     if (StringUtils.hasText(urlLink))
                                     {
