@@ -83,7 +83,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 // @Profile(GC_Constants.gc_BTPProfile)
-@Profile(GC_Constants.gc_LocalProfile)
+// @Profile(GC_Constants.gc_LocalProfile)
 public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
 {
 
@@ -1144,7 +1144,7 @@ public class CL_SrvCloudAPIBTPDest implements IF_SrvCloudAPI
                             {
 
                                 HttpPost httpPost = new HttpPost(accPOSTURL);
-                                httpPost.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + desProps.getAuthToken());
+                                httpPost.setHeader(HttpHeaders.AUTHORIZATION, desProps.getAuthToken());
                                 httpPost.addHeader("Content-Type", "application/json");
 
                                 ObjectMapper objMapper = new ObjectMapper();
