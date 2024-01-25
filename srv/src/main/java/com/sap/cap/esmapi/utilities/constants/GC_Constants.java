@@ -40,6 +40,8 @@ public class GC_Constants
 
     public static final String gc_BTPProfile = "btp";
 
+    public static final String gc_LocalProfile = "local";
+
     public static final String gc_role_employee_lso = "SVC_ESM_EMPLOYEE_LSO"; // I/D/C Users ARM Role
 
     public static final String gc_role_contractor_lso = "SVC_ESM_CONTRACTOR_LSO"; // P/S User(s)

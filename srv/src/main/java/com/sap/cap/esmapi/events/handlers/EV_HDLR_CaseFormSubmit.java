@@ -36,6 +36,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_Employee_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Extensions_CaseCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
+import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_DestinationProps;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
 import lombok.extern.slf4j.Slf4j;
@@ -64,8 +65,10 @@ public class EV_HDLR_CaseFormSubmit
                 TY_Case_Customer_SrvCloud newCaseEntity4Customer;
                 TY_Case_Employee_SrvCloud newCaseEntity4Employee;
 
-                if (evCaseFormSubmit != null && catgCusSrv != null)
+                if (evCaseFormSubmit != null && catgCusSrv != null
+                                && evCaseFormSubmit.getPayload().getDesProps() != null)
                 {
+                        TY_DestinationProps desProps = evCaseFormSubmit.getPayload().getDesProps();
                         log.info("Inside Case Form Asyncronous Submit Event Processing---- for Case Submission ID: "
                                         + evCaseFormSubmit.getPayload().getSubmGuid());
 
@@ -165,7 +168,7 @@ public class EV_HDLR_CaseFormSubmit
                                                                                                                                         catTreeSelCatg[1]));
                                                                                         newCaseEntity4Customer
                                                                                                         .setCategoryLevel2(
-                                                                                                                         new TY_CatgLvl1_CaseCreate(
+                                                                                                                        new TY_CatgLvl1_CaseCreate(
                                                                                                                                         catTreeSelCatg[0]));
                                                                                         break;
                                                                                 case 1:
@@ -204,7 +207,8 @@ public class EV_HDLR_CaseFormSubmit
                                                                                                                 evCaseFormSubmit.getPayload()
                                                                                                                                 .getCaseForm()
                                                                                                                                 .getDescription(),
-                                                                                                                GC_Constants.gc_NoteTypeDescription));
+                                                                                                                GC_Constants.gc_NoteTypeDescription),
+                                                                                                                desProps);
                                                                                 if (StringUtils.hasText(noteId))
                                                                                 {
                                                                                         newCaseEntity4Customer
@@ -299,7 +303,8 @@ public class EV_HDLR_CaseFormSubmit
                                                                         {
                                                                                 String caseID = srvCloudApiSrv
                                                                                                 .createCase4Customer(
-                                                                                                                newCaseEntity4Customer);
+                                                                                                                newCaseEntity4Customer,
+                                                                                                                desProps);
                                                                                 if (StringUtils.hasText(caseID))
                                                                                 {
                                                                                         handleCaseSuccCreated(
@@ -413,7 +418,7 @@ public class EV_HDLR_CaseFormSubmit
 
                                                                                         handleCatgError(evCaseFormSubmit,
                                                                                                         cusItemO);
-                                                                                        break;                
+                                                                                        break;
 
                                                                                 }
                                                                         }
@@ -439,7 +444,8 @@ public class EV_HDLR_CaseFormSubmit
                                                                                                                 evCaseFormSubmit.getPayload()
                                                                                                                                 .getCaseForm()
                                                                                                                                 .getDescription(),
-                                                                                                                GC_Constants.gc_NoteTypeDescription));
+                                                                                                                GC_Constants.gc_NoteTypeDescription),
+                                                                                                                desProps);
                                                                                 if (StringUtils.hasText(noteId))
                                                                                 {
                                                                                         newCaseEntity4Employee
@@ -527,7 +533,8 @@ public class EV_HDLR_CaseFormSubmit
                                                                         {
                                                                                 String caseID = srvCloudApiSrv
                                                                                                 .createCase4Employee(
-                                                                                                                newCaseEntity4Employee);
+                                                                                                                newCaseEntity4Employee,
+                                                                                                                desProps);
                                                                                 if (StringUtils.hasText(caseID))
                                                                                 {
                                                                                         handleCaseSuccCreated(

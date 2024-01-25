@@ -252,6 +252,7 @@ public class POCLocalController
                 // External/Internal User Pass to Asynch Thread as Session Scoped Service would
                 // not be accessible in Asynch thread
                 caseFormAsync.getCaseForm().setExternal(userSessSrv.getUserDetails4mSession().isExternal());
+                caseFormAsync.setDesProps(userSessSrv.getDestinationDetails4mUserSession());
                 EV_CaseFormSubmit eventCaseSubmit = new EV_CaseFormSubmit(this, caseFormAsync);
                 applicationEventPublisher.publishEvent(eventCaseSubmit);
             }
@@ -706,6 +707,7 @@ public class POCLocalController
                 // External/Internal User Pass to Asynch Thread as Session Scoped Service would
                 // not be accessible in Asynch thread
                 caseEditFormAsync.getCaseReply().setExternal(userSessSrv.getUserDetails4mSession().isExternal());
+                caseEditFormAsync.setDesProps(userSessSrv.getDestinationDetails4mUserSession());
                 EV_CaseReplySubmit eventCaseReplySubmit = new EV_CaseReplySubmit(this, caseEditFormAsync);
                 applicationEventPublisher.publishEvent(eventCaseReplySubmit);
             }

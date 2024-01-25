@@ -15,6 +15,7 @@ public class EV_CaseReplySubmit extends ApplicationEvent
     {
         super(source);
         this.payload = payload;
+
     }
 
 }

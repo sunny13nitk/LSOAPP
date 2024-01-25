@@ -41,6 +41,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +72,9 @@ public class ESSLocalController
     @Autowired
     private IF_CatalogSrv catalogTreeSrv;
 
+    @Autowired
+    private IF_UserSessionSrv userSessionSrv;
+
     @GetMapping("/")
     public String showCasesList4User(Model model)
     {
@@ -95,7 +99,8 @@ public class ESSLocalController
 
                 // Set Cases to Null on each refresh
                 userDetails.setCases(null);
-                userDetails.setCases(srvCloudApiSrv.getCases4User(userAcc.getAccountId()));
+                userDetails.setCases(srvCloudApiSrv.getCases4User(userAcc.getAccountId(),
+                        userSessionSrv.getDestinationDetails4mUserSession()));
                 if (userDetails != null && uiSrv != null && !CollectionUtils.isEmpty(userDetails.getCases()))
                 {
                     System.out.println("Number of cases post API call 4m Controller: " + userDetails.getCases().size());
@@ -303,8 +308,9 @@ public class ESSLocalController
                 if (StringUtils.hasText(caseForm.getDescription()))
                 {
                     // Create Note and Get Guid back
-                    String noteId = srvCloudApiSrv
-                            .createNotes(new TY_NotesCreate(false, caseForm.getDescription(), null));
+                    String noteId = srvCloudApiSrv.createNotes(
+                            new TY_NotesCreate(false, caseForm.getDescription(), null),
+                            userSessionSrv.getDestinationDetails4mUserSession());
                     if (StringUtils.hasText(noteId))
                     {
                         newCaseEntity.setDescription(new TY_Description_CaseCreate(noteId));
@@ -322,7 +328,8 @@ public class ESSLocalController
                             TY_Attachment newAttachment = new TY_Attachment(false,
                                     FilenameUtils.getName(caseForm.getAttachment().getOriginalFilename()),
                                     GC_Constants.gc_Attachment_Category, false);
-                            attR = srvCloudApiSrv.createAttachment(newAttachment);
+                            attR = srvCloudApiSrv.createAttachment(newAttachment,
+                                    userSessionSrv.getDestinationDetails4mUserSession());
                             if (attR != null)
                             {
                                 if (StringUtils.hasText(attR.getId()) && StringUtils.hasText(attR.getUploadUrl()))
@@ -330,7 +337,8 @@ public class ESSLocalController
                                     log.info("Attachment id :" + attR.getId() + " generated for Upload Url : "
                                             + attR.getUploadUrl());
 
-                                    if (srvCloudApiSrv.persistAttachment(attR.getUploadUrl(), caseForm.getAttachment()))
+                                    if (srvCloudApiSrv.persistAttachment(attR.getUploadUrl(), caseForm.getAttachment(),
+                                            userSessionSrv.getDestinationDetails4mUserSession()))
                                     {
                                         log.info("Attachment with id : " + attR.getId()
                                                 + " Persisted in Document Container..");
@@ -368,7 +376,8 @@ public class ESSLocalController
                 // Case Payload is now Ready: Post and get the Case ID back
                 try
                 {
-                    String caseID = srvCloudApiSrv.createCase(newCaseEntity);
+                    String caseID = srvCloudApiSrv.createCase(newCaseEntity,
+                            userSessionSrv.getDestinationDetails4mUserSession());
                     if (StringUtils.hasText(caseID))
                     {
                         System.out.println("Case ID : " + caseID + " created..");

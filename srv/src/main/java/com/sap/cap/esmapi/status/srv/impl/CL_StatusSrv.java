@@ -22,6 +22,7 @@ import com.sap.cap.esmapi.status.pojos.TY_StatusCfg;
 import com.sap.cap.esmapi.status.pojos.TY_StatusCfgItem;
 import com.sap.cap.esmapi.status.srv.intf.IF_StatusSrv;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,8 @@ public class CL_StatusSrv implements IF_StatusSrv
     private final MessageSource msgSrc; // Autowired
 
     private final IF_SrvCloudAPI srvCloudApi; // Autowired
+
+    private final IF_UserSessionSrv userSessionSrv; // Autowired
 
     private List<TY_StatusCfg> lobStatusCfgList;
 
@@ -147,7 +150,8 @@ public class CL_StatusSrv implements IF_StatusSrv
                 {
                     // Fetch Status Description snd Codes from Service cloud
 
-                    List<TY_StatusCfgItem> statusCfgs = srvCloudApi.getStatusCfg4StatusSchema(cus.getStatusSchema());
+                    List<TY_StatusCfgItem> statusCfgs = srvCloudApi.getStatusCfg4StatusSchema(cus.getStatusSchema(),
+                            userSessionSrv.getDestinationDetails4mUserSession());
                     if (CollectionUtils.isNotEmpty(statusCfgs))
                     {
                         if (CollectionUtils.isEmpty(lobStatusCfgList))

@@ -59,6 +59,7 @@ import com.sap.cap.esmapi.utilities.srv.intf.IF_AttachmentsFetchSrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_SessAttachmentsService;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.destination.intf.IF_DestinationService;
+import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_DestinationProps;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cap.esmapi.vhelps.pojos.TY_KeyValue;
 import com.sap.cap.esmapi.vhelps.srv.intf.IF_VHelpLOBUIModelSrv;
@@ -222,10 +223,15 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         {
                             try
                             {
-                                if (destSrv.getDestinationDetails4User(usAccConEmpl.getDestination()) != null)
+                                TY_DestinationProps desProps = destSrv
+                                        .getDestinationDetails4User(usAccConEmpl.getDestination());
+                                if (desProps != null)
                                 {
                                     log.info("Destination connection established successfully for -  "
                                             + usAccConEmpl.getDestination());
+                                    // #TEST
+                                    log.info(desProps.toString());
+                                    userSessInfo.setDestinationProps(desProps);
                                 }
                             }
                             catch (EX_ESMAPI e)
@@ -239,7 +245,8 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
 
                     usAccConEmpl.setUserEmail(token.getEmail());
                     log.info("Scanning Account for Email Address : " + usAccConEmpl.getUserEmail());
-                    usAccConEmpl.setAccountId(srvCloudApiSrv.getAccountIdByUserEmail(usAccConEmpl.getUserEmail()));
+                    usAccConEmpl.setAccountId(srvCloudApiSrv.getAccountIdByUserEmail(usAccConEmpl.getUserEmail(),
+                            userSessInfo.getDestinationProps()));
 
                     // Only seek Employee If Account/Contact not Found
                     if (!StringUtils.hasText(usAccConEmpl.getAccountId()))
@@ -249,7 +256,8 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                         if (!usAccConEmpl.isExternal())
                         {
                             // Seek Employee and populate
-                            usAccConEmpl.setEmployeeId(srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId()));
+                            usAccConEmpl.setEmployeeId(srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId(),
+                                    userSessInfo.getDestinationProps()));
                             if (StringUtils.hasText(usAccConEmpl.getEmployeeId()))
                             {
                                 usAccConEmpl.setEmployee(true);
@@ -449,12 +457,14 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                                             userSessInfo.getUserDetails().getUsAccEmpl().isExternal(),
                                             FilenameUtils.getName(attachment.getName()),
                                             GC_Constants.gc_Attachment_Category, false);
-                                    caseFormAsync.getAttRespList().add(srvCloudApiSrv.createAttachment(newAttachment));
+                                    caseFormAsync.getAttRespList().add(srvCloudApiSrv.createAttachment(newAttachment,
+                                            userSessInfo.getDestinationProps()));
                                     if (caseFormAsync.getAttRespList().get(i) != null)
                                     {
                                         if (srvCloudApiSrv.persistAttachment(
                                                 caseFormAsync.getAttRespList().get(i).getUploadUrl(),
-                                                attachment.getName(), attachment.getBlob()))
+                                                attachment.getName(), attachment.getBlob(),
+                                                userSessInfo.getDestinationProps()))
                                         {
                                             log.info("Attachment with id : "
                                                     + caseFormAsync.getAttRespList().get(i).getId()
@@ -547,7 +557,8 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     {
                         accountId = srvCloudApiSrv.createAccount(
                                 userSessInfo.getUserDetails().getUsAccEmpl().getUserEmail(),
-                                userSessInfo.getUserDetails().getUsAccEmpl().getUserName());
+                                userSessInfo.getUserDetails().getUsAccEmpl().getUserName(),
+                                userSessInfo.getDestinationProps());
                         // Also update in the session for newly created Account
                         if (StringUtils.hasText(accountId))
                         {
@@ -867,7 +878,6 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
         {
 
             TY_UserDetails userDetails = new TY_UserDetails();
-            // String userEmail = "rsharma@gmail.com";
 
             /*
              * Test with Existing Employee
@@ -879,12 +889,6 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             // userDetails.setAuthenticated(true);
             // //
             // userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
-
-            // Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId,
-            // userName, userEmail,
-            // srvCloudApiSrv.getAccountIdByUserEmail(userEmail),
-            // srvCloudApiSrv.getEmployeeIdByUserId(userId),
-            // true, false);
 
             /*
              * Test with Existing Employee
@@ -914,31 +918,66 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
             /*
              * Test with New Customer
              */
-            String userEmail = "ptripathi@gmail.com";
-            String userId = "SGJ456K";
-            String userName = "Pankaj Tripathi";
+            String userEmail = "narendramodi@gmail.com";
+            String userId = "SJH86775";
+            String userName = "Narendra Modi";
 
             userDetails.setAuthenticated(true);
             //
             userDetails.setRoles(userInfo.getRoles().stream().collect(Collectors.toList()));
 
-            Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee(userId, userName, userEmail,
-                    srvCloudApiSrv.getAccountIdByUserEmail(userEmail), srvCloudApiSrv.getEmployeeIdByUserId(userId),
-                    false, true, null);
-
             /*
              * Test with New Customer
              */
 
+            Ty_UserAccountEmployee usAccConEmpl = new Ty_UserAccountEmployee();
+            usAccConEmpl.setUserId(userId);
+            usAccConEmpl.setUserName(userName);
+            usAccConEmpl.setUserEmail(userEmail);
+
             if (StringUtils.hasText(userId))
             {
+                // If External User
                 if (!userId.matches(rlConfig.getInternalUsersRegex()))
                 {
                     usAccConEmpl.setExternal(true);
+
+                    TY_DestinationProps desProps = destSrv.getDestinationDetails4User(dS.getDestExternal());
+                    if (desProps != null)
+                    {
+                        userSessInfo.setDestinationProps(desProps);
+                    }
+
+                    // Seek the Account for External
+                    String accountID = srvCloudApiSrv.getAccountIdByUserEmail(usAccConEmpl.getUserEmail(),
+                            userSessInfo.getDestinationProps());
+                    if (StringUtils.hasText(accountID))
+                    {
+                        // If Account Found - Set It
+                        usAccConEmpl.setAccountId(accountID);
+                    }
                 }
+                else // For Internal Users
+                {
+                    TY_DestinationProps desProps = destSrv.getDestinationDetails4User(dS.getDestInternal());
+                    if (desProps != null)
+                    {
+                        userSessInfo.setDestinationProps(desProps);
+                    }
+                    // Seek an Employee
+                    String empID = srvCloudApiSrv.getEmployeeIdByUserId(usAccConEmpl.getUserId(),
+                            userSessInfo.getDestinationProps());
+                    if (StringUtils.hasText(empID))
+                    {
+                        usAccConEmpl.setEmployee(true);
+                        usAccConEmpl.setEmployeeId(empID);
+                    }
+                }
+
             }
-            userDetails.setUsAccEmpl(usAccConEmpl);
+
             userSessInfo.setUserDetails(userDetails); // Set in Session
+            userSessInfo.getUserDetails().setUsAccEmpl(usAccConEmpl); // Set in Session
 
             if (userSessInfo.getUserDetails().getUsAccEmpl() != null)
             {
@@ -1161,7 +1200,8 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                     // {
                     try
                     {
-                        TY_CaseDetails caseDetails = srvCloudApiSrv.getCaseDetails4Case(caseESS.getGuid());
+                        TY_CaseDetails caseDetails = srvCloudApiSrv.getCaseDetails4Case(caseESS.getGuid(),
+                                userSessInfo.getDestinationProps());
                         // --- Filter by External Note Type(s) only
                         if (caseDetails != null)
                         {
@@ -1284,12 +1324,13 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
                                         userSessInfo.getUserDetails().getUsAccEmpl().isExternal(),
                                         FilenameUtils.getName(attachment.getName()),
                                         GC_Constants.gc_Attachment_Category, false);
-                                caseReplyAsync.getAttRespList().add(srvCloudApiSrv.createAttachment(newAttachment));
+                                caseReplyAsync.getAttRespList().add(srvCloudApiSrv.createAttachment(newAttachment,
+                                        userSessInfo.getDestinationProps()));
                                 if (caseReplyAsync.getAttRespList().get(i) != null)
                                 {
                                     if (srvCloudApiSrv.persistAttachment(
                                             caseReplyAsync.getAttRespList().get(i).getUploadUrl(), attachment.getName(),
-                                            attachment.getBlob()))
+                                            attachment.getBlob(), userSessInfo.getDestinationProps()))
                                     {
                                         log.info(
                                                 "Attachment with id : " + caseReplyAsync.getAttRespList().get(i).getId()
@@ -1620,6 +1661,12 @@ public class CL_UserSessionSrv implements IF_UserSessionSrv
     public TY_CaseEdit_Form getCaseEditFormB4Submission()
     {
         return userSessInfo.getCaseReplyFormB4Subm();
+    }
+
+    @Override
+    public TY_DestinationProps getDestinationDetails4mUserSession()
+    {
+        return userSessInfo.getDestinationProps();
     }
 
 }

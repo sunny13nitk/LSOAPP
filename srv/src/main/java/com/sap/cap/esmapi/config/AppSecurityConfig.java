@@ -38,6 +38,7 @@ public class AppSecurityConfig
   XsuaaTokenFlows xsuaaTokenFlows;
 
   @Bean
+  @Profile(GC_Constants.gc_LocalProfile)
   public SecurityFilterChain appFilterChain(HttpSecurity http) throws Exception
   {
 

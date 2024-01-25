@@ -33,6 +33,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseReplyNote;
 import com.sap.cap.esmapi.utilities.pojos.TY_Case_SrvCloud_Reply;
 import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_NotesCreate;
+import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_DestinationProps;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +60,8 @@ public class EV_HDLR_CaseReplySubmit
     {
         if (evCaseReply != null && config != null)
         {
-            if (evCaseReply.getPayload().isValid() && CollectionUtils.isNotEmpty(config.getCustomizations()))
+            if (evCaseReply.getPayload().isValid() && CollectionUtils.isNotEmpty(config.getCustomizations())
+                    && evCaseReply.getPayload().getDesProps() != null)
             {
 
                 // prepare the Payload for PATCH operation for the case
@@ -67,6 +69,7 @@ public class EV_HDLR_CaseReplySubmit
                 // Case Reply Form Attached
                 if (evCaseReply.getPayload().getCaseReply() != null)
                 {
+                    TY_DestinationProps desProps = evCaseReply.getPayload().getDesProps();
                     // Case GUID , Type and ETag Bound
                     if (StringUtils.hasText(evCaseReply.getPayload().getCaseReply().getCaseDetails().getCaseGuid())
                             && StringUtils.hasText(evCaseReply.getPayload().getCaseReply().getCaseDetails().getETag())
@@ -92,7 +95,7 @@ public class EV_HDLR_CaseReplySubmit
                         {
                             // Handle for Case Note(s) Existing
                             caseDetails = srvCloudApiSrv.getCaseDetails4Case(
-                                    evCaseReply.getPayload().getCaseReply().getCaseDetails().getCaseGuid());
+                                    evCaseReply.getPayload().getCaseReply().getCaseDetails().getCaseGuid(), desProps);
 
                             if (caseDetails != null)
                             {
@@ -126,7 +129,7 @@ public class EV_HDLR_CaseReplySubmit
                                         // Create Note and Get Guid back
                                         String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(false,
                                                 evCaseReply.getPayload().getCaseReply().getReply(),
-                                                cfgO.get().getReplyNoteType()));
+                                                cfgO.get().getReplyNoteType()), desProps);
                                         if (StringUtils.hasText(noteId))
                                         {
                                             caseReplyPayload.getNotes()
@@ -139,8 +142,10 @@ public class EV_HDLR_CaseReplySubmit
                                     {
                                         // Create REply in Default Note Type
                                         // Create Note and Get Guid back
-                                        String noteId = srvCloudApiSrv.createNotes(new TY_NotesCreate(false,
-                                                evCaseReply.getPayload().getCaseReply().getReply(), null));
+                                        String noteId = srvCloudApiSrv.createNotes(
+                                                new TY_NotesCreate(false,
+                                                        evCaseReply.getPayload().getCaseReply().getReply(), null),
+                                                desProps);
                                         if (StringUtils.hasText(noteId))
                                         {
                                             caseReplyPayload.getNotes()
@@ -183,9 +188,13 @@ public class EV_HDLR_CaseReplySubmit
                             if (caseReplyPayload != null)
                             {
                                 // Invoke Srv cloud API to Patch/Update the Case
-                                if (srvCloudApiSrv.updateCasewithReply(new TY_CasePatchInfo(caseDetails.getCaseGuid(),
-                                        evCaseReply.getPayload().getCaseReply().getCaseDetails().getCaseId(),
-                                        caseDetails.getETag()), caseReplyPayload))
+                                if (srvCloudApiSrv
+                                        .updateCasewithReply(
+                                                new TY_CasePatchInfo(caseDetails.getCaseGuid(),
+                                                        evCaseReply.getPayload().getCaseReply().getCaseDetails()
+                                                                .getCaseId(),
+                                                        caseDetails.getETag()),
+                                                caseReplyPayload, desProps))
                                 {
                                     handleCaseSuccUpdated(
                                             evCaseReply.getPayload().getCaseReply().getCaseDetails().getCaseId(),

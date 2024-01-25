@@ -15,6 +15,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_Message;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserDetails;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserSessionInfo;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
+import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_DestinationProps;
 import com.sap.cloud.security.xsuaa.token.Token;
 
 public interface IF_UserSessionSrv
@@ -132,5 +133,7 @@ public interface IF_UserSessionSrv
      * Session
      */
     public TY_CaseEdit_Form getCaseDetails4Edit(String caseID) throws EX_ESMAPI;
+
+    public TY_DestinationProps getDestinationDetails4mUserSession();
 
 }

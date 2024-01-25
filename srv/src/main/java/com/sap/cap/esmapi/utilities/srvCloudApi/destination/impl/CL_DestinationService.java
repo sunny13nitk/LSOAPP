@@ -3,11 +3,13 @@ package com.sap.cap.esmapi.utilities.srvCloudApi.destination.impl;
 import java.util.Locale;
 
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.annotation.SessionScope;
 
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
+import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.srvCloudApi.destination.intf.IF_DestinationService;
 import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_DestinationProps;
 import com.sap.cloud.sdk.cloudplatform.connectivity.Destination;
@@ -18,9 +20,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
-@SessionScope
 @RequiredArgsConstructor
 @Slf4j
+@Profile(GC_Constants.gc_BTPProfile)
 public class CL_DestinationService implements IF_DestinationService
 {
 

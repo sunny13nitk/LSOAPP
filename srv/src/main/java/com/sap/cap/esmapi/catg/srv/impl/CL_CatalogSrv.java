@@ -28,6 +28,7 @@ import com.sap.cap.esmapi.catg.srv.intf.IF_CatalogSrv;
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.enums.EnumCaseTypes;
 import com.sap.cap.esmapi.utilities.pojos.TY_CaseCatalogCustomizing;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 
 @Service
@@ -53,6 +54,9 @@ public class CL_CatalogSrv implements IF_CatalogSrv
 
     @Autowired
     private MessageSource msgSrc;
+
+    @Autowired
+    private IF_UserSessionSrv userSessionSrv;
 
     @Override
     public TY_CatalogTree getCaseCatgTree4LoB(EnumCaseTypes caseType) throws EX_ESMAPI
@@ -282,21 +286,21 @@ public class CL_CatalogSrv implements IF_CatalogSrv
         // Get the Config
         Optional<TY_CatgCusItem> caseCFgO = catgCus.getCustomizations().stream()
                 .filter(g -> g.getCaseTypeEnum().toString().equals(caseType.toString())).findFirst();
-        if (caseCFgO.isPresent() && srvCloudApiSrv != null)
+        if (caseCFgO.isPresent() && srvCloudApiSrv != null && userSessionSrv != null)
         {
             // Read FRom Srv Cloud the Catg. Tree
             try
             {
                 // Get config from Srv Cloud for Case type - Active Catalog ID
-                TY_CaseCatalogCustomizing caseCus = srvCloudApiSrv
-                        .getActiveCaseTemplateConfig4CaseType(caseCFgO.get().getCaseType());
+                TY_CaseCatalogCustomizing caseCus = srvCloudApiSrv.getActiveCaseTemplateConfig4CaseType(
+                        caseCFgO.get().getCaseType(), userSessionSrv.getDestinationDetails4mUserSession());
                 if (caseCus != null)
                 {
                     if (StringUtils.hasText(caseCus.getCataglogId()))
                     {
                         // Get category Tree for Catalog ID
-                        caseCatgTree = new TY_CatalogTree(caseType,
-                                srvCloudApiSrv.getActiveCaseCategoriesByCatalogId(caseCus.getCataglogId()));
+                        caseCatgTree = new TY_CatalogTree(caseType, srvCloudApiSrv.getActiveCaseCategoriesByCatalogId(
+                                caseCus.getCataglogId(), userSessionSrv.getDestinationDetails4mUserSession()));
                         if (CollectionUtils.isNotEmpty(caseCatgTree.getCategories()))
                         {
                             // add to Container - for subsequent calls

@@ -41,6 +41,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cloud.security.xsuaa.token.Token;
 
@@ -73,10 +74,13 @@ public class APIRestController
     @Autowired
     private IF_CatalogSrv catalogSrv;
 
+    @Autowired
+    private IF_UserSessionSrv userSessionSrv;
+
     @GetMapping("/caseIds")
     public List<TY_CaseGuidId> getCaseGuidIdList()
     {
-        return srvCloudApiSrv.getCaseGuidIdList();
+        return srvCloudApiSrv.getCaseGuidIdList(userSessionSrv.getDestinationDetails4mUserSession());
     }
 
     @GetMapping("/authInfo")
@@ -114,7 +118,7 @@ public class APIRestController
     @GetMapping("/cases")
     private JsonNode getAllCases() throws IOException
     {
-        return srvCloudApiSrv.getAllCases();
+        return srvCloudApiSrv.getAllCases(userSessionSrv.getDestinationDetails4mUserSession());
 
     }
 
@@ -451,13 +455,13 @@ public class APIRestController
     @GetMapping("/accByEmail")
     private String getAccountIdByEmail(@RequestParam(name = "email", required = true) String email) throws IOException
     {
-        return srvCloudApiSrv.getAccountIdByUserEmail(email);
+        return srvCloudApiSrv.getAccountIdByUserEmail(email, userSessionSrv.getDestinationDetails4mUserSession());
     }
 
     @GetMapping("/cpByEmail")
     private String getContactIdByEmail(@RequestParam(name = "email", required = true) String email) throws IOException
     {
-        return srvCloudApiSrv.getContactPersonIdByUserEmail(email);
+        return srvCloudApiSrv.getContactPersonIdByUserEmail(email, userSessionSrv.getDestinationDetails4mUserSession());
 
     }
 
@@ -477,7 +481,7 @@ public class APIRestController
     private String getACCURL(@RequestParam(name = "userName", required = true) String userName,
             @RequestParam(name = "email", required = true) String email)
     {
-        return srvCloudApiSrv.createAccount(email, userName);
+        return srvCloudApiSrv.createAccount(email, userName, userSessionSrv.getDestinationDetails4mUserSession());
     }
 
     @GetMapping("/caseConfig")
@@ -485,7 +489,8 @@ public class APIRestController
             throws IOException
     {
 
-        return srvCloudApiSrv.getActiveCaseTemplateConfig4CaseType(caseType);
+        return srvCloudApiSrv.getActiveCaseTemplateConfig4CaseType(caseType,
+                userSessionSrv.getDestinationDetails4mUserSession());
 
     }
 
@@ -494,7 +499,7 @@ public class APIRestController
     {
         TY_NotesCreate newNote = new TY_NotesCreate(false, "This is a new Note dropped in via /n a Service call", null);
 
-        return srvCloudApiSrv.createNotes(newNote);
+        return srvCloudApiSrv.createNotes(newNote, userSessionSrv.getDestinationDetails4mUserSession());
     }
 
     @GetMapping("/parseURL")

@@ -19,6 +19,7 @@ import com.sap.cap.esmapi.utilities.pojos.TY_CaseESS;
 import com.sap.cap.esmapi.utilities.pojos.TY_UserESS;
 import com.sap.cap.esmapi.utilities.pojos.Ty_UserAccountEmployee;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_UserAPISrv;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.srv.intf.IF_SrvCloudAPI;
 import com.sap.cloud.security.xsuaa.token.Token;
 
@@ -39,6 +40,9 @@ public class CL_UserAPISrv implements IF_UserAPISrv
     @Autowired
     private IF_SrvCloudAPI srvCloudApiSrv;
 
+    @Autowired
+    private IF_UserSessionSrv userSessionSrv;
+
     @Override
     public Ty_UserAccountEmployee getUserDetails(@AuthenticationPrincipal Token token) throws EX_ESMAPI
     {
@@ -57,7 +61,8 @@ public class CL_UserAPISrv implements IF_UserAPISrv
                 userData.setUserId(token.getLogonName());
                 userData.setUserName(token.getGivenName() + " " + token.getFamilyName());
                 userData.setUserEmail(token.getEmail());
-                userData.setAccountId(srvCloudApiSrv.getAccountIdByUserEmail(userData.getUserEmail()));
+                userData.setAccountId(srvCloudApiSrv.getAccountIdByUserEmail(userData.getUserEmail(),
+                        userSessionSrv.getDestinationDetails4mUserSession()));
                 log.info(userData.toString());
 
             }
@@ -121,7 +126,8 @@ public class CL_UserAPISrv implements IF_UserAPISrv
         if (StringUtils.hasText(userData.getUserEmail()) && StringUtils.hasText(userData.getUserName()))
         {
 
-            accountId = srvCloudApiSrv.createAccount(userData.getUserEmail(), userData.getUserName());
+            accountId = srvCloudApiSrv.createAccount(userData.getUserEmail(), userData.getUserName(),
+                    userSessionSrv.getDestinationDetails4mUserSession());
             // Also update in the session for newly created Account
             if (StringUtils.hasText(accountId))
             {
@@ -170,7 +176,8 @@ public class CL_UserAPISrv implements IF_UserAPISrv
 
     private List<TY_CaseESS> getCases4User() throws IOException
     {
-        return srvCloudApiSrv.getCases4User(userData.getAccountId());
+        return srvCloudApiSrv.getCases4User(userData.getAccountId(),
+                userSessionSrv.getDestinationDetails4mUserSession());
     }
 
 }
