@@ -28,8 +28,8 @@ import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_Destination
 
 @Service
 @Scope("prototype")
-// @Profile(GC_Constants.gc_BTPProfile)
-@Profile(GC_Constants.gc_LocalProfile)
+@Profile(GC_Constants.gc_BTPProfile)
+// @Profile(GC_Constants.gc_LocalProfile)
 public class CL_APISrvBTPDest implements IF_APISrv
 {
 
