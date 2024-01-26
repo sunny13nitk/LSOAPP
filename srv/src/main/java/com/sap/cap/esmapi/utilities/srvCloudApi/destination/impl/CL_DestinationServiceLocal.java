@@ -7,6 +7,7 @@ import org.springframework.web.context.annotation.SessionScope;
 
 import com.sap.cap.esmapi.exceptions.EX_ESMAPI;
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
+import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 import com.sap.cap.esmapi.utilities.srvCloudApi.destination.intf.IF_DestinationService;
 import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_DestinationProps;
 
@@ -20,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CL_DestinationServiceLocal implements IF_DestinationService
 {
 
-    private final MessageSource msgSrc;
+    private final TY_SrvCloudUrls srvCloudUrls;
 
     private TY_DestinationProps destinationProps;
 
@@ -33,8 +34,7 @@ public class CL_DestinationServiceLocal implements IF_DestinationService
     public TY_DestinationProps getDestinationDetails4User(String DestinationName) throws EX_ESMAPI
     {
         log.info("Destination loaded for Local Testing");
-        this.destinationProps = new TY_DestinationProps("https://my1000101.de1.test.crm.cloud.sap/",
-                "Basic TlNEX1NDRF9JTlQ6UEV4c1NZZmlUNWQza0UrYmJodCRCQkIh");
+        this.destinationProps = new TY_DestinationProps(srvCloudUrls.getBaseUrl(), srvCloudUrls.getToken());
         return this.destinationProps;
     }
 

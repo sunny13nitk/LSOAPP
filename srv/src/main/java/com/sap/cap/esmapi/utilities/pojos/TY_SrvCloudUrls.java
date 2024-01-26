@@ -35,5 +35,7 @@ public class TY_SrvCloudUrls
     private String customerUrl;
     private String prevAtt;
     private String dlAtt;
+    private String baseUrl;
+    private String token;
 
 }

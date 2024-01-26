@@ -13,28 +13,26 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.pojos.TY_TopSkipRelay;
 import com.sap.cap.esmapi.utilities.srv.intf.IF_APISrv;
-import com.sap.cap.esmapi.utilities.srvCloudApi.destination.intf.IF_DestinationService;
+import com.sap.cap.esmapi.utilities.srv.intf.IF_UserSessionSrv;
 import com.sap.cap.esmapi.utilities.srvCloudApi.destination.pojos.TY_DestinationProps;
 
 @Service
 @Scope("prototype")
-@Profile(GC_Constants.gc_BTPProfile)
+// @Profile(GC_Constants.gc_BTPProfile)
 // @Profile(GC_Constants.gc_LocalProfile)
 public class CL_APISrvBTPDest implements IF_APISrv
 {
 
     @Autowired
-    private IF_DestinationService destSrv;
+    private IF_UserSessionSrv userSessionSrv;
 
     @Override
     public long getNumberofEntitiesByUrl(String url) throws RuntimeException, IOException
@@ -43,9 +41,9 @@ public class CL_APISrvBTPDest implements IF_APISrv
         long numEmtities = 0;
         JsonNode jsonNode = null;
 
-        if (destSrv != null)
+        if (userSessionSrv != null)
         {
-            TY_DestinationProps desProps = destSrv.getDestinationDetails4User(null);
+            TY_DestinationProps desProps = userSessionSrv.getDestinationDetails4mUserSession();
             if (desProps != null)
             {
                 if (StringUtils.hasText(desProps.getAuthToken()))
