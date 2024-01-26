@@ -12,7 +12,6 @@ import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cap.esmapi.utilities.pojos.TY_SrvCloudUrls;
 
 @Configuration
-// @Profile(GC_Constants.gc_TESTProfile)
 @PropertySources(
 { @PropertySource("classpath:srvcloudurls-test.properties") })
 public class SrvCloudPropsTest
