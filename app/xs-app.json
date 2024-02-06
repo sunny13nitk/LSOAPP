@@ -1,7 +1,11 @@
 {
   "welcomeFile": "index.html",
   "authenticationMethod": "route",
-   "routes": [
+  "logout": {
+    "logoutEndpoint": "/logout",
+    "logoutPage": "/logout.html"
+  },
+  "routes": [
     {
       "source": "^/ess",
       "target": "/ess",
