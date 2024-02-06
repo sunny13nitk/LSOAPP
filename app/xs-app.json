@@ -1,12 +1,10 @@
 {
   "welcomeFile": "index.html",
   "authenticationMethod": "route",
-  "responseHeaders": [
-    {
-      "name": "Content-Security-Policy",
-      "value": "frame-ancestors 'self' https://my1000101.de1.test.crm.cloud.sap/"
-    }
-  ],
+  "logout": {
+    "logoutEndpoint": "/logout",
+    "logoutPage": "/logout.html"
+  },
   "routes": [
     {
       "source": "^/ess",
