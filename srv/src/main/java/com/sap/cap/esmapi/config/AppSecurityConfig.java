@@ -79,7 +79,7 @@ public class AppSecurityConfig
         .bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
         .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
 
-    http.logout().addLogoutHandler(clearSiteData).logoutSuccessUrl("/logout/").permitAll();
+    http.logout().addLogoutHandler(clearSiteData).logoutUrl("/logout/").permitAll();
     // @formatter:on
 
     return http.build();
