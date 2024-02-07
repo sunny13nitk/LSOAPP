@@ -46,7 +46,7 @@ public class AppSecurityConfig
      * ----------- Local Testing --------------------
      */
 
-    http.logout((logout) -> logout.logoutSuccessUrl("/logout").permitAll()).authorizeRequests()
+    http.logout((logout) -> logout.logoutSuccessUrl("/logout/").permitAll()).authorizeRequests()
         .antMatchers(HttpMethod.GET, "/static/**").permitAll();
     http.requestMatchers().antMatchers("/api/**").antMatchers("/esslocal/**").antMatchers("/poclocal/**").and().csrf()
         .disable() // don't insist on csrf tokens in put, post etc.
@@ -65,7 +65,7 @@ public class AppSecurityConfig
     // */
 
     // @formatter:off
-    http.logout((logout) -> logout.logoutSuccessUrl("/logout").permitAll()).sessionManagement()
+    http.logout((logout) -> logout.logoutSuccessUrl("/logout/").permitAll()).sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         // session is created by approuter
         .and().authorizeRequests() // authorize all requests
@@ -74,9 +74,8 @@ public class AppSecurityConfig
         .permitAll().antMatchers("/web-components.js/**").permitAll().antMatchers(HttpMethod.GET, "/static/js/**")
         .permitAll().antMatchers("/ess/**").authenticated() // Only
         .antMatchers("/lso/**").hasAnyAuthority(GC_Constants.gc_role_employee_lso, GC_Constants.gc_role_contractor_lso)
-        .anyRequest().denyAll()
-
-        .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
+        .anyRequest().denyAll().and().oauth2ResourceServer()
+        .bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
         .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
     // @formatter:on
 
@@ -88,7 +87,7 @@ public class AppSecurityConfig
   public WebSecurityCustomizer webSecurityCustomizer() throws Exception
   {
     return (web) -> web.ignoring().antMatchers("/static/**").antMatchers("/images/**").antMatchers("/css/**")
-        .antMatchers("/js/**");
+        .antMatchers("/js/**").antMatchers("/logout/**");
 
   }
 
