@@ -15,7 +15,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
+import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
 
 import com.sap.cap.esmapi.utilities.constants.GC_Constants;
 import com.sap.cloud.security.xsuaa.XsuaaServiceConfiguration;
@@ -65,7 +66,9 @@ public class AppSecurityConfig
     // */
 
     // @formatter:off
-    http.logout((logout) -> logout.logoutSuccessUrl("/logout/").permitAll()).sessionManagement()
+    HeaderWriterLogoutHandler clearSiteData = new HeaderWriterLogoutHandler(new ClearSiteDataHeaderWriter());
+    http.logout((logout) -> logout.logoutSuccessUrl("/logout/").permitAll())
+        .logout((logout) -> logout.addLogoutHandler(clearSiteData)).sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         // session is created by approuter
         .and().authorizeRequests() // authorize all requests
