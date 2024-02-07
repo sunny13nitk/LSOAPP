@@ -66,7 +66,6 @@ public class AppSecurityConfig
     // */
 
     // @formatter:off
-    HeaderWriterLogoutHandler clearSiteData = new HeaderWriterLogoutHandler(new ClearSiteDataHeaderWriter());
     http.logout((logout) -> logout.logoutSuccessUrl("/logout/").permitAll()).sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         // session is created by approuter
