@@ -1,5 +1,6 @@
 package com.sap.cap.esmapi.ui.controllers;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,11 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class LogoutController
 {
 
+    @Value("${logout}")
+    private String logoutDestination;
+
     @GetMapping("/")
     public String showLogout()
     {
-        String redirectUrl = "https://learninghub.sap.com/logout";
-        return "redirect:" + redirectUrl;
+
+        return "redirect:" + logoutDestination;
     }
 
 }
