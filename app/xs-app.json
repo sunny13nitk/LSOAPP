@@ -15,6 +15,12 @@
       "authenticationType": "none"
     },
     {
+      "source": "^/logout",
+      "target": "/logout",
+      "destination": "token-destination",
+      "authenticationType": "none"
+    },
+    {
       "source": "^/api",
       "target": "/api",
       "destination": "token-destination",
