@@ -67,9 +67,7 @@ public class AppSecurityConfig
 
     // @formatter:off
     HeaderWriterLogoutHandler clearSiteData = new HeaderWriterLogoutHandler(new ClearSiteDataHeaderWriter());
-    http.logout((logout) -> logout.logoutSuccessUrl("/logout/").permitAll())
-        .logout((logout) -> logout.addLogoutHandler(clearSiteData)).sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         // session is created by approuter
         .and().authorizeRequests() // authorize all requests
         .antMatchers("/login/**").permitAll().antMatchers(HttpMethod.GET, "/static/**").permitAll()
@@ -80,6 +78,8 @@ public class AppSecurityConfig
         .anyRequest().denyAll().and().oauth2ResourceServer()
         .bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
         .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
+
+    http.logout().addLogoutHandler(clearSiteData).logoutSuccessUrl("/logout/").permitAll();
     // @formatter:on
 
     return http.build();
