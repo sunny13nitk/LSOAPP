@@ -68,7 +68,7 @@ public class AppSecurityConfig
 
     // @formatter:off
     HeaderWriterLogoutHandler clearSiteData = new HeaderWriterLogoutHandler(
-        new ClearSiteDataHeaderWriter(Directive.COOKIES));
+        new ClearSiteDataHeaderWriter(Directive.ALL));
     http.logout((logout) -> logout.logoutSuccessUrl("/logout/").permitAll())
         .logout((logout) -> logout.addLogoutHandler(clearSiteData)).sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
