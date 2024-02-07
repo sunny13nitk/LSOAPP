@@ -46,7 +46,8 @@ public class AppSecurityConfig
      * ----------- Local Testing --------------------
      */
 
-    http.authorizeRequests().antMatchers(HttpMethod.GET, "/static/**").permitAll();
+    http.logout((logout) -> logout.logoutSuccessUrl("/logout").permitAll()).authorizeRequests()
+        .antMatchers(HttpMethod.GET, "/static/**").permitAll();
     http.requestMatchers().antMatchers("/api/**").antMatchers("/esslocal/**").antMatchers("/poclocal/**").and().csrf()
         .disable() // don't insist on csrf tokens in put, post etc.
         .authorizeRequests().anyRequest().permitAll();
@@ -64,7 +65,8 @@ public class AppSecurityConfig
     // */
 
     // @formatter:off
-    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    http.logout((logout) -> logout.logoutSuccessUrl("/logout").permitAll()).sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         // session is created by approuter
         .and().authorizeRequests() // authorize all requests
         .antMatchers("/login/**").permitAll().antMatchers(HttpMethod.GET, "/static/**").permitAll()
@@ -72,14 +74,8 @@ public class AppSecurityConfig
         .permitAll().antMatchers("/web-components.js/**").permitAll().antMatchers(HttpMethod.GET, "/static/js/**")
         .permitAll().antMatchers("/ess/**").authenticated() // Only
         .antMatchers("/lso/**").hasAnyAuthority(GC_Constants.gc_role_employee_lso, GC_Constants.gc_role_contractor_lso)
-        .anyRequest().denyAll() // Deny
-                                // any
-                                // other
-                                // endpoint
-                                // access
-                                // then
-                                // listed
-                                // above
+        .anyRequest().denyAll()
+
         .and().oauth2ResourceServer().bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
         .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
     // @formatter:on
