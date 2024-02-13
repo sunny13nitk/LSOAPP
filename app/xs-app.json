@@ -55,6 +55,11 @@
       "target": "/login$1",
       "destination": "token-destination",
       "authenticationType": "xsuaa"
+    },
+    {
+      "source": "^/ui/index.html",
+      "target": "index.html",
+      "cacheControl": "no-cache, no-store, must-revalidate"
     }
   ]
 }
