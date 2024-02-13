@@ -57,7 +57,7 @@
       "authenticationType": "xsuaa"
     },
     {
-      "source": "^/ui/index.html",
+      "source": "^/index.html",
       "target": "index.html",
       "cacheControl": "no-cache, no-store, must-revalidate"
     }
