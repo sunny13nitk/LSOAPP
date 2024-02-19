@@ -4,7 +4,6 @@ applications:
   memory: 1024M
   routes:
     - route: esmapi-dev.cfapps.eu10-004.hana.ondemand.com
-  path: srv/target/esmapi-exec.jar
   services:
     - esmapi-xsuaa
     - esmapi-hana
