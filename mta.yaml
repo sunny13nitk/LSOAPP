@@ -74,9 +74,6 @@ resources:
       path: ./xs-security.json
       service: xsuaa
       service-plan: application
-      config:
-        xsappname: -${space}
-        tenant-mode: dedicated
     type: org.cloudfoundry.managed-service
   - name: iESM-destination-services
     parameters:
