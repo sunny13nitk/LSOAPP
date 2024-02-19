@@ -3,7 +3,7 @@ applications:
   instances: 1
   memory: 1024M
   routes:
-    - route: esmapi.cfapps.eu10-004.hana.ondemand.com
+    - route: esmapi-dev.cfapps.eu10-004.hana.ondemand.com
   path: srv/target/esmapi-exec.jar
   services:
     - esmapi-xsuaa
@@ -19,7 +19,7 @@ applications:
     - nodejs_buildpack
   memory: 128M
   routes:
-    - route: esmapi-web.cfapps.eu10-004.hana.ondemand.com
+    - route: esmapi-devapp.cfapps.eu10-004.hana.ondemand.com
   services:
     - esmapi-xsuaa
   env:

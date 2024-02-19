@@ -1,12 +1,100 @@
 environments:
   - test:
-      applications:
-        - name: esmapi
-          routes:
-            - route: esmapp-test.cfapps.eu10-004.hana.ondemand.com
+    applications:
+      - name: esmapi
+        instances: 1
+        memory: 1024M
+        routes:
+          - route: esmapi-test.cfapps.eu10-004.hana.ondemand.com
+        path: srv/target/esmapi-exec.jar
+        services:
+          - esmapi-xsuaa
+          - esmapi-hana
+        env:
+          IAS_XSUAA_XCHANGE_ENABLED: true
+          SEND_XFRAMEOPTIONS: false
+
+      # Application Router as web server
+      - name: app-esmapi
+        path: app
+        buildpacks:
+          - nodejs_buildpack  
+        memory: 128M
+        routes:
+          - route: esmapi-testapp.cfapps.eu10-004.hana.ondemand.com
+        services:
+          - esmapi-xsuaa
+        env:
+          destinations: >
+            [
+              {
+                "name":"token-destination",
+                "url":"https://esmapi-test.cfapps.eu10-004.hana.ondemand.com",
+                "forwardAuthToken": true
+              },
+              {
+                "name":"common_navigation_proxy",
+                "url":"https://newlxp-backend-test.cfapps.eu10.hana.ondemand.com/",
+                "forwardAuthToken": true
+              },
+              {
+                "name":"common_navigation_proxy_public",
+                "url":"https://newlxp-backend-test.cfapps.eu10.hana.ondemand.com",
+                "forwardAuthToken": false
+              },
+              {
+                "name":"common_navigation_resources",
+                "url":"https://newlxp-components-test.cfapps.eu10.hana.ondemand.com/",
+                "forwardAuthToken": false
+              } 
+            ]
   - production:
       applications:
         - name: esmapi
-          memory: 2G
+          instances: 1
+          memory: 1024M
           routes:
-            - route: esmapp-prod.cfapps.eu10-004.hana.ondemand.com
+            - route: esmapi-prod.cfapps.eu10-004.hana.ondemand.com
+          path: srv/target/esmapi-exec.jar
+          services:
+            - esmapi-xsuaa
+            - esmapi-hana
+          env:
+            IAS_XSUAA_XCHANGE_ENABLED: true
+            SEND_XFRAMEOPTIONS: false
+
+        # Application Router as web server
+        - name: app-esmapi
+          path: app
+          buildpacks:
+            - nodejs_buildpack  
+          memory: 128M
+          routes:
+            - route: esmapi-prodapp.cfapps.eu10-004.hana.ondemand.com
+          services:
+            - esmapi-xsuaa
+          env:
+            destinations: >
+              [
+                {
+                  "name":"token-destination",
+                  "url":"https://esmapi-prod.cfapps.eu10-004.hana.ondemand.com",
+                  "forwardAuthToken": true
+                },
+                {
+                  "name":"common_navigation_proxy",
+                  "url":"https://newlxp-backend-prod.cfapps.eu10.hana.ondemand.com/",
+                  "forwardAuthToken": true
+                },
+                {
+                  "name":"common_navigation_proxy_public",
+                  "url":"https://newlxp-backend-prod.cfapps.eu10.hana.ondemand.com",
+                  "forwardAuthToken": false
+                },
+                {
+                  "name":"common_navigation_resources",
+                  "url":"https://newlxp-components-prod.cfapps.eu10.hana.ondemand.com/",
+                  "forwardAuthToken": false
+                } 
+              ]
+...
