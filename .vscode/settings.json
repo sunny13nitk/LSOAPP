@@ -1,0 +1,7 @@
+{
+    "java.compile.nullAnalysis.mode": "disabled",
+    "SAP HANA Database Explorer.displaySapWebAnalyticsStartupNotification": false,
+    "java.format.settings.url": ".vscode/java-formatter.xml",
+    "rest-client.showResponseInDifferentTab": true,
+    "java.configuration.updateBuildConfiguration": "automatic"
+}

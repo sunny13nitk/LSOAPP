@@ -16,7 +16,7 @@ import javax.annotation.Generated;
 @CdsName("sap.common.Countries")
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-19T17:21:49.451535945Z",
+    date = "2024-02-19T17:43:27.367465Z",
     comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
 )
 public interface Countries_ extends StructuredType<Countries_> {
