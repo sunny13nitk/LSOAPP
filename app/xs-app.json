@@ -5,25 +5,25 @@
     {
       "source": "^/ess",
       "target": "/ess",
-      "destination": "token-destination",
+      "destination": "srv-url",
       "authenticationType": "none"
     },
     {
       "source": "^/lso",
       "target": "/lso",
-      "destination": "token-destination",
+      "destination": "srv-url",
       "authenticationType": "none"
     },
     {
       "source": "^/logout",
       "target": "/logout",
-      "destination": "token-destination",
+      "destination": "srv-url",
       "authenticationType": "none"
     },
     {
       "source": "^/api",
       "target": "/api",
-      "destination": "token-destination",
+      "destination": "srv-url",
       "authenticationType": "xsuaa"
     },
     {
@@ -53,7 +53,7 @@
     {
       "source": "^/login(.*)",
       "target": "/login$1",
-      "destination": "token-destination",
+      "destination": "srv-url",
       "authenticationType": "xsuaa"
     }
   ]

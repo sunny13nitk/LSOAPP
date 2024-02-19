@@ -1,5 +1,5 @@
 {
-  "xsappname": "esmapi",
+  "xsappname": "lsoapp",
   "oauth2-configuration": {
     "credential-types": [
       "instance-secret",

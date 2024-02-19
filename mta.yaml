@@ -1,15 +1,22 @@
 _schema-version: '3.1'
-ID: esmapi
+ID: lsoapp
 version: 1.0.0
 description: "LSO Portal App with MTA"
 parameters:
   enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm install
+        - cds build/all 
 modules:
-  - name: esmapi-srv
+  - name: lsoapp-srv
     type: java
     path: srv
     parameters:
       buildpack: sap_java_buildpack
+      memory: 1G
     build-parameters:
       builder: custom
       commands:
@@ -20,17 +27,16 @@ modules:
         properties:
           srv-url: ${default-url}
     requires:
-      - name: app-api
-        properties:
-          CDS_MULTITENANCY_APPUI_URL: ~{url}
-      - name: esmapi-auth
+      - name: esmapi-xsuaa
+      - name: esmapi-hana
+      - name: iESM-destination-services
 
-  - name: esmapi
+  - name: lsoapp-app
     type: approuter.nodejs
     path: app/
     parameters:
       keep-existing-routes: true
-      disk-quota: 256M
+      disk-quota: 1024M
       memory: 256M
     requires:
       - name: srv-api
@@ -39,19 +45,42 @@ modules:
           name: srv-api # must be used in xs-app.json as well
           url: ~{srv-url}
           forwardAuthToken: true
-      - name: esmapi-auth
     provides:
       - name: app-api
         properties:
           url: ${default-url}
+      - name: common_navigation_proxy
+        properties:
+          srv-url: https://newlxp-backend-dev.cfapps.eu10.hana.ondemand.com
+          forwardAuthToken: true
+      - name: common_navigation_proxy_public
+        properties:
+          srv-url: https://newlxp-backend-dev.cfapps.eu10.hana.ondemand.com
+      - name: common_navigation_resources
+        properties:
+          srv-url: https://newlxp-components-dev.cfapps.eu10.hana.ondemand.com/
+          forwardAuthToken: true      
 
 resources:
-  - name: esmapi-auth
-    type: org.cloudfoundry.managed-service
+  - name: esmapi-hana
     parameters:
+      service: hana
+      service-plan: hdi-shared
+    type: com.sap.xs.hdi-container
+    properties:
+      hdi-container-name: ${service-name}
+  - name: esmapi-xsuaa
+    parameters:
+      path: ./xs-security.json
       service: xsuaa
       service-plan: application
-      path: ./xs-security.json
       config:
-        xsappname: esmapi-${org}-${space}
+        xsappname: -${space}
         tenant-mode: dedicated
+    type: org.cloudfoundry.managed-service
+  - name: iESM-destination-services
+    parameters:
+      service-plan: lite
+      service: destination
+    type: org.cloudfoundry.managed-service  
+ 
