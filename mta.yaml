@@ -27,7 +27,7 @@ modules:
         properties:
           srv-url: ${default-url}
     requires:
-      - name: esmapi-xsuaa
+      - name: lsoapi-xsuaa
       - name: esmapi-hana
       - name: iESM-destination-services
 
@@ -45,6 +45,7 @@ modules:
           name: srv-api # must be used in xs-app.json as well
           url: ~{srv-url}
           forwardAuthToken: true
+      - name: lsoapi-xsuaa    
     provides:
       - name: app-api
         properties:
@@ -69,7 +70,7 @@ resources:
     type: com.sap.xs.hdi-container
     properties:
       hdi-container-name: ${service-name}
-  - name: esmapi-xsuaa
+  - name: lsoapi-xsuaa
     parameters:
       path: ./xs-security.json
       service: xsuaa

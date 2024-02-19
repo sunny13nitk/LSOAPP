@@ -78,7 +78,8 @@ public class AppSecurityConfig
         .antMatchers(HttpMethod.GET, "/static/images/**").permitAll().antMatchers(HttpMethod.GET, "/static/css/**")
         .permitAll().antMatchers("/web-components.js/**").permitAll().antMatchers(HttpMethod.GET, "/static/js/**")
         .permitAll().antMatchers("/ess/**").authenticated() // Only
-        .antMatchers("/lso/**").hasAnyAuthority(GC_Constants.gc_role_employee_lso, GC_Constants.gc_role_contractor_lso)
+        .antMatchers("/lso/**").authenticated()
+        //.antMatchers("/lso/**").hasAnyAuthority(GC_Constants.gc_role_employee_lso, GC_Constants.gc_role_contractor_lso)
         .anyRequest().denyAll().and().oauth2ResourceServer()
         .bearerTokenResolver(new IasXsuaaExchangeBroker(xsuaaTokenFlows)).jwt()
         .jwtAuthenticationConverter(getJwtAuthoritiesConverter());
