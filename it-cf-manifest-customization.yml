@@ -3,10 +3,10 @@ environments:
       applications:
         - name: esmapi
           routes:
-            - route: esmappt.cfapps.eu10-004.hana.ondemand.com
+            - route: esmapp-test.cfapps.eu10-004.hana.ondemand.com
   - production:
       applications:
         - name: esmapi
           memory: 2G
           routes:
-            - route: esmapp.cfapps.eu10-004.hana.ondemand.com
+            - route: esmapp-prod.cfapps.eu10-004.hana.ondemand.com
