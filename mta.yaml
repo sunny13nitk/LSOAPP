@@ -50,18 +50,6 @@ modules:
       - name: app-api
         properties:
           url: ${default-url}
-      # - name: common_navigation_proxy
-      #   properties:
-      #     srv-url: https://newlxp-backend-dev.cfapps.eu10.hana.ondemand.com
-      #     forwardAuthToken: true
-      # - name: common_navigation_proxy_public
-      #   properties:
-      #     srv-url: https://newlxp-backend-dev.cfapps.eu10.hana.ondemand.com
-      # - name: common_navigation_resources
-      #   properties:
-      #     srv-url: https://newlxp-components-dev.cfapps.eu10.hana.ondemand.com/
-      #     forwardAuthToken: true      
-
 resources:
   - name: esmapi-hana
     parameters:

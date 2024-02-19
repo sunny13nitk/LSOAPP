@@ -1,21 +1,15 @@
-**/gen/
-**/edmx/
-*.db
-*.sqlite
-schema.sql
-default-env.json
 
-**/bin/
-**/target/
+bin/
+target/
 .flattened-pom.xml
 .classpath
 .project
 .settings
 
-**/node/
-**/node_modules/
+node/
+node_modules/
 
-**/.mta/
+.mta/
 *.mtar
 
 *.log*
@@ -24,5 +18,13 @@ hs_err*
 *.tgz
 *.iml
 
-.vscode
+
 .idea
+
+
+# added by cds deploy
+default-env.json
+
+
+# added by cds deploy
+connection.properties
