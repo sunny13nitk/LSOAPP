@@ -1,0 +1,57 @@
+_schema-version: '3.1'
+ID: esmapi
+version: 1.0.0
+description: "LSO Portal App with MTA"
+parameters:
+  enable-parallel-deployments: true
+modules:
+  - name: esmapi-srv
+    type: java
+    path: srv
+    parameters:
+      buildpack: sap_java_buildpack
+    build-parameters:
+      builder: custom
+      commands:
+        - mvn clean package -DskipTests=true
+      build-result: target/*-exec.jar
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: app-api
+        properties:
+          CDS_MULTITENANCY_APPUI_URL: ~{url}
+      - name: esmapi-auth
+
+  - name: esmapi
+    type: approuter.nodejs
+    path: app/
+    parameters:
+      keep-existing-routes: true
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api # must be used in xs-app.json as well
+          url: ~{srv-url}
+          forwardAuthToken: true
+      - name: esmapi-auth
+    provides:
+      - name: app-api
+        properties:
+          url: ${default-url}
+
+resources:
+  - name: esmapi-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: esmapi-${org}-${space}
+        tenant-mode: dedicated
