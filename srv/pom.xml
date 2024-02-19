@@ -4,7 +4,7 @@
     <parent>
         <artifactId>esmapi-parent</artifactId>
         <groupId>com.sap.cap</groupId>
-        <version>${revision}</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>esmapi</artifactId>

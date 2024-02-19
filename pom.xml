@@ -5,20 +5,19 @@
  
 	<groupId>com.sap.cap</groupId>
 	<artifactId>esmapi-parent</artifactId>
-	<version>${revision}</version>
+	<version>1.0.0</version>
 	<packaging>pom</packaging>
 
 	<name>esmapi parent</name>
 
 	<properties>
-		<!-- OUR VERSION -->
-		<revision>1.0.0-SNAPSHOT</revision>
-
+		
 		<!-- DEPENDENCIES VERSION -->
 		<jdk.version>1.8</jdk.version>
 		<cds.services.version>1.30.2</cds.services.version>
 		<spring.boot.version>2.7.6</spring.boot.version>
 		<cds.install-cdsdk.version>6.4.0</cds.install-cdsdk.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<cds.install-node.downloadUrl>https://nodejs.org/dist/</cds.install-node.downloadUrl>
 	</properties>
