@@ -8,6 +8,8 @@
       "kind": "entity",
       "doc": "Aspect for entities with canonical universal IDs\n\nSee https://cap.cloud.sap/docs/cds/common#aspect-cuid",
       "@readonly": true,
+      "@Capabilities.Insertable": false,
+      "@Capabilities.Updatable": false,
       "projection": {
         "from": {
           "ref": [
@@ -44,9 +46,9 @@
           "length": 1000
         }
       },
+      "@Capabilities.DeleteRestrictions.Deletable": false,
       "@Capabilities.InsertRestrictions.Insertable": false,
-      "@Capabilities.UpdateRestrictions.Updatable": false,
-      "@Capabilities.DeleteRestrictions.Deletable": false
+      "@Capabilities.UpdateRestrictions.Updatable": false
     },
     "db.esmlogs.esmappmsglog": {
       "kind": "entity",
@@ -89,8 +91,6 @@
     "Language": {
       "kind": "type",
       "doc": "Type for an association to Languages\n\nSee https://cap.cloud.sap/docs/cds/common#type-language",
-      "@title": "{i18n>Language}",
-      "@description": "{i18n>LanguageCode.Description}",
       "type": "cds.Association",
       "target": "sap.common.Languages",
       "keys": [
@@ -106,8 +106,6 @@
     "Currency": {
       "kind": "type",
       "doc": "Type for an association to Currencies\n\nSee https://cap.cloud.sap/docs/cds/common#type-currency",
-      "@title": "{i18n>Currency}",
-      "@description": "{i18n>CurrencyCode.Description}",
       "type": "cds.Association",
       "target": "sap.common.Currencies",
       "keys": [
@@ -123,8 +121,6 @@
     "Country": {
       "kind": "type",
       "doc": "Type for an association to Countries\n\nSee https://cap.cloud.sap/docs/cds/common#type-country",
-      "@title": "{i18n>Country}",
-      "@description": "{i18n>CountryCode.Description}",
       "type": "cds.Association",
       "target": "sap.common.Countries",
       "keys": [
@@ -144,14 +140,13 @@
     "sap.common.Locale": {
       "kind": "type",
       "doc": "Type for a language code",
-      "@title": "{i18n>LanguageCode}",
       "type": "cds.String",
       "length": 14,
       "@Common.Label": "{i18n>LanguageCode}"
     },
     "sap.common.Languages": {
       "kind": "entity",
-      "doc": "Code list for languages\n\nSee https://cap.cloud.sap/docs/cds/common#entity-languages",
+      "doc": "Code list for languages\n\nSee https://cap.cloud.sap/docs/cds/common#entity-sapcommonlanguages",
       "@cds.autoexpose": true,
       "@cds.persistence.skip": "if-unused",
       "@UI.Identification": [
@@ -167,14 +162,12 @@
       ],
       "elements": {
         "name": {
-          "@title": "{i18n>Name}",
           "localized": true,
           "type": "cds.String",
           "length": 255,
           "@Common.Label": "{i18n>Name}"
         },
         "descr": {
-          "@title": "{i18n>Description}",
           "localized": true,
           "type": "cds.String",
           "length": 1000,
@@ -185,7 +178,6 @@
           "@Common.Text": {
             "=": "name"
           },
-          "@title": "{i18n>LanguageCode}",
           "key": true,
           "type": "cds.String",
           "length": 14,
@@ -249,7 +241,7 @@
     },
     "sap.common.Countries": {
       "kind": "entity",
-      "doc": "Code list for countries\n\nSee https://cap.cloud.sap/docs/cds/common#entity-countries",
+      "doc": "Code list for countries\n\nSee https://cap.cloud.sap/docs/cds/common#entity-sapcommoncountries",
       "@cds.autoexpose": true,
       "@cds.persistence.skip": "if-unused",
       "@UI.Identification": [
@@ -265,21 +257,18 @@
       ],
       "elements": {
         "name": {
-          "@title": "{i18n>Name}",
           "localized": true,
           "type": "cds.String",
           "length": 255,
           "@Common.Label": "{i18n>Name}"
         },
         "descr": {
-          "@title": "{i18n>Description}",
           "localized": true,
           "type": "cds.String",
           "length": 1000,
           "@Common.Label": "{i18n>Description}"
         },
         "code": {
-          "@title": "{i18n>CountryCode}",
           "@Common.Text": {
             "=": "name"
           },
@@ -346,7 +335,7 @@
     },
     "sap.common.Currencies": {
       "kind": "entity",
-      "doc": "Code list for currencies\n\nSee https://cap.cloud.sap/docs/cds/common#entity-currencies",
+      "doc": "Code list for currencies\n\nSee https://cap.cloud.sap/docs/cds/common#entity-sapcommoncurrencies",
       "@cds.autoexpose": true,
       "@cds.persistence.skip": "if-unused",
       "@UI.Identification": [
@@ -362,21 +351,18 @@
       ],
       "elements": {
         "name": {
-          "@title": "{i18n>Name}",
           "localized": true,
           "type": "cds.String",
           "length": 255,
           "@Common.Label": "{i18n>Name}"
         },
         "descr": {
-          "@title": "{i18n>Description}",
           "localized": true,
           "type": "cds.String",
           "length": 1000,
           "@Common.Label": "{i18n>Description}"
         },
         "code": {
-          "@title": "{i18n>CurrencyCode}",
           "@Common.Text": {
             "=": "name"
           },
@@ -386,15 +372,9 @@
           "@Common.Label": "{i18n>CurrencyCode}"
         },
         "symbol": {
-          "@title": "{i18n>CurrencySymbol}",
           "type": "cds.String",
           "length": 5,
           "@Common.Label": "{i18n>CurrencySymbol}"
-        },
-        "minorUnit": {
-          "@title": "{i18n>CurrencyMinorUnit}",
-          "type": "cds.Int16",
-          "@Common.Label": "{i18n>CurrencyMinorUnit}"
         },
         "texts": {
           "type": "cds.Composition",
@@ -454,7 +434,7 @@
     },
     "sap.common.CodeList": {
       "kind": "aspect",
-      "doc": "Aspect for a code list with name and description\n\nSee https://cap.cloud.sap/docs/cds/common#aspect-codelist",
+      "doc": "Aspect for a code list with name and description\n\nSee https://cap.cloud.sap/docs/cds/common#aspect-sapcommoncodelist",
       "@cds.autoexpose": true,
       "@cds.persistence.skip": "if-unused",
       "@UI.Identification": [
@@ -467,31 +447,16 @@
       "@cds.odata.valuelist": true,
       "elements": {
         "name": {
-          "@title": "{i18n>Name}",
           "localized": true,
           "type": "cds.String",
           "length": 255,
           "@Common.Label": "{i18n>Name}"
         },
         "descr": {
-          "@title": "{i18n>Description}",
           "localized": true,
           "type": "cds.String",
           "length": 1000,
           "@Common.Label": "{i18n>Description}"
-        }
-      }
-    },
-    "sap.common.TextsAspect": {
-      "kind": "aspect",
-      "elements": {
-        "locale": {
-          "doc": "Type for a language code",
-          "@title": "{i18n>LanguageCode}",
-          "key": true,
-          "type": "cds.String",
-          "length": 14,
-          "@Common.Label": "{i18n>LanguageCode}"
         }
       }
     },
@@ -515,7 +480,6 @@
           },
           "@UI.HiddenFilter": true,
           "@Core.Immutable": true,
-          "@title": "{i18n>CreatedAt}",
           "@readonly": true,
           "type": "cds.Timestamp",
           "@Core.Computed": true,
@@ -528,9 +492,7 @@
           },
           "@UI.HiddenFilter": true,
           "@Core.Immutable": true,
-          "@title": "{i18n>CreatedBy}",
           "@readonly": true,
-          "@description": "{i18n>UserID.Description}",
           "type": "cds.String",
           "length": 255,
           "@Core.Computed": true,
@@ -545,7 +507,6 @@
             "=": "$now"
           },
           "@UI.HiddenFilter": true,
-          "@title": "{i18n>ChangedAt}",
           "@readonly": true,
           "type": "cds.Timestamp",
           "@Core.Computed": true,
@@ -560,9 +521,7 @@
             "=": "$user"
           },
           "@UI.HiddenFilter": true,
-          "@title": "{i18n>ChangedBy}",
           "@readonly": true,
-          "@description": "{i18n>UserID.Description}",
           "type": "cds.String",
           "length": 255,
           "@Core.Computed": true,
@@ -588,8 +547,6 @@
     "User": {
       "kind": "type",
       "doc": "Canonical user ID",
-      "@title": "{i18n>UserID}",
-      "@description": "{i18n>UserID.Description}",
       "type": "cds.String",
       "length": 255,
       "@Common.Label": "{i18n>UserID}",
@@ -608,27 +565,21 @@
     "sap.common.Languages.texts": {
       "kind": "entity",
       "@odata.draft.enabled": false,
-      "includes": [
-        "sap.common.TextsAspect"
-      ],
       "elements": {
         "locale": {
           "doc": "Type for a language code",
-          "@title": "{i18n>LanguageCode}",
           "key": true,
           "type": "cds.String",
           "length": 14,
           "@Common.Label": "{i18n>LanguageCode}"
         },
         "name": {
-          "@title": "{i18n>Name}",
           "localized": null,
           "type": "cds.String",
           "length": 255,
           "@Common.Label": "{i18n>Name}"
         },
         "descr": {
-          "@title": "{i18n>Description}",
           "localized": null,
           "type": "cds.String",
           "length": 1000,
@@ -640,7 +591,6 @@
           "@Common.Text": {
             "=": "name"
           },
-          "@title": "{i18n>LanguageCode}",
           "key": true,
           "type": "cds.String",
           "length": 14,
@@ -651,27 +601,21 @@
     "sap.common.Countries.texts": {
       "kind": "entity",
       "@odata.draft.enabled": false,
-      "includes": [
-        "sap.common.TextsAspect"
-      ],
       "elements": {
         "locale": {
           "doc": "Type for a language code",
-          "@title": "{i18n>LanguageCode}",
           "key": true,
           "type": "cds.String",
           "length": 14,
           "@Common.Label": "{i18n>LanguageCode}"
         },
         "name": {
-          "@title": "{i18n>Name}",
           "localized": null,
           "type": "cds.String",
           "length": 255,
           "@Common.Label": "{i18n>Name}"
         },
         "descr": {
-          "@title": "{i18n>Description}",
           "localized": null,
           "type": "cds.String",
           "length": 1000,
@@ -679,7 +623,6 @@
         },
         "code": {
           "@odata.containment.ignore": true,
-          "@title": "{i18n>CountryCode}",
           "@Common.Text": {
             "=": "name"
           },
@@ -693,27 +636,21 @@
     "sap.common.Currencies.texts": {
       "kind": "entity",
       "@odata.draft.enabled": false,
-      "includes": [
-        "sap.common.TextsAspect"
-      ],
       "elements": {
         "locale": {
           "doc": "Type for a language code",
-          "@title": "{i18n>LanguageCode}",
           "key": true,
           "type": "cds.String",
           "length": 14,
           "@Common.Label": "{i18n>LanguageCode}"
         },
         "name": {
-          "@title": "{i18n>Name}",
           "localized": null,
           "type": "cds.String",
           "length": 255,
           "@Common.Label": "{i18n>Name}"
         },
         "descr": {
-          "@title": "{i18n>Description}",
           "localized": null,
           "type": "cds.String",
           "length": 1000,
@@ -721,7 +658,6 @@
         },
         "code": {
           "@odata.containment.ignore": true,
-          "@title": "{i18n>CurrencyCode}",
           "@Common.Text": {
             "=": "name"
           },
@@ -735,7 +671,7 @@
   },
   "$version": "2.0",
   "meta": {
-    "creator": "CDS Compiler v4.6.2",
+    "creator": "CDS Compiler v3.5.0",
     "flavor": "inferred"
   }
 }
