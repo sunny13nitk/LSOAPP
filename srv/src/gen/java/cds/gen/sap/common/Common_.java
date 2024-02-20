@@ -7,7 +7,7 @@ import javax.annotation.Generated;
 
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-20T16:45:18.292079588Z",
+    date = "2024-02-20T16:55:33.281307100Z",
     comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
 )
 @CdsName("sap.common")
