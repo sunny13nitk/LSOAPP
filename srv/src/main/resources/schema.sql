@@ -1,5 +1,5 @@
-DROP VIEW IF EXISTS LogsReadService_Logs;
 
+DROP VIEW IF EXISTS LogsReadService_Logs;
 DROP TABLE IF EXISTS db_esmlogs_esmappmsglog;
 
 CREATE TABLE db_esmlogs_esmappmsglog (
@@ -11,7 +11,7 @@ CREATE TABLE db_esmlogs_esmappmsglog (
   objectid NVARCHAR(50),
   message NVARCHAR(1000),
   PRIMARY KEY(ID)
-);
+); 
 
 CREATE VIEW LogsReadService_Logs AS SELECT
   esmappmsglog_0.ID,
@@ -21,5 +21,5 @@ CREATE VIEW LogsReadService_Logs AS SELECT
   esmappmsglog_0.msgtype,
   esmappmsglog_0.objectid,
   esmappmsglog_0.message
-FROM db_esmlogs_esmappmsglog AS esmappmsglog_0;
+FROM db_esmlogs_esmappmsglog AS esmappmsglog_0; 
 

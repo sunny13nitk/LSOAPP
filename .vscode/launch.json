@@ -1,14 +1,15 @@
 {
-    "configurations": [
-        {
-            "type": "java",
-            "name": "Spring Boot-Application<esmapi>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.sap.cap.esmapi.Application",
-            "projectName": "esmapi",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
-        }
-    ]
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-Application<esmapi>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.sap.cap.esmapi.Application",
+      "projectName": "esmapi",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ],
+  "version": "0.2.0"
 }
