@@ -5,7 +5,7 @@
  
 	<groupId>com.sap.cap</groupId>
 	<artifactId>lsoapp-parent</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 <!-- Comment -->
 	<name>lsoapp parent</name>
