@@ -12,12 +12,12 @@ import javax.annotation.Generated;
 /**
  * Code list for languages
  *
- * See https://cap.cloud.sap/docs/cds/common#entity-sapcommonlanguages
+ * See https://cap.cloud.sap/docs/cds/common#entity-languages
  */
 @CdsName("sap.common.Languages")
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-20T16:20:22.996750600Z",
+    date = "2024-02-20T16:45:18.292079588Z",
     comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
 )
 public interface Languages extends CdsData {

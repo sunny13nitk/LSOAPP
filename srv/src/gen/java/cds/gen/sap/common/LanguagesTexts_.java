@@ -9,7 +9,7 @@ import javax.annotation.Generated;
 @CdsName("sap.common.Languages.texts")
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-20T16:20:22.996750600Z",
+    date = "2024-02-20T16:45:18.292079588Z",
     comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
 )
 public interface LanguagesTexts_ extends StructuredType<LanguagesTexts_> {
