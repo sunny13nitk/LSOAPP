@@ -9,7 +9,7 @@ import javax.annotation.Generated;
 @CdsName("sap.common.Currencies.texts")
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-20T08:23:36.978394200Z",
+    date = "2024-02-20T08:39:24.872875100Z",
     comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
 )
 public interface CurrenciesTexts_ extends StructuredType<CurrenciesTexts_> {

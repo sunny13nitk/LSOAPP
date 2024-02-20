@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
  
 	<groupId>com.sap.cap</groupId>
-	<artifactId>esmapi-parent</artifactId>
+	<artifactId>lsoapp-parent</artifactId>
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
 <!-- Comment -->
-	<name>esmapi parent</name>
+	<name>lsoapp parent</name>
 
 	<properties>
 		

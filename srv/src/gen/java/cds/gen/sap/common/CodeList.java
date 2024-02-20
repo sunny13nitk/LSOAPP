@@ -9,12 +9,12 @@ import javax.annotation.Generated;
 /**
  * Aspect for a code list with name and description
  *
- * See https://cap.cloud.sap/docs/cds/common#aspect-codelist
+ * See https://cap.cloud.sap/docs/cds/common#aspect-sapcommoncodelist
  */
 @CdsName("sap.common.CodeList")
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-20T08:23:36.978394200Z",
+    date = "2024-02-20T08:39:24.872875100Z",
     comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
 )
 public interface CodeList extends CdsData {

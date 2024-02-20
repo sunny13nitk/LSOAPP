@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>esmapi-parent</artifactId>
+        <artifactId>lsoapp-parent</artifactId>
         <groupId>com.sap.cap</groupId>
         <version>1.0.0</version>
     </parent>
@@ -10,7 +10,7 @@
     <artifactId>srv</artifactId>
     <packaging>jar</packaging>
 
-    <name>esmapi</name>
+    <name>lsoapp</name>
 
     <!-- ACTUAL DEPENDENCIES -->
     <dependencies>
