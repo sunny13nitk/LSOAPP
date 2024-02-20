@@ -4,12 +4,6 @@ version: 1.0.0
 description: "LSO Portal App with MTA"
 parameters:
   enable-parallel-deployments: true
-build-parameters:
-  before-all:
-    - builder: custom
-      commands:
-        - npm install
-        - cds build 
 modules:
   - name: lsoapp-srv
     type: java
