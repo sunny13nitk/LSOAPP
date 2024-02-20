@@ -14,7 +14,7 @@ modules:
     build-parameters:
       builder: custom
       commands:
-        - mvn clean package -DskipTests=true
+        - mvn clean install -DskipTests
       build-result: target/*-exec.jar
     provides:
       - name: srv-api # required by consumers of CAP services (e.g. approuter)
