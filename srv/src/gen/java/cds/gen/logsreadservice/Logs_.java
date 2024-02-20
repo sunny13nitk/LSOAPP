@@ -15,7 +15,7 @@ import javax.annotation.Generated;
 @CdsName("LogsReadService.Logs")
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-20T08:39:24.872875100Z",
+    date = "2024-02-20T09:22:17.512655200Z",
     comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
 )
 public interface Logs_ extends StructuredType<Logs_> {
