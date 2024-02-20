@@ -12,12 +12,12 @@ import javax.annotation.Generated;
 /**
  * Code list for countries
  *
- * See https://cap.cloud.sap/docs/cds/common#entity-sapcommoncountries
+ * See https://cap.cloud.sap/docs/cds/common#entity-countries
  */
 @CdsName("sap.common.Countries")
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-20T09:22:17.512655200Z",
+    date = "2024-02-20T09:23:07.438730600Z",
     comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
 )
 public interface Countries extends CdsData {
