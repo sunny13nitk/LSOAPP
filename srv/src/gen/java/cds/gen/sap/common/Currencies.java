@@ -7,7 +7,7 @@ import java.lang.String;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 /**
  * Code list for currencies
@@ -17,8 +17,8 @@ import javax.annotation.Generated;
 @CdsName("sap.common.Currencies")
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-21T10:04:38.092987600Z",
-    comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
+    date = "2024-02-21T10:47:07.638874300Z",
+    comments = "com.sap.cds:cds-maven-plugin:2.6.1 / com.sap.cds:cds4j-api:2.6.1"
 )
 public interface Currencies extends CdsData {
   String NAME = "name";

@@ -3,12 +3,12 @@ package cds.gen.db.esmlogs;
 import com.sap.cds.ql.CdsName;
 import java.lang.Class;
 import java.lang.String;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-21T10:04:38.092987600Z",
-    comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
+    date = "2024-02-21T10:47:07.638874300Z",
+    comments = "com.sap.cds:cds-maven-plugin:2.6.1 / com.sap.cds:cds4j-api:2.6.1"
 )
 @CdsName("db.esmlogs")
 public interface Esmlogs_ {
