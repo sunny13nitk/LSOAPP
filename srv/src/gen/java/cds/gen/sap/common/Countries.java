@@ -7,18 +7,18 @@ import java.lang.String;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.processing.Generated;
+import javax.annotation.Generated;
 
 /**
  * Code list for countries
  *
- * See https://cap.cloud.sap/docs/cds/common#entity-sapcommoncountries
+ * See https://cap.cloud.sap/docs/cds/common#entity-countries
  */
 @CdsName("sap.common.Countries")
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-21T10:47:07.638874300Z",
-    comments = "com.sap.cds:cds-maven-plugin:2.6.1 / com.sap.cds:cds4j-api:2.6.1"
+    date = "2024-02-21T11:05:15.432736508Z",
+    comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
 )
 public interface Countries extends CdsData {
   String NAME = "name";

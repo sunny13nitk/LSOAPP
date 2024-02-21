@@ -5,7 +5,7 @@ import com.sap.cds.Struct;
 import com.sap.cds.ql.CdsName;
 import java.lang.String;
 import java.time.Instant;
-import javax.annotation.processing.Generated;
+import javax.annotation.Generated;
 
 /**
  * Aspect to capture changes by user and name
@@ -15,8 +15,8 @@ import javax.annotation.processing.Generated;
 @CdsName("managed")
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-21T10:47:07.638874300Z",
-    comments = "com.sap.cds:cds-maven-plugin:2.6.1 / com.sap.cds:cds4j-api:2.6.1"
+    date = "2024-02-21T11:05:15.432736508Z",
+    comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
 )
 public interface Managed extends CdsData {
   String CREATED_AT = "createdAt";
