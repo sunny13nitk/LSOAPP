@@ -27,9 +27,16 @@
         <Property Name="message" Type="Edm.String" MaxLength="1000"/>
       </EntityType>
       <Annotations Target="LogsReadService.Logs">
+        <Annotation Term="Capabilities.Insertable" Bool="false"/>
+        <Annotation Term="Capabilities.Updatable" Bool="false"/>
         <Annotation Term="Core.Description" String="Aspect for entities with canonical universal IDs&#xA;&#xA;See https://cap.cloud.sap/docs/cds/common#aspect-cuid"/>
       </Annotations>
       <Annotations Target="LogsReadService.EntityContainer/Logs">
+        <Annotation Term="Capabilities.DeleteRestrictions">
+          <Record Type="Capabilities.DeleteRestrictionsType">
+            <PropertyValue Property="Deletable" Bool="false"/>
+          </Record>
+        </Annotation>
         <Annotation Term="Capabilities.InsertRestrictions">
           <Record Type="Capabilities.InsertRestrictionsType">
             <PropertyValue Property="Insertable" Bool="false"/>
@@ -40,14 +47,6 @@
             <PropertyValue Property="Updatable" Bool="false"/>
           </Record>
         </Annotation>
-        <Annotation Term="Capabilities.DeleteRestrictions">
-          <Record Type="Capabilities.DeleteRestrictionsType">
-            <PropertyValue Property="Deletable" Bool="false"/>
-          </Record>
-        </Annotation>
-      </Annotations>
-      <Annotations Target="LogsReadService.Logs/ID">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
       </Annotations>
     </Schema>
   </edmx:DataServices>
