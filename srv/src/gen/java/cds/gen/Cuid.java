@@ -4,6 +4,7 @@ import com.sap.cds.CdsData;
 import com.sap.cds.Struct;
 import com.sap.cds.ql.CdsName;
 import java.lang.String;
+import javax.annotation.Generated;
 
 /**
  * Aspect for entities with canonical universal IDs
@@ -11,6 +12,11 @@ import java.lang.String;
  * See https://cap.cloud.sap/docs/cds/common#aspect-cuid
  */
 @CdsName("cuid")
+@Generated(
+    value = "cds-maven-plugin",
+    date = "2024-02-21T09:29:56.857963511Z",
+    comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
+)
 public interface Cuid extends CdsData {
   String ID = "ID";
 

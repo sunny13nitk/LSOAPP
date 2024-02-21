@@ -7,6 +7,7 @@ import java.lang.String;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Generated;
 
 /**
  * Code list for languages
@@ -14,6 +15,11 @@ import java.util.Map;
  * See https://cap.cloud.sap/docs/cds/common#entity-languages
  */
 @CdsName("sap.common.Languages")
+@Generated(
+    value = "cds-maven-plugin",
+    date = "2024-02-21T09:29:56.857963511Z",
+    comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
+)
 public interface Languages extends CdsData {
   String NAME = "name";
 
