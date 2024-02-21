@@ -19,7 +19,7 @@
 		<cds.install-cdsdk.version>6.4.0</cds.install-cdsdk.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<cds.install-node.downloadUrl>https://nodejs.org/dist/</cds.install-node.downloadUrl>
+		<cds.install-node.downloadUrl>https://int.repositories.cloud.sap/artifactory/build-releases-apt/</cds.install-node.downloadUrl>
 	</properties>
 
 	<modules>

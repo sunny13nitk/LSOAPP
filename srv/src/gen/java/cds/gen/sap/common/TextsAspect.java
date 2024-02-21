@@ -9,7 +9,7 @@ import javax.annotation.Generated;
 @CdsName("sap.common.TextsAspect")
 @Generated(
     value = "cds-maven-plugin",
-    date = "2024-02-21T07:46:00.221011665Z",
+    date = "2024-02-21T08:10:52.891382693Z",
     comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
 )
 public interface TextsAspect extends CdsData {
