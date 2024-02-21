@@ -10,6 +10,8 @@ modules:
     path: srv
     parameters:
       buildpack: sap_java_buildpack
+      properties:
+        version: 8.0.282
       memory: 1G
     build-parameters:
       builder: custom
