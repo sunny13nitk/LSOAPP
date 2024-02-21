@@ -7,7 +7,6 @@ import java.lang.String;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Generated;
 
 /**
  * Aspect for entities with canonical universal IDs
@@ -15,11 +14,6 @@ import javax.annotation.Generated;
  * See https://cap.cloud.sap/docs/cds/common#aspect-cuid
  */
 @CdsName("LogsReadService.Logs")
-@Generated(
-    value = "cds-maven-plugin",
-    date = "2024-02-21T08:10:52.891382693Z",
-    comments = "com.sap.cds:cds-maven-plugin:1.30.2 / com.sap.cds:cds4j-api:1.34.2"
-)
 public interface Logs extends CdsData {
   String ID = "ID";
 

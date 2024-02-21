@@ -13,13 +13,13 @@
 	<properties>
 		
 		<!-- DEPENDENCIES VERSION -->
-		<jdk.version>1.8</jdk.version>
-		<cds.services.version>1.30.2</cds.services.version>
-		<spring.boot.version>2.7.6</spring.boot.version>
-		<cds.install-cdsdk.version>6.4.0</cds.install-cdsdk.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+ 		<jdk.version>1.8</jdk.version>
+		<cds.services.version>1.34.8</cds.services.version>
+		<spring.boot.version>2.7.18</spring.boot.version>
+		<cds.install-cdsdk.version>6.3.0</cds.install-cdsdk.version>
+		<cloud.sdk.version>4.28.0</cloud.sdk.version>
 
-		<cds.install-node.downloadUrl>https://int.repositories.cloud.sap/artifactory/build-releases-apt/</cds.install-node.downloadUrl>
+		<node.url>https://int.repositories.cloud.sap/artifactory/build-releases-apt/</node.url>
 	</properties>
 
 	<modules>
